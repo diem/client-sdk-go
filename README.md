@@ -1,3 +1,12 @@
-# New Open Source Project
+# libra-client-sdk-go
 
-A new open source project from the Libra Association.
+Go lang client sdk for connect to Libra FullNode JSON-RPC APIs.
+
+# License
+
+[Apache License V2](../blob/LICENSE)
+
+
+# Contributing
+
+[CONTRIBUTING](../blob/CONTRIBUTING.md)

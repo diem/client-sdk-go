@@ -23,20 +23,6 @@ type Request struct {
 	ID      int     `json:"id"`
 }
 
-// Response is type of JSON-RPC response struct
-type Response struct {
-	JsonRpc                  string           `json:"jsonrpc"`
-	ID                       *int             `json:"id"`
-	Result                   *json.RawMessage `json:"result"`
-	Error                    *ResponseError   `json:"error"`
-	LibraChainID             uint64           `json:"libra_chain_id"`
-	LibraLedgerTimestampusec uint64           `json:"libra_ledger_timestampusec"`
-	LibraLedgerVersion       uint64           `json:"libra_ledger_version"`
-}
-
-// ResponseResult is type for serializing JSON-RPC response result
-type ResponseResult interface{}
-
 // ResponseError is type of JSON-RPC response error, it implements error interface.
 type ResponseError struct {
 	Code    int32       `json:"code"`
@@ -49,6 +35,37 @@ func (e *ResponseError) Error() string {
 	return fmt.Sprintf("%d - %s", e.Code, e.Message)
 }
 
+// Response is type of JSON-RPC response struct
+type Response struct {
+	JsonRpc                  string           `json:"jsonrpc"`
+	ID                       *int             `json:"id"`
+	Result                   *json.RawMessage `json:"result"`
+	Error                    *ResponseError   `json:"error"`
+	LibraChainID             uint64           `json:"libra_chain_id"`
+	LibraLedgerTimestampusec uint64           `json:"libra_ledger_timestampusec"`
+	LibraLedgerVersion       uint64           `json:"libra_ledger_version"`
+}
+
+// UnmarshalResult unmarshals result json into given struct.
+// Returns true, nil for success unmarshal, otherwise first bool
+// will always be false.
+// Returns false, nil if `Result` is nil.
+func (r *Response) UnmarshalResult(result interface{}) (bool, error) {
+	if r.Result == nil {
+		return false, nil
+	}
+
+	if err := json.Unmarshal(*r.Result, result); err != nil {
+		return false, newError(ParseResponseResultJsonError, err)
+	}
+	return true, nil
+}
+
+// Client is interface of the JSON-RPC client
+type Client interface {
+	Call(Method, ...Param) (*Response, error)
+}
+
 // NewClient creates a new JSON-RPC Client
 func NewClient(url string) Client {
 	return &client{url: url, http: &http.Client{Transport: &http.Transport{
@@ -57,50 +74,40 @@ func NewClient(url string) Client {
 	}}}
 }
 
-// Client is interface of the JSON-RPC client
-type Client interface {
-	Call(Method, ResponseResult, ...Param) (*Response, *Error)
-}
-
 type client struct {
 	url  string
 	http *http.Client
 }
 
 // Call implements Client interface
-func (c *client) Call(method Method, respResult ResponseResult, params ...Param) (*Response, *Error) {
+func (c *client) Call(method Method, params ...Param) (*Response, error) {
 	if params == nil {
 		params = make([]Param, 0)
 	}
 	request := Request{JsonRpc: "2.0", Method: method, Params: params, ID: 1}
 	reqBytes, err := json.Marshal(request)
 	if err != nil {
-		return nil, NewError(SerializeRequestJsonError, err)
+		return nil, newError(SerializeRequestJsonError, err)
 	}
 	resp, err := http.Post(c.url, "application/json", bytes.NewBuffer(reqBytes))
 
 	if err != nil {
-		return nil, NewError(HttpCallError, err)
+		return nil, newError(HttpCallError, err)
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, NewError(ReadHttpResponseBodyError, err)
+		return nil, newError(ReadHttpResponseBodyError, err)
 	}
 
 	var jsonRpcResponse Response
 	if err = json.Unmarshal(body, &jsonRpcResponse); err != nil {
-		return nil, NewError(ParseResponseJsonError, err)
+		return nil, newError(ParseResponseJsonError, err)
 	}
 	if jsonRpcResponse.JsonRpc != "2.0" {
-		return nil, NewError(InvalidJsonRpcResponseError,
+		return nil, newError(InvalidJsonRpcResponseError,
 			fmt.Errorf("unexpected jsonrpc version: %s", jsonRpcResponse.JsonRpc))
-	}
-	if jsonRpcResponse.Result != nil {
-		if err := json.Unmarshal(*jsonRpcResponse.Result, respResult); err != nil {
-			return nil, NewError(ParseResponseResultJsonError, err)
-		}
 	}
 	return &jsonRpcResponse, nil
 }

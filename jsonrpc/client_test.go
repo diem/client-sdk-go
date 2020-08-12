@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/libra/libra-client-sdk-go/jsonrpc"
@@ -185,6 +186,9 @@ func response_error(code int, msg string, data interface{}) expectation {
 		assert.NotNil(t, resp.Error)
 		assert.Nil(t, resp.Result)
 
+		assert.Contains(t, resp.Error.Error(), strconv.Itoa(code))
+		assert.Contains(t, resp.Error.Error(), msg)
+
 		assert.Equal(t, int32(code), resp.Error.Code)
 		assert.Equal(t, msg, resp.Error.Message)
 		assert.EqualValues(t, data, resp.Error.Data)
@@ -206,6 +210,7 @@ func error(errorType jsonrpc.ErrorType) expectation {
 		require.Error(t, err)
 		require.NotNil(t, err)
 		assert.Equal(t, errorType, err.ErrorType)
+		assert.Contains(t, err.Error(), errorType)
 	}
 }
 

@@ -17,12 +17,19 @@ type Client interface {
 	Call(...*Request) (map[RequestID]*Response, error)
 }
 
-// NewClient creates a new JSON-RPC Client
+// NewClient creates a new JSON-RPC Client.
+// Creates http.Transport with 10 max idel connections and 30 seconds idle timeout.
 func NewClient(url string) Client {
-	return &client{url: url, http: &http.Client{Transport: &http.Transport{
+	return NewClientWithTransport(url, &http.Transport{
 		MaxIdleConns:    10,
 		IdleConnTimeout: 30 * time.Second,
-	}}}
+	})
+}
+
+// NewClientWithTransport creates a new JSON-RPC Client with given URL and
+// `*http.Transport`
+func NewClientWithTransport(url string, t *http.Transport) Client {
+	return &client{url: url, http: &http.Client{Transport: t}}
 }
 
 type client struct {

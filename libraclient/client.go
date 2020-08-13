@@ -33,9 +33,17 @@ type Client interface {
 	Submit(string) error
 }
 
-// New creates a `LibraClient` connect to given server URL
+// New creates a `LibraClient` connect to given server URL.
+// It creates default jsonrpc client `http.Transport` config, if you need to customize
+// `http.Transport` config (for better connection pool production usage), call `NewWithJsonRpcClient` with
+// `jsonrpc.NewClientWithTransport(url, <your http.Transport>)`
 func New(url string) Client {
-	return &client{jsonrpc.NewClient(url)}
+	return NewWithJsonRpcClient(jsonrpc.NewClient(url))
+}
+
+// NewWithJsonRpcClient creates a `LibraClient` with given `jsonrpc.Client`
+func NewWithJsonRpcClient(rpc jsonrpc.Client) Client {
+	return &client{rpc}
 }
 
 type client struct {

@@ -159,7 +159,7 @@ func TestClient(t *testing.T) {
 				account, err := client.GetAccount("000000000000000000000000000000DD")
 				require.NoError(t, err)
 
-				ret, err := client.GetEvents(account.SentEventsKey, 0, 5)
+				ret, err := client.GetEvents(account.SentEventsKey, 2, 5)
 				require.Nil(t, err)
 				assert.NotEmpty(t, ret)
 				assert.Len(t, ret, 5)
@@ -169,7 +169,7 @@ func TestClient(t *testing.T) {
 			name: "get events error",
 			call: func(t *testing.T, client libraclient.Client) {
 				ret, err := client.GetEvents(
-					"00000000000000001668f6be25668c1a17cd8caf6b8d2f2K", 0, 15)
+					"00000000000000001668f6be25668c1a17cd8caf6b8d2f2K", 2, 15)
 				require.Error(t, err)
 				assert.Empty(t, ret)
 			},

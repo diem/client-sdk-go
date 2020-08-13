@@ -1,4 +1,4 @@
-package libraclient
+package librakeys
 
 import (
 	"crypto/ed25519"

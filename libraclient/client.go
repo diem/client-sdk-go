@@ -120,7 +120,7 @@ func (c *client) GetEvents(key string, start uint64, limit uint64) ([]*Event, er
 }
 
 func (c *client) Submit(data string) error {
-	ok, err := c.call(GetAccountTransaction, nil, data)
+	ok, err := c.call(Submit, nil, data)
 	if !ok {
 		return err
 	}
@@ -128,10 +128,12 @@ func (c *client) Submit(data string) error {
 }
 
 func (c *client) call(method jsonrpc.Method, ret interface{}, params ...jsonrpc.Param) (bool, error) {
-	resp, err := c.rpc.Call(method, params...)
+	req := jsonrpc.NewRequest(method, params...)
+	resps, err := c.rpc.Call(req)
 	if err != nil {
 		return false, err
 	}
+	resp := resps[req.ID]
 	if resp.Error != nil {
 		return false, resp.Error
 	}

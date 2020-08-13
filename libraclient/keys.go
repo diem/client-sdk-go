@@ -83,3 +83,8 @@ func MustNewAuthKeyFromString(key string) AuthKey {
 func (k AuthKey) AccountAddress() AccountAddress {
 	return AccountAddress(k[len(k)-AccountAddressLength:])
 }
+
+// ToString returns hex encoded string for the AuthKey
+func (k AuthKey) ToString() string {
+	return hex.EncodeToString(k)
+}

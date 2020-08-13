@@ -15,7 +15,7 @@ func TestNewAuthKeyFromPublicKey(t *testing.T) {
 	publicKey := libraclient.PublicKey(bytes)
 	authKey := libraclient.NewAuthKey(publicKey, libraclient.Ed25519Key)
 	assert.Equal(t, "459c77a38803bd53f3adee52703810e3a74fd7c46952c497e75afb0a7932586d",
-		hex.EncodeToString(authKey))
+		authKey.ToString())
 }
 
 func TestAccountAddressFromAuthKey(t *testing.T) {
@@ -30,4 +30,14 @@ func TestMustGenKeys(t *testing.T) {
 	assert.NotEmpty(t, keys.PrivateKey)
 	assert.NotEmpty(t, keys.AuthKey)
 	assert.NotEmpty(t, keys.AccountAddress)
+}
+
+func TestMustNewAuthKeyFromStringPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			return
+		}
+		assert.Fail(t, "should panic, but not")
+	}()
+	libraclient.MustNewAuthKeyFromString("invalid")
 }

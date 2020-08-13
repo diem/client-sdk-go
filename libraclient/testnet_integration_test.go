@@ -25,6 +25,15 @@ func TestClient(t *testing.T) {
 			},
 		},
 		{
+			name: "get currencies error",
+			call: func(t *testing.T, client libraclient.Client) {
+				client = libraclient.New("invalid")
+				ret, err := client.GetCurrencies()
+				require.Error(t, err)
+				assert.Nil(t, ret)
+			},
+		},
+		{
 			name: "get metadata",
 			call: func(t *testing.T, client libraclient.Client) {
 				ret, err := client.GetMetadata()
@@ -33,11 +42,29 @@ func TestClient(t *testing.T) {
 			},
 		},
 		{
+			name: "get metadata error",
+			call: func(t *testing.T, client libraclient.Client) {
+				client = libraclient.New("invalid")
+				ret, err := client.GetMetadata()
+				require.Error(t, err)
+				assert.Nil(t, ret)
+			},
+		},
+		{
 			name: "get metadata by version",
 			call: func(t *testing.T, client libraclient.Client) {
 				ret, err := client.GetMetadataByVersion(1)
 				require.Nil(t, err)
 				assert.NotNil(t, ret)
+			},
+		},
+		{
+			name: "get metadata by version error",
+			call: func(t *testing.T, client libraclient.Client) {
+				client = libraclient.New("invalid")
+				ret, err := client.GetMetadataByVersion(1)
+				require.Error(t, err)
+				assert.Nil(t, ret)
 			},
 		},
 		{
@@ -68,7 +95,7 @@ func TestClient(t *testing.T) {
 			name: "get account transaction",
 			call: func(t *testing.T, client libraclient.Client) {
 				ret, err := client.GetAccountTransaction(
-					"1668f6be25668c1a17cd8caf6b8d2f25", 0, true)
+					"000000000000000000000000000000DD", 0, true)
 				require.Nil(t, err)
 				assert.NotNil(t, ret)
 			},
@@ -95,7 +122,7 @@ func TestClient(t *testing.T) {
 			name: "get account transactions",
 			call: func(t *testing.T, client libraclient.Client) {
 				ret, err := client.GetAccountTransactions(
-					"1668f6be25668c1a17cd8caf6b8d2f25", 0, 10, true)
+					"000000000000000000000000000000DD", 0, 10, true)
 				require.Nil(t, err)
 				assert.NotEmpty(t, ret)
 			},
@@ -129,11 +156,13 @@ func TestClient(t *testing.T) {
 		{
 			name: "get events",
 			call: func(t *testing.T, client libraclient.Client) {
-				ret, err := client.GetEvents(
-					"00000000000000001668f6be25668c1a17cd8caf6b8d2f25", 0, 15)
+				account, err := client.GetAccount("000000000000000000000000000000DD")
+				require.NoError(t, err)
+
+				ret, err := client.GetEvents(account.SentEventsKey, 0, 5)
 				require.Nil(t, err)
 				assert.NotEmpty(t, ret)
-				assert.Len(t, ret, 15)
+				assert.Len(t, ret, 5)
 			},
 		},
 		{
@@ -152,7 +181,7 @@ func TestClient(t *testing.T) {
 				require.Error(t, err)
 				jrpcErr, ok := err.(*jsonrpc.ResponseError)
 				require.True(t, ok)
-				require.Equal(t, "Invalid params", jrpcErr.Message)
+				require.Equal(t, "Invalid param data(params[0]): should be hex-encoded string of LCS serialized Libra SignedTransaction type", jrpcErr.Message)
 			},
 		},
 	}

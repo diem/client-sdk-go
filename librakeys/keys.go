@@ -43,7 +43,7 @@ func MustGenKeys() *Keys {
 	if err != nil {
 		panic(err)
 	}
-	authKey := NewAuthKey(PublicKey(publicKey), Ed25519Key)
+	authKey := NewAuthKey(PublicKey(publicKey))
 	return &Keys{
 		PublicKey(publicKey),
 		PrivateKey(privateKey),
@@ -53,10 +53,10 @@ func MustGenKeys() *Keys {
 }
 
 // NewAuthKey return auth key from public key
-func NewAuthKey(publicKey PublicKey, scheme KeyScheme) AuthKey {
+func NewAuthKey(publicKey PublicKey) AuthKey {
 	hash := sha3.New256()
 	hash.Write(publicKey)
-	hash.Write([]byte{byte(scheme)})
+	hash.Write([]byte{byte(Ed25519Key)})
 	return AuthKey(hash.Sum(nil))
 }
 

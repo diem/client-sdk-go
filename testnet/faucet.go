@@ -16,7 +16,7 @@ func MustMint(authKey string, amount uint64, currencyCode string) (ret int) {
 	for i := 0; i < retry; i++ {
 		ret, err = Mint(authKey, amount, currencyCode)
 		if err != nil {
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(1100 * time.Millisecond)
 			continue
 		}
 		return

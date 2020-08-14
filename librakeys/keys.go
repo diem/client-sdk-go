@@ -7,6 +7,7 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 
+	"github.com/libra/libra-client-sdk-go/libraid"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -16,12 +17,6 @@ const (
 	Ed25519Key      KeyScheme = 0
 	MultiEd25519Key KeyScheme = 1
 )
-
-// AccountAddress represents Libra account address
-type AccountAddress []byte
-
-// AccountAddress bytes length
-const AccountAddressLength = 16
 
 // AuthKey is Libra account authentication key
 type AuthKey []byte
@@ -37,7 +32,7 @@ type Keys struct {
 	PublicKey      PublicKey
 	PrivateKey     PrivateKey
 	AuthKey        AuthKey
-	AccountAddress AccountAddress
+	AccountAddress libraid.AccountAddress
 }
 
 // MustGenKeys generates local account keys, panics if got error
@@ -83,8 +78,8 @@ func MustNewAuthKeyFromString(key string) AuthKey {
 }
 
 // AccountAddress return account address from auth key
-func (k AuthKey) AccountAddress() AccountAddress {
-	return AccountAddress(k[len(k)-AccountAddressLength:])
+func (k AuthKey) AccountAddress() libraid.AccountAddress {
+	return libraid.AccountAddress(k[len(k)-libraid.AccountAddressLength:])
 }
 
 // ToString returns hex encoded string for the AuthKey

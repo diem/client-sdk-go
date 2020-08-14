@@ -24,7 +24,7 @@
 - [ ] Handle stale responses:
   - [ ] client tracks latest server response block version and timestamp, raise error when received server response contains stale version / timestamp.
   - [ ] parse and use libra_chain_id, libra_ledger_version and libra_ledger_tiemstamp in the JSONRPC response.
-- [ ] Parsing and gen Libra Account Identifier (see [LIP-5][2])
+- [x] Parsing and gen Libra Account Identifier (see [LIP-5][2])
   - bech32 addresses/subaddresses support
 - [ ] language specific standard release publish: e.g. java maven central repo, python pip
 - [ ] Multi-network: initialize Client with chain id, JSON-RPC server URL

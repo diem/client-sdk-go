@@ -5,22 +5,22 @@
   - libra
     - libraclient: high level APIs interface, should support application to do easy mock / stub development.
       - types: data transfer object types for jsonrpc client, should match server side JSON-RPC spec data types.
-    - jsonrpc: jsonrpc client interface, include plain data classes / structs defined in Libra JSON-RPC SPEC document.
+      - utils: includes crypto, data types converting and other utils functions
+        - signing, sha3 hashing, address parsing and converting, hex encoding / decoding
+        - LCS utils
+    - jsonrpc: jsonrpc client
     - stdlib: move stdlib script utils.
     - testnet: testnet utils, should include FaucetService for handling testnet mint.
     - types: Libra onchain data structure types.
-    - utils: includes crypto, data types converting and other utils functions
-      - signing, sha3 hashing, address parsing and converting, hex encoding / decoding
-      - LCS utils
-- [ ] JSON-RPC 2.0 Spec:
-  - spec version validation.
-  - batch requests and responses handling.
+- [x] JSON-RPC 2.0 Spec:
+  - [x] spec version validation.
+  - [x] batch requests and responses handling.
 - [x] JSON-RPC client error handling should distinguish the following 3 type errors:
   - Transport layer error, e.g. HTTP call failure.
   - JSON-RPC protocol error: e.g. server responds to non json data, or can't be parsed into [Libra JSON-RPC SPEC][1] defined data structure, or missing result & error field.
   - JSON-RPC error: error returned from server.
 - [x] https
-- [ ] Client connection pool: keep connection alive for less likely getting inconsistent data from connecting to multiple servers.
+- [x] Client connection pool: keep connection alive for less likely getting inconsistent data from connecting to multiple servers.
 - [ ] Handle stale responses:
   - [ ] client tracks latest server response block version and timestamp, raise error when received server response contains stale version / timestamp.
   - [ ] parse and use libra_chain_id, libra_ledger_version and libra_ledger_tiemstamp in the JSONRPC response.
@@ -63,8 +63,10 @@
 
 # Testnet support
 
-- [ ] Generate ed25519 private key, derive ed25519 public keys from private key. generate Single and MultiSig auth-keys
-- [ ] Mint coins through Faucet service
+- [x] Generate ed25519 private key, derive ed25519 public keys from private key.
+- [x] Generate Single auth-keys
+- [ ] Generate MultiSig auth-keys
+- [x] Mint coins through [Faucet service][6]
 
 See [doc][5] for above concepts.
 
@@ -83,3 +85,4 @@ See [doc][5] for above concepts.
 [3]: https://github.com/libra/libra/blob/master/language/stdlib/transaction_scripts/doc/peer_to_peer_with_metadata.md "P2P Transafer"
 [4]: https://github.com/libra/libra/tree/master/language/stdlib/transaction_scripts/doc "Move Stdlib scripts"
 [5]: https://github.com/libra/libra/blob/master/client/libra-dev/README.md "Libra Client Dev Doc"
+[6]: https://github.com/libra/libra/blob/master/json-rpc/docs/service_testnet_faucet.md "Faucet service"

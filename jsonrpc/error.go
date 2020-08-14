@@ -20,8 +20,8 @@ type Error struct {
 	Cause     error
 }
 
-// NewError creates new `Error` by gien type and cause
-func NewError(t ErrorType, cause error) *Error {
+// newError creates new `Error` by gien type and cause
+func newError(t ErrorType, cause error) *Error {
 	return &Error{t, cause}
 }
 

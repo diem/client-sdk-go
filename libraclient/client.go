@@ -33,9 +33,17 @@ type Client interface {
 	Submit(string) error
 }
 
-// New creates a `LibraClient` connect to given server URL
+// New creates a `LibraClient` connect to given server URL.
+// It creates default jsonrpc client `http.Transport` config, if you need to customize
+// `http.Transport` config (for better connection pool production usage), call `NewWithJsonRpcClient` with
+// `jsonrpc.NewClientWithTransport(url, <your http.Transport>)`
 func New(url string) Client {
-	return &client{jsonrpc.NewClient(url)}
+	return NewWithJsonRpcClient(jsonrpc.NewClient(url))
+}
+
+// NewWithJsonRpcClient creates a `LibraClient` with given `jsonrpc.Client`
+func NewWithJsonRpcClient(rpc jsonrpc.Client) Client {
+	return &client{rpc}
 }
 
 type client struct {
@@ -45,8 +53,8 @@ type client struct {
 // GetCurrencies calls to "get_currencies" method
 func (c *client) GetCurrencies() ([]*CurrencyInfo, error) {
 	var ret []*CurrencyInfo
-	err := c.call(GetCurrencies, &ret)
-	if err != nil {
+	ok, err := c.call(GetCurrencies, &ret)
+	if !ok {
 		return nil, err
 	}
 
@@ -55,8 +63,8 @@ func (c *client) GetCurrencies() ([]*CurrencyInfo, error) {
 
 func (c *client) GetMetadata() (*Metadata, error) {
 	var ret Metadata
-	err := c.call(GetMetadata, &ret)
-	if err != nil {
+	ok, err := c.call(GetMetadata, &ret)
+	if !ok {
 		return nil, err
 	}
 
@@ -65,8 +73,8 @@ func (c *client) GetMetadata() (*Metadata, error) {
 
 func (c *client) GetMetadataByVersion(version uint64) (*Metadata, error) {
 	var ret Metadata
-	err := c.call(GetMetadata, &ret, version)
-	if err != nil {
+	ok, err := c.call(GetMetadata, &ret, version)
+	if !ok {
 		return nil, err
 	}
 
@@ -75,12 +83,9 @@ func (c *client) GetMetadataByVersion(version uint64) (*Metadata, error) {
 
 func (c *client) GetAccount(address Address) (*Account, error) {
 	var ret Account
-	err := c.call(GetAccount, &ret, address)
-	if err != nil {
+	ok, err := c.call(GetAccount, &ret, address)
+	if !ok {
 		return nil, err
-	}
-	if ret.AuthenticationKey == "" {
-		return nil, nil
 	}
 
 	return &ret, nil
@@ -88,19 +93,16 @@ func (c *client) GetAccount(address Address) (*Account, error) {
 
 func (c *client) GetAccountTransaction(address Address, sequenceNum uint64, includeEvent bool) (*Transaction, error) {
 	var ret Transaction
-	err := c.call(GetAccountTransaction, &ret, address, sequenceNum, includeEvent)
-	if err != nil {
+	ok, err := c.call(GetAccountTransaction, &ret, address, sequenceNum, includeEvent)
+	if !ok {
 		return nil, err
-	}
-	if ret.Hash == "" {
-		return nil, nil
 	}
 	return &ret, nil
 }
 
 func (c *client) GetAccountTransactions(address Address, start uint64, limit uint64, includeEvent bool) ([]*Transaction, error) {
 	var ret []*Transaction
-	err := c.call(GetAccountTransactions, &ret, address, start, limit, includeEvent)
+	_, err := c.call(GetAccountTransactions, &ret, address, start, limit, includeEvent)
 	if err != nil {
 		return nil, err
 	}
@@ -109,8 +111,8 @@ func (c *client) GetAccountTransactions(address Address, start uint64, limit uin
 
 func (c *client) GetTransactions(startVersion uint64, limit uint64, includeEvent bool) ([]*Transaction, error) {
 	var ret []*Transaction
-	err := c.call(GetTransactions, &ret, startVersion, limit, includeEvent)
-	if err != nil {
+	ok, err := c.call(GetTransactions, &ret, startVersion, limit, includeEvent)
+	if !ok {
 		return nil, err
 	}
 	return ret, nil
@@ -118,29 +120,30 @@ func (c *client) GetTransactions(startVersion uint64, limit uint64, includeEvent
 
 func (c *client) GetEvents(key string, start uint64, limit uint64) ([]*Event, error) {
 	var ret []*Event
-	err := c.call(GetEvents, &ret, key, start, limit)
-	if err != nil {
+	ok, err := c.call(GetEvents, &ret, key, start, limit)
+	if !ok {
 		return nil, err
 	}
 	return ret, nil
 }
 
 func (c *client) Submit(data string) error {
-	err := c.call(GetAccountTransaction, nil, data)
-	if err != nil {
+	ok, err := c.call(Submit, nil, data)
+	if !ok {
 		return err
 	}
 	return nil
 }
 
-func (c *client) call(method jsonrpc.Method, ret interface{}, params ...jsonrpc.Param) error {
-	resp, err := c.rpc.Call(method, ret, params...)
+func (c *client) call(method jsonrpc.Method, ret interface{}, params ...jsonrpc.Param) (bool, error) {
+	req := jsonrpc.NewRequest(method, params...)
+	resps, err := c.rpc.Call(req)
 	if err != nil {
-		return err
+		return false, err
 	}
+	resp := resps[req.ID]
 	if resp.Error != nil {
-		return resp.Error
+		return false, resp.Error
 	}
-
-	return nil
+	return resp.UnmarshalResult(ret)
 }

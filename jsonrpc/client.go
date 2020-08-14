@@ -3,63 +3,33 @@ package jsonrpc
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 )
 
-// Method is type of JSON-RPC method
-type Method string
-
-// Param is type of JSON-RPC params list
-type Param interface{}
-
-// Request is type of JSON-RPC request struct
-type Request struct {
-	JsonRpc string  `json:"jsonrpc"`
-	Method  Method  `json:"method"`
-	Params  []Param `json:"params"`
-	ID      int     `json:"id"`
-}
-
-// Response is type of JSON-RPC response struct
-type Response struct {
-	JsonRpc                  string           `json:"jsonrpc"`
-	ID                       *int             `json:"id"`
-	Result                   *json.RawMessage `json:"result"`
-	Error                    *ResponseError   `json:"error"`
-	LibraChainID             uint64           `json:"libra_chain_id"`
-	LibraLedgerTimestampusec uint64           `json:"libra_ledger_timestampusec"`
-	LibraLedgerVersion       uint64           `json:"libra_ledger_version"`
-}
-
-// ResponseResult is type for serializing JSON-RPC response result
-type ResponseResult interface{}
-
-// ResponseError is type of JSON-RPC response error, it implements error interface.
-type ResponseError struct {
-	Code    int32       `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
-}
-
-// Error implements error interface, returns `Code` + `Message`
-func (e *ResponseError) Error() string {
-	return fmt.Sprintf("%d - %s", e.Code, e.Message)
-}
-
-// NewClient creates a new JSON-RPC Client
-func NewClient(url string) Client {
-	return &client{url: url, http: &http.Client{Transport: &http.Transport{
-		MaxIdleConns:    10,
-		IdleConnTimeout: 30 * time.Second,
-	}}}
-}
-
 // Client is interface of the JSON-RPC client
 type Client interface {
-	Call(Method, ResponseResult, ...Param) (*Response, *Error)
+	// Call with requests. When given multiple requests
+	Call(...*Request) (map[RequestID]*Response, error)
+}
+
+// NewClient creates a new JSON-RPC Client.
+// Creates http.Transport with 10 max idel connections and 30 seconds idle timeout.
+func NewClient(url string) Client {
+	return NewClientWithTransport(url, &http.Transport{
+		MaxIdleConns:    10,
+		IdleConnTimeout: 30 * time.Second,
+	})
+}
+
+// NewClientWithTransport creates a new JSON-RPC Client with given URL and
+// `*http.Transport`
+func NewClientWithTransport(url string, t *http.Transport) Client {
+	return &client{url: url, http: &http.Client{Transport: t}}
 }
 
 type client struct {
@@ -68,39 +38,76 @@ type client struct {
 }
 
 // Call implements Client interface
-func (c *client) Call(method Method, respResult ResponseResult, params ...Param) (*Response, *Error) {
-	if params == nil {
-		params = make([]Param, 0)
+func (c *client) Call(requests ...*Request) (map[RequestID]*Response, error) {
+	switch len(requests) {
+	case 0:
+		return nil, errors.New("no requests")
+	case 1:
+		request := requests[0]
+		reqBody, err := json.Marshal(request)
+		if err != nil {
+			return nil, newError(SerializeRequestJsonError, err)
+		}
+		var resp Response
+		if err = c.httpPost(reqBody, &resp); err != nil {
+			return nil, err
+		}
+		return valid(requests, &resp)
+	default:
+		reqBody, err := json.Marshal(requests)
+		if err != nil {
+			return nil, newError(SerializeRequestJsonError, err)
+		}
+		var resps []*Response
+		if err = c.httpPost(reqBody, &resps); err != nil {
+			return nil, err
+		}
+		return valid(requests, resps...)
 	}
-	request := Request{JsonRpc: "2.0", Method: method, Params: params, ID: 1}
-	reqBytes, err := json.Marshal(request)
-	if err != nil {
-		return nil, NewError(SerializeRequestJsonError, err)
-	}
-	resp, err := http.Post(c.url, "application/json", bytes.NewBuffer(reqBytes))
+}
 
+func (c *client) httpPost(body []byte, ret interface{}) error {
+	resp, err := c.http.Post(c.url, "application/json", bytes.NewBuffer(body))
 	if err != nil {
-		return nil, NewError(HttpCallError, err)
+		return newError(HttpCallError, err)
 	}
 
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, NewError(ReadHttpResponseBodyError, err)
+		return newError(ReadHttpResponseBodyError, err)
 	}
 
-	var jsonRpcResponse Response
-	if err = json.Unmarshal(body, &jsonRpcResponse); err != nil {
-		return nil, NewError(ParseResponseJsonError, err)
+	if resp.StatusCode != 200 {
+		return newError(HttpCallError, fmt.Errorf(
+			"Failed https call: %d, %s", resp.StatusCode, string(body)))
 	}
-	if jsonRpcResponse.JsonRpc != "2.0" {
-		return nil, NewError(InvalidJsonRpcResponseError,
-			fmt.Errorf("unexpected jsonrpc version: %s", jsonRpcResponse.JsonRpc))
+
+	if err = json.Unmarshal(body, ret); err != nil {
+		return newError(ParseResponseJsonError, err)
 	}
-	if jsonRpcResponse.Result != nil {
-		if err := json.Unmarshal(*jsonRpcResponse.Result, respResult); err != nil {
-			return nil, NewError(ParseResponseResultJsonError, err)
+	return nil
+}
+
+func valid(requests []*Request, resps ...*Response) (map[RequestID]*Response, error) {
+	ret := make(map[RequestID]*Response)
+	for _, resp := range resps {
+		if err := resp.Validate(); err != nil {
+			return nil, err
+		}
+		if resp.ID != nil {
+			ret[*resp.ID] = resp
 		}
 	}
-	return &jsonRpcResponse, nil
+	var missing []string
+	for _, req := range requests {
+		if _, ok := ret[req.ID]; !ok {
+			missing = append(missing, req.ToString())
+		}
+	}
+	if len(missing) > 0 {
+		return ret, newError(InvalidJsonRpcResponseError, fmt.Errorf(
+			"missing responses for requests: \n%s", strings.Join(missing, "\n")))
+	}
+	return ret, nil
 }

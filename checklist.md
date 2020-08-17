@@ -36,7 +36,7 @@
 
 - [ ] transfer: wrap peer to peer transfer with metadata script and submit transaction
   - may have the option to wait until the transaction executed successfully or failed.
-- [ ] waitForTransactionExecuted(String accountAddress, long sequence, String signedTranscationHash, long timeout):
+- [x] waitForTransactionExecuted(String accountAddress, long sequence, String signedTranscationHash, long timeout):
   - for given signed transaction sender address, sequence number, expiration time (or 5 sec timeout) to wait and validate execution result is executed, otherwise return/raise an error / flag to tell it is not executed.
   - when signedTransactionHash validation failed, it should return / raise TransactionSequenceNumberConflictError
   - when transaction execution vm_status is not "executed", it should return / raise TransactionExecutionFailure
@@ -56,9 +56,9 @@
 
 # Submit Transaction
 
-- [ ] Submit [p2p transfer][3] transaction
+- [x] Submit [p2p transfer][3] transaction
 - [ ] Submit other [Move Stdlib scripts][4]
-- [ ] Wait for transaction executed:
+- [x] Wait for transaction executed:
   - wait for a transaction by get_transaction by account and transaction sequence, no validation of vm_status and signature. (low level API, consider not exposing, only for internal or test usage.)
 
 # Testnet support

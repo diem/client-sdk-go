@@ -4,11 +4,11 @@
 package libraclient
 
 import (
-	"github.com/libra/libra-client-sdk-go/jsonrpc"
-)
+	"errors"
+	"fmt"
+	"time"
 
-const (
-	TESTNET_URL = "https://client.testnet.libra.org/v1"
+	"github.com/libra/libra-client-sdk-go/jsonrpc"
 )
 
 // List of supported methods
@@ -21,6 +21,8 @@ const (
 	GetTransactions        jsonrpc.Method = "get_transactions"
 	GetEvents              jsonrpc.Method = "get_events"
 	Submit                 jsonrpc.Method = "submit"
+
+	VmStatusExecuted = "executed"
 )
 
 // Client is Libra client implements high level APIs
@@ -34,6 +36,7 @@ type Client interface {
 	GetTransactions(uint64, uint64, bool) ([]*Transaction, error)
 	GetEvents(string, uint64, uint64) ([]*Event, error)
 	Submit(string) error
+	WaitForTransaction(address Address, seq uint64, signature string, timeout time.Duration) (*Transaction, error)
 }
 
 // New creates a `LibraClient` connect to given server URL.
@@ -51,6 +54,29 @@ func NewWithJsonRpcClient(rpc jsonrpc.Client) Client {
 
 type client struct {
 	rpc jsonrpc.Client
+}
+
+// WaitForTransaction waits for given (address, sequence number, signature) transaction.
+func (c *client) WaitForTransaction(address Address, seq uint64, signature string, timeout time.Duration) (*Transaction, error) {
+	step := time.Millisecond * 500
+	for i := time.Duration(0); i < timeout; i += step {
+		txn, err := c.GetAccountTransaction(address, seq, true)
+		if err != nil {
+			return nil, err
+		}
+		if txn != nil {
+			if txn.Transaction.Signature != signature {
+				return txn, errors.New("found transaction, but signature does not match")
+			}
+			if txn.VmStatus != VmStatusExecuted {
+				return txn, fmt.Errorf("transaction execution failed: %v", txn.VmStatus)
+
+			}
+			return txn, nil
+		}
+		time.Sleep(step)
+	}
+	return nil, fmt.Errorf("transaction not found within timeout period: %v", timeout)
 }
 
 // GetCurrencies calls to "get_currencies" method

@@ -1,5 +1,9 @@
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/facebookincubator/serde-reflection v0.0.0-20200817194809-1ece6142271c h1:7Jhs4tPAmhpfHfiy4VScKMQzyNLO+ixu+g/tgXYi4uQ=
+github.com/facebookincubator/serde-reflection v0.0.0-20200817194809-1ece6142271c/go.mod h1:++02RGTGgEd3QCVGF+CNW0JFYAgL2rW1axnhwWt407c=
+github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang v0.0.0-20200817194809-1ece6142271c h1:gvcE0t96AqKk8jiN7iAHb9y8DIPy8n0eu2+I8Tza0+k=
+github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang v0.0.0-20200817194809-1ece6142271c/go.mod h1:FCJD3q7fZmpX01ratdDA9HgdUrhXTeHpi6I1tr8jWJU=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/sipa/bech32 v0.0.0-20181103234641-bdc264f84014 h1:lYM8A3mRlw1drL0geyx8mb8UIxqracXNlouv7GrAJWE=

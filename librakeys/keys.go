@@ -22,10 +22,15 @@ const (
 type AuthKey []byte
 
 // PublicKey is Libra account public key
-type PublicKey ed25519.PublicKey
+type PublicKey interface {
+	KeyScheme() KeyScheme
+	ToBytes() []byte
+}
 
 // PrivateKey is Libra account private key
-type PrivateKey ed25519.PrivateKey
+type PrivateKey interface {
+	Sign(msg []byte) []byte
+}
 
 // Keys holds Libra local account keys
 type Keys struct {
@@ -41,19 +46,29 @@ func MustGenKeys() *Keys {
 	if err != nil {
 		panic(err)
 	}
-	authKey := NewAuthKey(PublicKey(publicKey))
+	pk := NewPublicKey(publicKey)
+	authKey := NewAuthKey(pk)
 	return &Keys{
-		PublicKey(publicKey),
-		PrivateKey(privateKey),
+		pk,
+		NewPrivateKey(privateKey),
 		authKey,
 		authKey.AccountAddress(),
 	}
 }
 
+func NewPrivateKey(key ed25519.PrivateKey) PrivateKey {
+	return &singlePrivateKey{key}
+}
+
+// NewPublicKey from single `ed25519.PublicKey`
+func NewPublicKey(key ed25519.PublicKey) PublicKey {
+	return &singlePublicKey{key}
+}
+
 // NewAuthKey return auth key from public key
 func NewAuthKey(publicKey PublicKey) AuthKey {
 	hash := sha3.New256()
-	hash.Write(publicKey)
+	hash.Write(publicKey.ToBytes())
 	hash.Write([]byte{byte(Ed25519Key)})
 	return AuthKey(hash.Sum(nil))
 }
@@ -85,4 +100,24 @@ func (k AuthKey) AccountAddress() libraid.AccountAddress {
 // ToString returns hex encoded string for the AuthKey
 func (k AuthKey) ToString() string {
 	return hex.EncodeToString(k)
+}
+
+type singlePublicKey struct {
+	pk ed25519.PublicKey
+}
+
+func (k *singlePublicKey) KeyScheme() KeyScheme {
+	return Ed25519Key
+}
+
+func (k *singlePublicKey) ToBytes() []byte {
+	return []byte(k.pk)
+}
+
+type singlePrivateKey struct {
+	pk ed25519.PrivateKey
+}
+
+func (k *singlePrivateKey) Sign(msg []byte) []byte {
+	return ed25519.Sign(k.pk, msg)
 }

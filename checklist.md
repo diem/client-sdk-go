@@ -26,10 +26,10 @@
   - [x] parse and use libra_chain_id, libra_ledger_version and libra_ledger_tiemstamp in the JSONRPC response.
 - [x] Parsing and gen Libra Account Identifier (see [LIP-5][2])
   - bech32 addresses/subaddresses support
-- [ ] language specific standard release publish: e.g. java maven central repo, python pip
-- [ ] Multi-network: initialize Client with chain id, JSON-RPC server URL
+- [x] language specific standard release publish: e.g. java maven central repo, python pip
+- [x] Multi-network: initialize Client with chain id, JSON-RPC server URL
 - [x] Handle unsigned int64 data type properly
-- [ ] Validate server chain id: client should be initialized with chain id and validate server response chain id is the same.
+- [x] Validate server chain id: client should be initialized with chain id and validate server response chain id is the same.
 - [ ] Validate input parameters, e.g. invalid account address: "kkk". Should return / raise InvalidArgumentError.
 
 # High Level API

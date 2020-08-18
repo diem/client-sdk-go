@@ -207,7 +207,7 @@ func TestClient(t *testing.T) {
 				txn := librasigner.Sign(
 					account1, sequenceNum, script,
 					10000, 0, currencyCode,
-					time.Now().Add(time.Second*30),
+					uint64(time.Now().Add(time.Second*30).Unix()),
 					testnet.ChainID,
 				)
 				err := client.Submit(txn.HexSignedTransaction())
@@ -217,6 +217,7 @@ func TestClient(t *testing.T) {
 					hex.EncodeToString(account1.AccountAddress),
 					sequenceNum,
 					txn.HexSignature(),
+					uint64(time.Now().Add(time.Second).Unix()),
 					time.Second*5,
 				)
 				require.NoError(t, err)

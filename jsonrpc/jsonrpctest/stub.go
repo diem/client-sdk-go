@@ -21,7 +21,7 @@ func (s *Stub) Call(requests ...*jsonrpc.Request) (map[jsonrpc.RequestID]*jsonrp
 			resp.LibraChainID = uint64(testnet.ChainID)
 		}
 		if resp.LibraLedgerTimestampusec == 0 {
-			resp.LibraLedgerTimestampusec = uint64(time.Now().Unix() * 1000)
+			resp.LibraLedgerTimestampusec = uint64(time.Now().Unix() * 1000000)
 		}
 		if resp.LibraLedgerVersion == 0 {
 			resp.LibraLedgerVersion = 100

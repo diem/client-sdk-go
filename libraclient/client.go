@@ -6,6 +6,7 @@ package libraclient
 import (
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/libra/libra-client-sdk-go/jsonrpc"
@@ -36,7 +37,14 @@ type Client interface {
 	GetTransactions(uint64, uint64, bool) ([]*Transaction, error)
 	GetEvents(string, uint64, uint64) ([]*Event, error)
 	Submit(string) error
-	WaitForTransaction(address Address, seq uint64, signature string, timeout time.Duration) (*Transaction, error)
+	WaitForTransaction(
+		address Address,
+		seq uint64,
+		signature string,
+		expirationTimeSec uint64,
+		timeout time.Duration,
+	) (*Transaction, error)
+	LastResponseLedgerState() LedgerState
 }
 
 // New creates a `LibraClient` connect to given server URL.
@@ -49,15 +57,37 @@ func New(url string) Client {
 
 // NewWithJsonRpcClient creates a `LibraClient` with given `jsonrpc.Client`
 func NewWithJsonRpcClient(rpc jsonrpc.Client) Client {
-	return &client{rpc}
+	return &client{rpc: rpc}
+}
+
+// LedgerState represents response LibraLedgerTimestampusec & LibraLedgerVersion
+type LedgerState struct {
+	TimestampUsec uint64
+	Version       uint64
 }
 
 type client struct {
-	rpc jsonrpc.Client
+	rpc  jsonrpc.Client
+	mux  sync.RWMutex
+	last LedgerState
+}
+
+// LastResponseLedgerState returns last recorded response ledger state
+func (c *client) LastResponseLedgerState() LedgerState {
+	c.mux.RLock()
+	defer c.mux.RUnlock()
+	return c.last
+}
+
+// UpdateLastResponseLedgerState updates LastResponseLedgerState
+func (c *client) UpdateLastResponseLedgerState(state LedgerState) {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	c.last = state
 }
 
 // WaitForTransaction waits for given (address, sequence number, signature) transaction.
-func (c *client) WaitForTransaction(address Address, seq uint64, signature string, timeout time.Duration) (*Transaction, error) {
+func (c *client) WaitForTransaction(address Address, seq uint64, signature string, expirationTimeSec uint64, timeout time.Duration) (*Transaction, error) {
 	step := time.Millisecond * 500
 	for i := time.Duration(0); i < timeout; i += step {
 		txn, err := c.GetAccountTransaction(address, seq, true)
@@ -73,6 +103,9 @@ func (c *client) WaitForTransaction(address Address, seq uint64, signature strin
 
 			}
 			return txn, nil
+		}
+		if expirationTimeSec*1000000 < c.LastResponseLedgerState().TimestampUsec {
+			return nil, errors.New("transaction expired")
 		}
 		time.Sleep(step)
 	}
@@ -174,5 +207,9 @@ func (c *client) call(method jsonrpc.Method, ret interface{}, params ...jsonrpc.
 	if resp.Error != nil {
 		return false, resp.Error
 	}
+	c.UpdateLastResponseLedgerState(LedgerState{
+		TimestampUsec: resp.LibraLedgerTimestampusec,
+		Version:       resp.LibraLedgerVersion,
+	})
 	return resp.UnmarshalResult(ret)
 }

@@ -30,7 +30,7 @@ func TestSign(t *testing.T) {
 	raw := librasigner.RawTransaction{
 		libraid.AccountAddress(sender), seq, script,
 		maxGasAmount, gasUnitPrice, currencyCode,
-		expiration, testnet.ChainID,
+		uint64(expiration.Unix()), testnet.ChainID,
 	}
 
 	assert.Equal(t, expectedRawTxn, hex.EncodeToString(raw.ToLCS()))

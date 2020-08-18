@@ -21,9 +21,9 @@
   - JSON-RPC error: error returned from server.
 - [x] https
 - [x] Client connection pool: keep connection alive for less likely getting inconsistent data from connecting to multiple servers.
-- [ ] Handle stale responses:
-  - [ ] client tracks latest server response block version and timestamp, raise error when received server response contains stale version / timestamp.
-  - [ ] parse and use libra_chain_id, libra_ledger_version and libra_ledger_tiemstamp in the JSONRPC response.
+- [x] Handle stale responses:
+  - [x] client tracks latest server response block version and timestamp, raise error when received server response contains stale version / timestamp.
+  - [x] parse and use libra_chain_id, libra_ledger_version and libra_ledger_tiemstamp in the JSONRPC response.
 - [x] Parsing and gen Libra Account Identifier (see [LIP-5][2])
   - bech32 addresses/subaddresses support
 - [ ] language specific standard release publish: e.g. java maven central repo, python pip

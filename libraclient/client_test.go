@@ -131,6 +131,91 @@ func TestWaitForTransaction(t *testing.T) {
 	}
 }
 
+func TestHandleStaleResponse(t *testing.T) {
+	cases := []struct {
+		name     string
+		response jsonrpc.Response
+		call     func(t *testing.T, client libraclient.Client)
+	}{
+		{
+			name: "return error if server response version is older",
+			response: jsonrpc.Response{
+				LibraLedgerVersion:       9,
+				LibraLedgerTimestampusec: 1597722856123456,
+				Result: toPtr(json.RawMessage(`{
+    "timestamp": 1597722856123456,
+    "version": 9,
+    "chain_id": 2
+}`)),
+			},
+			call: func(t *testing.T, client libraclient.Client) {
+				client.UpdateLastResponseLedgerState(libraclient.LedgerState{
+					Version:       10,
+					TimestampUsec: 1597722856123477,
+				})
+				ret, err := client.GetMetadata()
+				assert.EqualError(t, err, "stale response error: expected server response ledger version >= 10, but got 9")
+				assert.Nil(t, ret)
+			},
+		},
+		{
+			name: "return error if server response timestamp is older",
+			response: jsonrpc.Response{
+				LibraLedgerVersion:       10,
+				LibraLedgerTimestampusec: 1597722856123456,
+				Result: toPtr(json.RawMessage(`{
+    "timestamp": 1597722856123456,
+    "version": 10,
+    "chain_id": 2
+}`)),
+			},
+			call: func(t *testing.T, client libraclient.Client) {
+				client.UpdateLastResponseLedgerState(libraclient.LedgerState{
+					Version:       10,
+					TimestampUsec: 1597722856123477,
+				})
+				ret, err := client.GetMetadata()
+				assert.EqualError(t, err, "stale response error: expected server response ledger timestamp(usec) >= 1597722856123477, but got 1597722856123456")
+				assert.Nil(t, ret)
+			},
+		},
+		{
+			name: "update last response state if server response version & timestamp is new",
+			response: jsonrpc.Response{
+				LibraLedgerVersion:       11,
+				LibraLedgerTimestampusec: 1597722856123488,
+				Result: toPtr(json.RawMessage(`{
+    "timestamp": 1597722856123488,
+    "version": 11,
+    "chain_id": 2
+}`)),
+			},
+			call: func(t *testing.T, client libraclient.Client) {
+				client.UpdateLastResponseLedgerState(libraclient.LedgerState{
+					Version:       10,
+					TimestampUsec: 1597722856123477,
+				})
+				_, err := client.GetMetadata()
+				assert.NoError(t, err)
+				last := client.LastResponseLedgerState()
+				assert.Equal(t, uint64(11), last.Version)
+				assert.Equal(t, uint64(1597722856123488), last.TimestampUsec)
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			client := libraclient.NewWithJsonRpcClient(&jsonrpctest.Stub{
+				Responses: map[jsonrpc.RequestID]jsonrpc.Response{
+					1: tc.response,
+				},
+			})
+			tc.call(t, client)
+		})
+	}
+}
+
 func toPtr(msg json.RawMessage) *json.RawMessage {
 	return &msg
 }

@@ -45,6 +45,7 @@ type Client interface {
 		timeout time.Duration,
 	) (*Transaction, error)
 	LastResponseLedgerState() LedgerState
+	UpdateLastResponseLedgerState(state LedgerState)
 }
 
 // New creates a `LibraClient` connect to given server URL.
@@ -207,9 +208,32 @@ func (c *client) call(method jsonrpc.Method, ret interface{}, params ...jsonrpc.
 	if resp.Error != nil {
 		return false, resp.Error
 	}
-	c.UpdateLastResponseLedgerState(LedgerState{
+	err = c.validateAndUpdateState(LedgerState{
 		TimestampUsec: resp.LibraLedgerTimestampusec,
 		Version:       resp.LibraLedgerVersion,
 	})
+	if err != nil {
+		return false, err
+	}
 	return resp.UnmarshalResult(ret)
+}
+
+func (c *client) validateAndUpdateState(state LedgerState) error {
+	var last = c.LastResponseLedgerState()
+	if last.Version > state.Version {
+		return fmt.Errorf(
+			"stale response error: expected server response ledger %s >= %d, but got %d",
+			"version",
+			last.Version,
+			state.Version)
+	}
+	if last.TimestampUsec > state.TimestampUsec {
+		return fmt.Errorf(
+			"stale response error: expected server response ledger %s >= %d, but got %d",
+			"timestamp(usec)",
+			last.TimestampUsec,
+			state.TimestampUsec)
+	}
+	c.UpdateLastResponseLedgerState(state)
+	return nil
 }

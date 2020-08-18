@@ -2,7 +2,6 @@ package librasigner
 
 import (
 	"encoding/hex"
-	"time"
 
 	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/lcs"
 	"github.com/libra/libra-client-sdk-go/libraid"
@@ -18,7 +17,7 @@ type RawTransaction struct {
 	MaxGasAmount       uint64
 	GasUnitPrice       uint64
 	GasCurrencyCode    string
-	ExpirationTime     time.Time
+	ExpirationTimeSec  uint64
 	ChainID            byte
 }
 
@@ -42,7 +41,7 @@ func (t *RawTransaction) ToLCS() []byte {
 	s.SerializeU64(t.MaxGasAmount)
 	s.SerializeU64(t.GasUnitPrice)
 	s.SerializeStr(t.GasCurrencyCode)
-	s.SerializeU64(uint64(t.ExpirationTime.Unix()))
+	s.SerializeU64(t.ExpirationTimeSec)
 	s.SerializeU8(t.ChainID)
 
 	return s.GetBytes()
@@ -80,13 +79,13 @@ func (t *SignedTransaction) HexSignedTransaction() string {
 func Sign(
 	account *librakeys.Keys, sequenceNum uint64, transactionPayload []byte,
 	maxGasAmmount uint64, gasUnitPrice uint64, gasCurrencyCode string,
-	expirationTime time.Time,
+	expirationTimeSec uint64,
 	chainID byte,
 ) *SignedTransaction {
 	rawTxn := RawTransaction{
 		account.AccountAddress, sequenceNum, transactionPayload,
 		maxGasAmmount, gasUnitPrice, gasCurrencyCode,
-		expirationTime, chainID,
+		expirationTimeSec, chainID,
 	}
 	signature := account.PrivateKey.Sign(rawTxn.SigningMessage())
 	return &SignedTransaction{

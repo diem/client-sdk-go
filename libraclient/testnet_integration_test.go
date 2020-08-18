@@ -36,7 +36,7 @@ func TestClient(t *testing.T) {
 		{
 			name: "get currencies error",
 			call: func(t *testing.T, client libraclient.Client) {
-				client = libraclient.New("invalid")
+				client = libraclient.New(testnet.ChainID, "invalid")
 				ret, err := client.GetCurrencies()
 				require.Error(t, err)
 				assert.Nil(t, ret)
@@ -53,7 +53,7 @@ func TestClient(t *testing.T) {
 		{
 			name: "get metadata error",
 			call: func(t *testing.T, client libraclient.Client) {
-				client = libraclient.New("invalid")
+				client = libraclient.New(testnet.ChainID, "invalid")
 				ret, err := client.GetMetadata()
 				require.Error(t, err)
 				assert.Nil(t, ret)
@@ -70,7 +70,7 @@ func TestClient(t *testing.T) {
 		{
 			name: "get metadata by version error",
 			call: func(t *testing.T, client libraclient.Client) {
-				client = libraclient.New("invalid")
+				client = libraclient.New(testnet.ChainID, "invalid")
 				ret, err := client.GetMetadataByVersion(1)
 				require.Error(t, err)
 				assert.Nil(t, ret)
@@ -228,7 +228,7 @@ func TestClient(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			client := libraclient.New(testnet.URL)
+			client := libraclient.New(testnet.ChainID, testnet.URL)
 			tc.call(t, client)
 		})
 	}

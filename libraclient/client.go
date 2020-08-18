@@ -52,13 +52,13 @@ type Client interface {
 // It creates default jsonrpc client `http.Transport` config, if you need to customize
 // `http.Transport` config (for better connection pool production usage), call `NewWithJsonRpcClient` with
 // `jsonrpc.NewClientWithTransport(url, <your http.Transport>)`
-func New(url string) Client {
-	return NewWithJsonRpcClient(jsonrpc.NewClient(url))
+func New(chainID byte, url string) Client {
+	return NewWithJsonRpcClient(chainID, jsonrpc.NewClient(url))
 }
 
 // NewWithJsonRpcClient creates a `LibraClient` with given `jsonrpc.Client`
-func NewWithJsonRpcClient(rpc jsonrpc.Client) Client {
-	return &client{rpc: rpc}
+func NewWithJsonRpcClient(chainID byte, rpc jsonrpc.Client) Client {
+	return &client{chainID: chainID, rpc: rpc}
 }
 
 // LedgerState represents response LibraLedgerTimestampusec & LibraLedgerVersion
@@ -68,9 +68,10 @@ type LedgerState struct {
 }
 
 type client struct {
-	rpc  jsonrpc.Client
-	mux  sync.RWMutex
-	last LedgerState
+	chainID byte
+	rpc     jsonrpc.Client
+	mux     sync.RWMutex
+	last    LedgerState
 }
 
 // LastResponseLedgerState returns last recorded response ledger state
@@ -205,8 +206,9 @@ func (c *client) call(method jsonrpc.Method, ret interface{}, params ...jsonrpc.
 		return false, err
 	}
 	resp := resps[req.ID]
-	if resp.Error != nil {
-		return false, resp.Error
+
+	if err = c.validateChainID(byte(resp.LibraChainID)); err != nil {
+		return false, err
 	}
 	err = c.validateAndUpdateState(LedgerState{
 		TimestampUsec: resp.LibraLedgerTimestampusec,
@@ -215,7 +217,18 @@ func (c *client) call(method jsonrpc.Method, ret interface{}, params ...jsonrpc.
 	if err != nil {
 		return false, err
 	}
+
+	if resp.Error != nil {
+		return false, resp.Error
+	}
 	return resp.UnmarshalResult(ret)
+}
+
+func (c *client) validateChainID(chainID byte) error {
+	if c.chainID != chainID {
+		return fmt.Errorf("chain id mismatch error: expected server response chain id == %d, but got %d", c.chainID, chainID)
+	}
+	return nil
 }
 
 func (c *client) validateAndUpdateState(state LedgerState) error {

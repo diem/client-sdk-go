@@ -10,6 +10,7 @@ import (
 	"github.com/libra/libra-client-sdk-go/jsonrpc/jsonrpctest"
 	"github.com/libra/libra-client-sdk-go/libraclient"
 	"github.com/libra/libra-client-sdk-go/librakeys"
+	"github.com/libra/libra-client-sdk-go/testnet"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -121,7 +122,7 @@ func TestWaitForTransaction(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			client := libraclient.NewWithJsonRpcClient(&jsonrpctest.Stub{
+			client := libraclient.NewWithJsonRpcClient(testnet.ChainID, &jsonrpctest.Stub{
 				Responses: map[jsonrpc.RequestID]jsonrpc.Response{
 					1: tc.response,
 				},
@@ -206,7 +207,43 @@ func TestHandleStaleResponse(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			client := libraclient.NewWithJsonRpcClient(&jsonrpctest.Stub{
+			client := libraclient.NewWithJsonRpcClient(testnet.ChainID, &jsonrpctest.Stub{
+				Responses: map[jsonrpc.RequestID]jsonrpc.Response{
+					1: tc.response,
+				},
+			})
+			tc.call(t, client)
+		})
+	}
+}
+
+func TestValidateChainID(t *testing.T) {
+	cases := []struct {
+		name     string
+		response jsonrpc.Response
+		call     func(t *testing.T, client libraclient.Client)
+	}{
+		{
+			name: "return error if server response chain id mismatched",
+			response: jsonrpc.Response{
+				LibraChainID: 9,
+				Result: toPtr(json.RawMessage(`{
+    "timestamp": 1597722856123456,
+    "version": 9,
+    "chain_id": 9
+}`)),
+			},
+			call: func(t *testing.T, client libraclient.Client) {
+				ret, err := client.GetMetadata()
+				assert.EqualError(t, err, "chain id mismatch error: expected server response chain id == 2, but got 9")
+				assert.Nil(t, ret)
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			client := libraclient.NewWithJsonRpcClient(testnet.ChainID, &jsonrpctest.Stub{
 				Responses: map[jsonrpc.RequestID]jsonrpc.Response{
 					1: tc.response,
 				},

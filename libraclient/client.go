@@ -233,6 +233,9 @@ func (c *client) validateChainID(chainID byte) error {
 
 func (c *client) validateAndUpdateState(state LedgerState) error {
 	var last = c.LastResponseLedgerState()
+	if last.Version == state.Version && last.TimestampUsec == state.TimestampUsec {
+		return nil
+	}
 	if last.Version > state.Version {
 		return fmt.Errorf(
 			"stale response error: expected server response ledger %s >= %d, but got %d",

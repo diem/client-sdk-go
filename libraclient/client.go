@@ -98,15 +98,15 @@ func (c *client) WaitForTransaction(address Address, seq uint64, signature strin
 		}
 		if txn != nil {
 			if txn.Transaction.Signature != signature {
-				return txn, errors.New("found transaction, but signature does not match")
+				return nil, errors.New("found transaction, but signature does not match")
 			}
 			if txn.VmStatus != VmStatusExecuted {
-				return txn, fmt.Errorf("transaction execution failed: %v", txn.VmStatus)
+				return nil, fmt.Errorf("transaction execution failed: %v", txn.VmStatus)
 
 			}
 			return txn, nil
 		}
-		if expirationTimeSec*1000000 < c.LastResponseLedgerState().TimestampUsec {
+		if expirationTimeSec*1_000_000 <= c.LastResponseLedgerState().TimestampUsec {
 			return nil, errors.New("transaction expired")
 		}
 		time.Sleep(step)

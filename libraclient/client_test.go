@@ -30,7 +30,7 @@ func TestWaitForTransaction(t *testing.T) {
 					hex.EncodeToString(account.AccountAddress),
 					0,
 					"sig",
-					uint64(time.Now().Add(time.Second).Unix()),
+					uint64(time.Now().Add(2*time.Second).Unix()),
 					time.Second*1,
 				)
 				require.EqualError(t, err, "transaction not found within timeout period: 1s")
@@ -65,7 +65,7 @@ func TestWaitForTransaction(t *testing.T) {
 					time.Second*5,
 				)
 				assert.EqualError(t, err, "found transaction, but signature does not match")
-				assert.NotNil(t, ret)
+				assert.Nil(t, ret)
 			},
 		},
 		{
@@ -96,7 +96,7 @@ func TestWaitForTransaction(t *testing.T) {
 					time.Second*5,
 				)
 				assert.EqualError(t, err, "transaction execution failed: map[abort_code:5 location:00000000000000000000000000000001::LibraAccount type:move_abort]")
-				assert.NotNil(t, ret)
+				assert.Nil(t, ret)
 			},
 		},
 		{
@@ -104,6 +104,25 @@ func TestWaitForTransaction(t *testing.T) {
 			response: jsonrpc.Response{
 				Result:                   nil,
 				LibraLedgerTimestampusec: 1597722856123456,
+			},
+			call: func(t *testing.T, client libraclient.Client) {
+				account := librakeys.MustGenKeys()
+				ret, err := client.WaitForTransaction(
+					hex.EncodeToString(account.AccountAddress),
+					0,
+					"a181a036ba68fcd25a7ba9f3895caf720af7aee4bf86c4d798050a1101e75f71ccd891158c8fa0bf349bbb66fb0ba50b29b6fb29822dc04071aff831735e6402",
+					uint64(1597722856),
+					time.Second*5,
+				)
+				assert.EqualError(t, err, "transaction expired")
+				assert.Nil(t, ret)
+			},
+		},
+		{
+			name: "wait for transaction: if onchain time is exactly same with expiration time",
+			response: jsonrpc.Response{
+				Result:                   nil,
+				LibraLedgerTimestampusec: 1597722856000000,
 			},
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()

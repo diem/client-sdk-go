@@ -24,7 +24,7 @@ func TestNewAuthKeyFromPublicKey(t *testing.T) {
 func TestAccountAddressFromAuthKey(t *testing.T) {
 	key := librakeys.MustNewAuthKeyFromString(
 		"459c77a38803bd53f3adee52703810e3a74fd7c46952c497e75afb0a7932586d")
-	assert.Equal(t, "a74fd7c46952c497e75afb0a7932586d", hex.EncodeToString(key.AccountAddress()))
+	assert.Equal(t, "a74fd7c46952c497e75afb0a7932586d", key.AccountAddress().Hex())
 }
 
 func TestMustGenKeys(t *testing.T) {

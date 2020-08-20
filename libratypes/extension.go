@@ -1,10 +1,19 @@
+// Copyright (c) The Libra Core Contributors
+// SPDX-License-Identifier: Apache-2.0
+
 package libratypes
 
 import (
 	"encoding/hex"
+	"fmt"
 
 	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/lcs"
 	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/serde"
+)
+
+const (
+	// AccountAddressLength is valid account address length
+	AccountAddressLength = 16
 )
 
 // Serializable interface for `ToLCS`
@@ -32,4 +41,31 @@ func (t *SignedTransaction) HexSignature() string {
 		return hex.EncodeToString(sig.Value)
 	}
 	panic("t.Authenticator type not found")
+}
+
+// Hex returns hex encoded string for the AccountAddress
+func (a AccountAddress) Hex() string {
+	return hex.EncodeToString(a.Value)
+}
+
+// NewAccountAddressFromHex creates account address from given hex string
+func NewAccountAddressFromHex(address string) (*AccountAddress, error) {
+	bytes, err := hex.DecodeString(address)
+	if err != nil {
+		return nil, err
+	}
+	if len(bytes) != AccountAddressLength {
+		return nil, fmt.Errorf(
+			"Account address should be 16 bytes, but given %d bytes", len(bytes))
+	}
+	return &AccountAddress{bytes}, nil
+}
+
+// MustNewAccountAddressFromHex creates account address or panic for invalid address hex string
+func MustNewAccountAddressFromHex(address string) *AccountAddress {
+	ret, err := NewAccountAddressFromHex(address)
+	if err != nil {
+		panic(err)
+	}
+	return ret
 }

@@ -4,14 +4,12 @@
 package libraclient_test
 
 import (
-	"encoding/hex"
 	"testing"
 	"time"
 
 	"github.com/libra/libra-client-sdk-go/jsonrpc"
 	"github.com/libra/libra-client-sdk-go/libraclient"
 	"github.com/libra/libra-client-sdk-go/librakeys"
-	"github.com/libra/libra-client-sdk-go/librasigner"
 	"github.com/libra/libra-client-sdk-go/librastd"
 	"github.com/libra/libra-client-sdk-go/libratypes"
 	"github.com/libra/libra-client-sdk-go/testnet"
@@ -204,11 +202,11 @@ func TestClient(t *testing.T) {
 				account2 := genAccount(client, currencyCode)
 				script := librastd.EncodePeerToPeerWithMetadataScript(
 					librastd.CurrencyCode(currencyCode),
-					libratypes.AccountAddress{account2.AccountAddress},
+					account2.AccountAddress,
 					amount, []byte{}, []byte{})
 
-				txn := librasigner.Sign(
-					account1, sequenceNum,
+				txn := account1.Sign(
+					sequenceNum,
 					libratypes.TransactionPayload__Script{script},
 					10000, 0, currencyCode,
 					uint64(time.Now().Add(time.Second*30).Unix()),
@@ -218,7 +216,7 @@ func TestClient(t *testing.T) {
 				require.NoError(t, err)
 
 				ret, err := client.WaitForTransaction(
-					hex.EncodeToString(account1.AccountAddress),
+					account1.AccountAddress.Hex(),
 					sequenceNum,
 					txn.HexSignature(),
 					uint64(time.Now().Add(time.Second).Unix()),

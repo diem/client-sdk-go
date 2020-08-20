@@ -26,7 +26,6 @@ type AuthKey []byte
 type PublicKey interface {
 	NewAuthenticator(sig []byte) libratypes.TransactionAuthenticator
 	NewAuthKey() AuthKey
-	ToBytes() []byte
 	Hex() string
 }
 
@@ -41,7 +40,7 @@ type Keys struct {
 	PublicKey      PublicKey
 	PrivateKey     PrivateKey
 	AuthKey        AuthKey
-	AccountAddress libraid.AccountAddress
+	AccountAddress libratypes.AccountAddress
 }
 
 // MustGenKeys generates local account keys, panics if got error
@@ -141,8 +140,8 @@ func MustNewAuthKeyFromString(key string) AuthKey {
 }
 
 // AccountAddress return account address from auth key
-func (k AuthKey) AccountAddress() libraid.AccountAddress {
-	return libraid.AccountAddress(k[len(k)-libraid.AccountAddressLength:])
+func (k AuthKey) AccountAddress() libratypes.AccountAddress {
+	return libratypes.AccountAddress{k[len(k)-libraid.AccountAddressLength:]}
 }
 
 // Hex returns hex encoded string for the AuthKey
@@ -166,10 +165,6 @@ func (k *singlePublicKey) NewAuthKey() AuthKey {
 	hash.Write([]byte(k.pk))
 	hash.Write([]byte{byte(Ed25519Key)})
 	return AuthKey(hash.Sum(nil))
-}
-
-func (k *singlePublicKey) ToBytes() []byte {
-	return []byte(k.pk)
 }
 
 func (k *singlePublicKey) Hex() string {

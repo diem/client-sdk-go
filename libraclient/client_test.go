@@ -1,7 +1,6 @@
 package libraclient_test
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"testing"
 	"time"
@@ -27,7 +26,7 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					hex.EncodeToString(account.AccountAddress),
+					account.AccountAddress.Hex(),
 					0,
 					"sig",
 					uint64(time.Now().Add(2*time.Second).Unix()),
@@ -58,7 +57,7 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					hex.EncodeToString(account.AccountAddress),
+					account.AccountAddress.Hex(),
 					0,
 					"mismatched sig",
 					uint64(time.Now().Add(time.Second).Unix()),
@@ -89,7 +88,7 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					hex.EncodeToString(account.AccountAddress),
+					account.AccountAddress.Hex(),
 					0,
 					"a181a036ba68fcd25a7ba9f3895caf720af7aee4bf86c4d798050a1101e75f71ccd891158c8fa0bf349bbb66fb0ba50b29b6fb29822dc04071aff831735e6402",
 					uint64(time.Now().Add(time.Second).Unix()),
@@ -108,7 +107,7 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					hex.EncodeToString(account.AccountAddress),
+					account.AccountAddress.Hex(),
 					0,
 					"a181a036ba68fcd25a7ba9f3895caf720af7aee4bf86c4d798050a1101e75f71ccd891158c8fa0bf349bbb66fb0ba50b29b6fb29822dc04071aff831735e6402",
 					uint64(1597722856),
@@ -127,7 +126,7 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					hex.EncodeToString(account.AccountAddress),
+					account.AccountAddress.Hex(),
 					0,
 					"a181a036ba68fcd25a7ba9f3895caf720af7aee4bf86c4d798050a1101e75f71ccd891158c8fa0bf349bbb66fb0ba50b29b6fb29822dc04071aff831735e6402",
 					uint64(1597722856),

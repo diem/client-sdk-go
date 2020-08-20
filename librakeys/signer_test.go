@@ -8,7 +8,6 @@ import (
 
 	"github.com/libra/libra-client-sdk-go/librakeys"
 	"github.com/libra/libra-client-sdk-go/librastd"
-	"github.com/libra/libra-client-sdk-go/libratypes"
 	"github.com/libra/libra-client-sdk-go/testnet"
 	"github.com/stretchr/testify/assert"
 )
@@ -37,7 +36,7 @@ func TestSign(t *testing.T) {
 
 	txn := sender.Sign(
 		seq,
-		libratypes.TransactionPayload__Script{script},
+		script,
 		maxGasAmount, gasUnitPrice, currencyCode,
 		expiration,
 		testnet.ChainID,

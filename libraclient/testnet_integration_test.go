@@ -11,7 +11,6 @@ import (
 	"github.com/libra/libra-client-sdk-go/libraclient"
 	"github.com/libra/libra-client-sdk-go/librakeys"
 	"github.com/libra/libra-client-sdk-go/librastd"
-	"github.com/libra/libra-client-sdk-go/libratypes"
 	"github.com/libra/libra-client-sdk-go/testnet"
 
 	"github.com/stretchr/testify/assert"
@@ -207,7 +206,7 @@ func TestClient(t *testing.T) {
 
 				txn := account1.Sign(
 					sequenceNum,
-					libratypes.TransactionPayload__Script{script},
+					script,
 					10000, 0, currencyCode,
 					uint64(time.Now().Add(time.Second*30).Unix()),
 					testnet.ChainID,

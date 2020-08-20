@@ -10,7 +10,7 @@ import (
 
 // Sign transaction
 func (keys *Keys) Sign(
-	sequenceNum uint64, transactionPayload libratypes.TransactionPayload,
+	sequenceNum uint64, script libratypes.Script,
 	maxGasAmmount uint64, gasUnitPrice uint64, gasCurrencyCode string,
 	expirationTimeSec uint64,
 	chainID byte,
@@ -18,7 +18,7 @@ func (keys *Keys) Sign(
 	rawTxn := libratypes.RawTransaction{
 		Sender:                  keys.AccountAddress,
 		SequenceNumber:          sequenceNum,
-		Payload:                 transactionPayload,
+		Payload:                 libratypes.TransactionPayload__Script{script},
 		MaxGasAmount:            maxGasAmmount,
 		GasUnitPrice:            gasUnitPrice,
 		GasCurrencyCode:         gasCurrencyCode,

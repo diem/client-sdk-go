@@ -6,6 +6,7 @@ package libraid
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 )
 
 const (
@@ -29,6 +30,31 @@ func GenSubAddress() (SubAddress, error) {
 // MustGenSubAddress calls `GenSubAddress` and panics if got error
 func MustGenSubAddress() SubAddress {
 	ret, err := GenSubAddress()
+	if err != nil {
+		panic(err)
+	}
+	return ret
+}
+
+// NewSubAddressFromHex creates SubAddress from given hex-encoded bytes string
+// SubAddress should be 8 bytes.
+func NewSubAddressFromHex(str string) (SubAddress, error) {
+	bytes, err := hex.DecodeString(str)
+	if err != nil {
+		return nil, err
+	}
+	if len(bytes) != SubAddressLength {
+		return nil, fmt.Errorf(
+			"Subaddress should be 8 bytes, but given %d bytes", len(bytes))
+	}
+
+	return SubAddress(bytes), nil
+}
+
+// MustNewSubAddressFromHex creates SubAddress or panic if given hex-encoded subaddress
+// is invalid
+func MustNewSubAddressFromHex(str string) SubAddress {
+	ret, err := NewSubAddressFromHex(str)
 	if err != nil {
 		panic(err)
 	}

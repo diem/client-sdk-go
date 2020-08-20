@@ -1,17 +1,15 @@
 
 # Basics
 
-- [ ] module structure:
+- [x] module structure:
   - libra
     - libraclient: high level APIs interface, should support application to do easy mock / stub development.
-      - types: data transfer object types for jsonrpc client, should match server side JSON-RPC spec data types.
-      - utils: includes crypto, data types converting and other utils functions
-        - signing, sha3 hashing, address parsing and converting, hex encoding / decoding
-        - LCS utils
     - jsonrpc: jsonrpc client
-    - stdlib: move stdlib script utils.
+    - librakeys: keys utils, generate public & private keys for testing, create auth keys, and sign transaction
+    - libraid: Libra Account Identifier and Intent URL encoding & decodeing
+    - librastd: move stdlib script utils.
     - testnet: testnet utils, should include FaucetService for handling testnet mint.
-    - types: Libra onchain data structure types.
+    - libratypes: Libra onchain data structure types.
 - [x] JSON-RPC 2.0 Spec:
   - [x] spec version validation.
   - [x] batch requests and responses handling.
@@ -50,14 +48,13 @@
 - [x] Get account
 - [x] Get account transaction
 - [x] Get account transactions
-- [ ] Get account events
 - [x] Handle error response
 - [x] Serialize result JSON to typed data structure
 
 # Submit Transaction
 
 - [x] Submit [p2p transfer][3] transaction
-- [ ] Submit other [Move Stdlib scripts][4]
+- [x] Submit other [Move Stdlib scripts][4]
 - [x] Wait for transaction executed:
   - wait for a transaction by get_transaction by account and transaction sequence, no validation of vm_status and signature. (low level API, consider not exposing, only for internal or test usage.)
 
@@ -73,7 +70,8 @@ See [doc][5] for above concepts.
 # Examples
 
 - [ ] Query blockchain example
-- [ ] Submit p2p transfer transaction example
+- [ ] p2p transfer transaction example
+- [ ] create childVASP example
 
 # Nice to have
 

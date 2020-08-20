@@ -15,7 +15,7 @@ import (
 
 func TestEncodeDecodeIntent(t *testing.T) {
 	address := *libratypes.MustNewAccountAddressFromHex("f72589b71ff4f8d139674a3f7369c69b")
-	subAddress := libraid.SubAddress(decode("cf64428bdeb62af2"))
+	subAddress := libraid.MustNewSubAddressFromHex("cf64428bdeb62af2")
 	account := libraid.NewAccount(libraid.MainnetPrefix, address, subAddress)
 	accountEncode, _ := account.Encode()
 

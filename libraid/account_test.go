@@ -4,7 +4,6 @@
 package libraid_test
 
 import (
-	"encoding/hex"
 	"testing"
 
 	"github.com/libra/libra-client-sdk-go/libraid"
@@ -25,7 +24,7 @@ func TestGenSubAddress(t *testing.T) {
 
 func TestEncodeDecodeAccountIdentifier(t *testing.T) {
 	address := *libratypes.MustNewAccountAddressFromHex("f72589b71ff4f8d139674a3f7369c69b")
-	subAddress := libraid.SubAddress(decode("cf64428bdeb62af2"))
+	subAddress := libraid.MustNewSubAddressFromHex("cf64428bdeb62af2")
 
 	ret, err := libraid.EncodeAccount(libraid.MainnetPrefix, address, subAddress)
 	require.NoError(t, err)
@@ -57,7 +56,7 @@ func TestEncodeDecodeAccountIdentifierWithoutSubAddress(t *testing.T) {
 func TestEncodeShouldValidateAddressLen(t *testing.T) {
 	t.Run("invalid account address", func(t *testing.T) {
 		address := libratypes.AccountAddress{}
-		subAddress := libraid.SubAddress(decode("cf64428bdeb62af2"))
+		subAddress := libraid.MustNewSubAddressFromHex("cf64428bdeb62af2")
 
 		ret, err := libraid.EncodeAccount(libraid.MainnetPrefix, address, subAddress)
 		require.Error(t, err)
@@ -65,7 +64,7 @@ func TestEncodeShouldValidateAddressLen(t *testing.T) {
 	})
 	t.Run("invalid sub account address", func(t *testing.T) {
 		address := *libratypes.MustNewAccountAddressFromHex("f72589b71ff4f8d139674a3f7369c69b")
-		subAddress := libraid.SubAddress(decode("cf64428bdeb62af2")[:7])
+		subAddress := libraid.SubAddress([]byte{1})
 
 		ret, err := libraid.EncodeAccount(libraid.MainnetPrefix, address, subAddress)
 		require.Error(t, err)
@@ -75,7 +74,7 @@ func TestEncodeShouldValidateAddressLen(t *testing.T) {
 
 func TestDecodeInvalidAccountIdentifierString(t *testing.T) {
 	address := *libratypes.MustNewAccountAddressFromHex("f72589b71ff4f8d139674a3f7369c69b")
-	subAddress := libraid.SubAddress(decode("cf64428bdeb62af2"))
+	subAddress := libraid.MustNewSubAddressFromHex("cf64428bdeb62af2")
 	t.Run("invalid checksum", func(t *testing.T) {
 		ret, err := libraid.EncodeAccount(libraid.MainnetPrefix, address, subAddress)
 		require.NoError(t, err)
@@ -100,14 +99,33 @@ func TestDecodeInvalidAccountIdentifierString(t *testing.T) {
 	})
 }
 
-func decode(str string) []byte {
-	ret, err := hex.DecodeString(str)
-	if err != nil {
-		panic(err)
-	}
-	return ret
-}
+func TestMustNewSubAddressFromHexPanicsForInvalidSubAddress(t *testing.T) {
+	t.Run("invalid hex-encoded string", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r != nil {
+				return
+			}
+			assert.Fail(t, "should panic, but not")
+		}()
+		libraid.MustNewSubAddressFromHex("invalid")
+	})
+	t.Run("invalid bytes length: too long", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r != nil {
+				return
+			}
+			assert.Fail(t, "should panic, but not")
+		}()
+		libraid.MustNewSubAddressFromHex("f72589b71ff4f8d139674a3f7369c69b")
+	})
 
-func encode(b []byte) string {
-	return hex.EncodeToString(b)
+	t.Run("invalid bytes length: too short", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r != nil {
+				return
+			}
+			assert.Fail(t, "should panic, but not")
+		}()
+		libraid.MustNewSubAddressFromHex("f72589b")
+	})
 }

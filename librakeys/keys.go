@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 
 	"github.com/libra/libra-client-sdk-go/libraid"
+	"github.com/libra/libra-client-sdk-go/libratypes"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -23,13 +24,16 @@ type AuthKey []byte
 
 // PublicKey is Libra account public key
 type PublicKey interface {
-	KeyScheme() KeyScheme
+	NewAuthenticator(sig []byte) libratypes.TransactionAuthenticator
+	NewAuthKey() AuthKey
 	ToBytes() []byte
+	Hex() string
 }
 
 // PrivateKey is Libra account private key
 type PrivateKey interface {
 	Sign(msg []byte) []byte
+	Hex() string
 }
 
 // Keys holds Libra local account keys
@@ -47,7 +51,7 @@ func MustGenKeys() *Keys {
 		panic(err)
 	}
 	pk := NewPublicKey(publicKey)
-	authKey := NewAuthKey(pk)
+	authKey := pk.NewAuthKey()
 	return &Keys{
 		pk,
 		NewPrivateKey(privateKey),
@@ -56,6 +60,20 @@ func MustGenKeys() *Keys {
 	}
 }
 
+// MustNewKeysFromPublicAndPrivateKeyHexStrings creates `*Keys` from given public and private keys
+// it panics if given string is not valid hex-encoded bytes.
+func MustNewKeysFromPublicAndPrivateKeyHexStrings(publicKey string, privateKey string) *Keys {
+	pk := MustNewPublicKeyFromString(publicKey)
+	authKey := pk.NewAuthKey()
+	return &Keys{
+		pk,
+		MustNewPrivateKeyFromString(privateKey),
+		authKey,
+		authKey.AccountAddress(),
+	}
+}
+
+// NewPrivateKey from single `ed25519.PrivateKey`
 func NewPrivateKey(key ed25519.PrivateKey) PrivateKey {
 	return &singlePrivateKey{key}
 }
@@ -65,12 +83,22 @@ func NewPublicKey(key ed25519.PublicKey) PublicKey {
 	return &singlePublicKey{key}
 }
 
-// NewAuthKey return auth key from public key
-func NewAuthKey(publicKey PublicKey) AuthKey {
-	hash := sha3.New256()
-	hash.Write(publicKey.ToBytes())
-	hash.Write([]byte{byte(Ed25519Key)})
-	return AuthKey(hash.Sum(nil))
+// NewPrivateKeyFromString creates `PrivateKey` from given hex-encoded key string
+func NewPrivateKeyFromString(key string) (PrivateKey, error) {
+	bytes, err := hex.DecodeString(key)
+	if err != nil {
+		return nil, err
+	}
+	return &singlePrivateKey{bytes}, nil
+}
+
+// NewPublicKeyFromString creates `PublicKey` from given hex-encoded key string
+func NewPublicKeyFromString(key string) (PublicKey, error) {
+	bytes, err := hex.DecodeString(key)
+	if err != nil {
+		return nil, err
+	}
+	return &singlePublicKey{bytes}, nil
 }
 
 // NewAuthKeyFromString creates AuthKey from given hex-encoded key string.
@@ -81,6 +109,26 @@ func NewAuthKeyFromString(key string) (AuthKey, error) {
 		return nil, err
 	}
 	return AuthKey(bytes), nil
+}
+
+// MustNewPrivateKeyFromString creates `PrivateKey` from given hex-encoded key string
+// or panic
+func MustNewPrivateKeyFromString(key string) PrivateKey {
+	ret, err := NewPrivateKeyFromString(key)
+	if err != nil {
+		panic(err)
+	}
+	return ret
+}
+
+// MustNewPublicKeyFromString creates `PublicKey` from given hex-encoded key string
+// or panic
+func MustNewPublicKeyFromString(key string) PublicKey {
+	ret, err := NewPublicKeyFromString(key)
+	if err != nil {
+		panic(err)
+	}
+	return ret
 }
 
 // MustNewAuthKeyFromString parses given key or panic
@@ -97,8 +145,8 @@ func (k AuthKey) AccountAddress() libraid.AccountAddress {
 	return libraid.AccountAddress(k[len(k)-libraid.AccountAddressLength:])
 }
 
-// ToString returns hex encoded string for the AuthKey
-func (k AuthKey) ToString() string {
+// Hex returns hex encoded string for the AuthKey
+func (k AuthKey) Hex() string {
 	return hex.EncodeToString(k)
 }
 
@@ -106,12 +154,26 @@ type singlePublicKey struct {
 	pk ed25519.PublicKey
 }
 
-func (k *singlePublicKey) KeyScheme() KeyScheme {
-	return Ed25519Key
+func (k *singlePublicKey) NewAuthenticator(signature []byte) libratypes.TransactionAuthenticator {
+	return &libratypes.TransactionAuthenticator__Ed25519{
+		PublicKey: libratypes.Ed25519PublicKey{[]byte(k.pk)},
+		Signature: libratypes.Ed25519Signature{signature},
+	}
+}
+
+func (k *singlePublicKey) NewAuthKey() AuthKey {
+	hash := sha3.New256()
+	hash.Write([]byte(k.pk))
+	hash.Write([]byte{byte(Ed25519Key)})
+	return AuthKey(hash.Sum(nil))
 }
 
 func (k *singlePublicKey) ToBytes() []byte {
 	return []byte(k.pk)
+}
+
+func (k *singlePublicKey) Hex() string {
+	return hex.EncodeToString(k.pk)
 }
 
 type singlePrivateKey struct {
@@ -120,4 +182,8 @@ type singlePrivateKey struct {
 
 func (k *singlePrivateKey) Sign(msg []byte) []byte {
 	return ed25519.Sign(k.pk, msg)
+}
+
+func (k *singlePrivateKey) Hex() string {
+	return hex.EncodeToString(k.pk)
 }

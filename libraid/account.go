@@ -7,6 +7,7 @@
 package libraid
 
 import (
+	"encoding/hex"
 	"errors"
 
 	"github.com/sipa/bech32/ref/go/src/bech32"
@@ -32,6 +33,11 @@ var EmptySubAddress SubAddress = []byte{0, 0, 0, 0, 0, 0, 0, 0}
 
 // AccountAddress represents account address bytes
 type AccountAddress []byte
+
+// Hex returns hex encoded string for the AccountAddress
+func (a AccountAddress) Hex() string {
+	return hex.EncodeToString(a)
+}
 
 // NetworkPrefix is account identifier prefix type
 type NetworkPrefix string

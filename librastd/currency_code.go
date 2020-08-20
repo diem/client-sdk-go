@@ -1,19 +1,20 @@
 package librastd
 
-import "github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/lcs"
+import (
+	"github.com/libra/libra-client-sdk-go/libratypes"
+)
 
-func serializeCurrencyCode(s *lcs.Serializer, currencyCode string) {
-	// []TypeTag size
-	s.SerializeLen(1)
-	// TypeTag Struct
-	s.SerializeVariantIndex(7)
-	// address
-	for _, b := range codeAddress {
-		s.SerializeU8(b)
+// CurrencyCode converts given currency code string into Move TypeTag that is required by
+// move script argument.
+func CurrencyCode(code string) libratypes.TypeTag {
+	return &libratypes.TypeTag__Struct{
+		Value: libratypes.StructTag{
+			Address: libratypes.AccountAddress{
+				Value: codeAddress,
+			},
+			Module:     libratypes.Identifier{Value: code},
+			Name:       libratypes.Identifier{Value: code},
+			TypeParams: []libratypes.TypeTag{},
+		},
 	}
-	// module
-	s.SerializeStr(currencyCode)
-	s.SerializeStr(currencyCode)
-	// type params
-	s.SerializeLen(0)
 }

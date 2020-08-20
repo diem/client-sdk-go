@@ -1,6 +1,6 @@
 package librastd
 
-var codeAddress = []byte{
+var codeAddress = []uint8{
 	0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 1,
 }

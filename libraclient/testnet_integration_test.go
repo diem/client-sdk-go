@@ -13,6 +13,7 @@ import (
 	"github.com/libra/libra-client-sdk-go/librakeys"
 	"github.com/libra/libra-client-sdk-go/librasigner"
 	"github.com/libra/libra-client-sdk-go/librastd"
+	"github.com/libra/libra-client-sdk-go/libratypes"
 	"github.com/libra/libra-client-sdk-go/testnet"
 
 	"github.com/stretchr/testify/assert"
@@ -201,16 +202,19 @@ func TestClient(t *testing.T) {
 				var amount uint64 = 10
 				account1 := genAccount(client, currencyCode)
 				account2 := genAccount(client, currencyCode)
-				script := librastd.EncodePeerToPeerScriptWithMetadata(
-					account2.AccountAddress, currencyCode, amount, []byte{}, []byte{})
+				script := librastd.EncodePeerToPeerWithMetadataScript(
+					librastd.CurrencyCode(currencyCode),
+					libratypes.AccountAddress{account2.AccountAddress},
+					amount, []byte{}, []byte{})
 
 				txn := librasigner.Sign(
-					account1, sequenceNum, script,
+					account1, sequenceNum,
+					libratypes.TransactionPayload__Script{script},
 					10000, 0, currencyCode,
 					uint64(time.Now().Add(time.Second*30).Unix()),
 					testnet.ChainID,
 				)
-				err := client.Submit(txn.HexSignedTransaction())
+				err := client.Submit(txn.Hex())
 				require.NoError(t, err)
 
 				ret, err := client.WaitForTransaction(
@@ -236,7 +240,7 @@ func TestClient(t *testing.T) {
 
 func genAccount(client libraclient.Client, currencyCode string) *librakeys.Keys {
 	keys := librakeys.MustGenKeys()
-	waitAccountSequence(client, testnet.MustMint(keys.AuthKey.ToString(), 1000, currencyCode))
+	waitAccountSequence(client, testnet.MustMint(keys.AuthKey.Hex(), 1000, currencyCode))
 	return keys
 }
 

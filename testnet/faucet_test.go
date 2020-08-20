@@ -10,7 +10,7 @@ import (
 
 func TestMint(t *testing.T) {
 	keys := librakeys.MustGenKeys()
-	seq := testnet.MustMint(keys.AuthKey.ToString(), 1000, "LBR")
+	seq := testnet.MustMint(keys.AuthKey.Hex(), 1000, "LBR")
 	assert.True(t, seq > 0)
 }
 

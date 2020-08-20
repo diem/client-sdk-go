@@ -5,6 +5,7 @@ package libraid
 
 import (
 	"crypto/rand"
+	"encoding/hex"
 )
 
 const (
@@ -32,4 +33,9 @@ func MustGenSubAddress() SubAddress {
 		panic(err)
 	}
 	return ret
+}
+
+// Hex returns hex-encoded address string
+func (a SubAddress) Hex() string {
+	return hex.EncodeToString(a)
 }

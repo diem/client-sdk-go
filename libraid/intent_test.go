@@ -8,12 +8,13 @@ import (
 	"testing"
 
 	"github.com/libra/libra-client-sdk-go/libraid"
+	"github.com/libra/libra-client-sdk-go/libratypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestEncodeDecodeIntent(t *testing.T) {
-	address := libraid.AccountAddress(decode("f72589b71ff4f8d139674a3f7369c69b"))
+	address := *libratypes.MustNewAccountAddressFromHex("f72589b71ff4f8d139674a3f7369c69b")
 	subAddress := libraid.SubAddress(decode("cf64428bdeb62af2"))
 	account := libraid.NewAccount(libraid.MainnetPrefix, address, subAddress)
 	accountEncode, _ := account.Encode()

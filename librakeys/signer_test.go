@@ -1,10 +1,12 @@
-package librasigner_test
+// Copyright (c) The Libra Core Contributors
+// SPDX-License-Identifier: Apache-2.0
+
+package librakeys_test
 
 import (
 	"testing"
 
 	"github.com/libra/libra-client-sdk-go/librakeys"
-	"github.com/libra/libra-client-sdk-go/librasigner"
 	"github.com/libra/libra-client-sdk-go/librastd"
 	"github.com/libra/libra-client-sdk-go/libratypes"
 	"github.com/libra/libra-client-sdk-go/testnet"
@@ -30,11 +32,11 @@ func TestSign(t *testing.T) {
 
 	script := librastd.EncodePeerToPeerWithMetadataScript(
 		librastd.CurrencyCode(currencyCode),
-		libratypes.AccountAddress{receiver.AccountAddress},
+		receiver.AccountAddress,
 		amount, []byte{}, []byte{})
 
-	txn := librasigner.Sign(
-		sender, seq,
+	txn := sender.Sign(
+		seq,
 		libratypes.TransactionPayload__Script{script},
 		maxGasAmount, gasUnitPrice, currencyCode,
 		expiration,

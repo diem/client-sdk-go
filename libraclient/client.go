@@ -100,7 +100,7 @@ func (c *client) WaitForTransaction(address Address, seq uint64, signature strin
 			if txn.Transaction.Signature != signature {
 				return nil, errors.New("found transaction, but signature does not match")
 			}
-			if txn.VmStatus != VmStatusExecuted {
+			if txn.VmStatus.Type != VmStatusExecuted {
 				return nil, fmt.Errorf("transaction execution failed: %v", txn.VmStatus)
 
 			}

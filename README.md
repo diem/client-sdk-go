@@ -8,7 +8,7 @@ Go lang client sdk for connect to Libra FullNode JSON-RPC APIs.
 - jsonrpc: jsonrpc client
 - librakeys: keys utils, generate public & private keys for testing, create auth keys, and sign transaction
 - libraid: Libra Account Identifier and Intent URL encoding & decodeing
-- librastd: move stdlib script utils.
+- stdlib: move stdlib script utils.
 - testnet: testnet utils
 - libratypes: Libra onchain data structure types.
 

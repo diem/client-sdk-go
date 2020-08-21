@@ -73,23 +73,21 @@ func DecodeToAccount(prefix NetworkPrefix, encodedAccountIdentifier string) (*Ac
 	}
 
 	return &Account{
-		Prefix:         prefix,
-		Version:        byte(version),
-		AccountAddress: libratypes.AccountAddress{ints2bytes(data[:AccountAddressLength])},
-		SubAddress:     SubAddress(ints2bytes(data[AccountAddressLength:])),
+		Prefix:  prefix,
+		Version: byte(version),
+		AccountAddress: *libratypes.MustNewAccountAddressFromBytes(
+			ints2bytes(data[:AccountAddressLength])),
+		SubAddress: SubAddress(ints2bytes(data[AccountAddressLength:])),
 	}, nil
 }
 
 // Encode encodes Account into SegwitAddr string
 func (ai *Account) Encode() (string, error) {
-	if len(ai.AccountAddress.Value) != AccountAddressLength {
-		return "", errors.New("invalid account address")
-	}
 	if len(ai.SubAddress) != SubAddressLength {
 		return "", errors.New("invalid sub address")
 	}
 	data := make([]byte, 0, AccountAddressLength+SubAddressLength)
-	data = append(data, ai.AccountAddress.Value...)
+	data = append(data, ai.AccountAddress.Value[:]...)
 	data = append(data, ai.SubAddress...)
 
 	return bech32.SegwitAddrEncode(string(ai.Prefix), int(ai.Version), bytes2ints(data))

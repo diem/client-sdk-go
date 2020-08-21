@@ -18,7 +18,7 @@ func (keys *Keys) Sign(
 	rawTxn := libratypes.RawTransaction{
 		Sender:                  keys.AccountAddress,
 		SequenceNumber:          sequenceNum,
-		Payload:                 libratypes.TransactionPayload__Script{script},
+		Payload:                 &libratypes.TransactionPayload__Script{script},
 		MaxGasAmount:            maxGasAmmount,
 		GasUnitPrice:            gasUnitPrice,
 		GasCurrencyCode:         gasCurrencyCode,
@@ -29,7 +29,7 @@ func (keys *Keys) Sign(
 	hash := sha3.New256()
 	hash.Write([]byte("LIBRA::RawTransaction"))
 	rawTransactionPrefix := hash.Sum(nil)
-	signingMsg := append(rawTransactionPrefix, libratypes.ToLCS(rawTxn)...)
+	signingMsg := append(rawTransactionPrefix, libratypes.ToLCS(&rawTxn)...)
 	signature := keys.PrivateKey.Sign(signingMsg)
 
 	return &libratypes.SignedTransaction{

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/libra/libra-client-sdk-go/librakeys"
-	"github.com/libra/libra-client-sdk-go/librastd"
+	"github.com/libra/libra-client-sdk-go/stdlib"
 	"github.com/libra/libra-client-sdk-go/testnet"
 	"github.com/stretchr/testify/assert"
 )
@@ -29,8 +29,8 @@ func TestSign(t *testing.T) {
 		"6762610fdb4bc8acee054bf11870277c63386d64a22ae67a90936e74cb6c4ccba761194c93feb3983e6fffb0af9ccc02bc91fe21e1a9c38b24e03dabc40105ed",
 	)
 
-	script := librastd.EncodePeerToPeerWithMetadataScript(
-		librastd.CurrencyCode(currencyCode),
+	script := stdlib.EncodePeerToPeerWithMetadataScript(
+		stdlib.CurrencyCode(currencyCode),
 		receiver.AccountAddress,
 		amount, []byte{}, []byte{})
 

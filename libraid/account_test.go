@@ -54,14 +54,6 @@ func TestEncodeDecodeAccountIdentifierWithoutSubAddress(t *testing.T) {
 }
 
 func TestEncodeShouldValidateAddressLen(t *testing.T) {
-	t.Run("invalid account address", func(t *testing.T) {
-		address := libratypes.AccountAddress{}
-		subAddress := libraid.MustNewSubAddressFromHex("cf64428bdeb62af2")
-
-		ret, err := libraid.EncodeAccount(libraid.MainnetPrefix, address, subAddress)
-		require.Error(t, err)
-		assert.Equal(t, "", ret)
-	})
 	t.Run("invalid sub account address", func(t *testing.T) {
 		address := *libratypes.MustNewAccountAddressFromHex("f72589b71ff4f8d139674a3f7369c69b")
 		subAddress := libraid.SubAddress([]byte{1})

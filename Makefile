@@ -13,8 +13,8 @@ fetch-libra-testnet:
 gen:
 	cd libra && cargo build -p transaction-builder-generator && target/debug/generate-transaction-builders \
 		--language go \
-		--module-name librastd \
+		--module-name stdlib \
 		--libra-package-name github.com/libra/libra-client-sdk-go \
 		--with-libra-types "testsuite/generate-format/tests/staged/libra.yaml" \
-		--target-source-dir "./../" \
+		--target-source-dir ".." \
 		"language/stdlib/compiled/transaction_scripts/abi"

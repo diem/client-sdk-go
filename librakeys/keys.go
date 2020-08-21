@@ -32,7 +32,6 @@ type PublicKey interface {
 // PrivateKey is Libra account private key
 type PrivateKey interface {
 	Sign(msg []byte) []byte
-	Hex() string
 }
 
 // Keys holds Libra local account keys
@@ -55,7 +54,7 @@ func MustGenKeys() *Keys {
 		pk,
 		NewPrivateKey(privateKey),
 		authKey,
-		authKey.AccountAddress(),
+		*authKey.AccountAddress(),
 	}
 }
 
@@ -68,7 +67,7 @@ func MustNewKeysFromPublicAndPrivateKeyHexStrings(publicKey string, privateKey s
 		pk,
 		MustNewPrivateKeyFromString(privateKey),
 		authKey,
-		authKey.AccountAddress(),
+		*authKey.AccountAddress(),
 	}
 }
 
@@ -140,8 +139,9 @@ func MustNewAuthKeyFromString(key string) AuthKey {
 }
 
 // AccountAddress return account address from auth key
-func (k AuthKey) AccountAddress() libratypes.AccountAddress {
-	return libratypes.AccountAddress{k[len(k)-libraid.AccountAddressLength:]}
+func (k AuthKey) AccountAddress() *libratypes.AccountAddress {
+	return libratypes.MustNewAccountAddressFromBytes(
+		k[len(k)-libraid.AccountAddressLength:])
 }
 
 // Hex returns hex encoded string for the AuthKey

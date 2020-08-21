@@ -35,17 +35,19 @@ func (t *SignedTransaction) Hex() string {
 
 // HexSignature returns transaction signature hex encoded string
 func (t *SignedTransaction) HexSignature() string {
-	switch t.Authenticator.(type) {
+	switch auth := t.Authenticator.(type) {
 	case *TransactionAuthenticator__Ed25519:
-		sig := t.Authenticator.(*TransactionAuthenticator__Ed25519).Signature
-		return hex.EncodeToString(sig.Value)
+		return hex.EncodeToString(auth.Signature.Value)
+	case *TransactionAuthenticator__MultiEd25519:
+		return hex.EncodeToString(auth.Signature.Value)
+	default:
+		panic(fmt.Sprintf("unknown Authenticator type: %v", auth))
 	}
-	panic("t.Authenticator type not found")
 }
 
 // Hex returns hex encoded string for the AccountAddress
-func (a AccountAddress) Hex() string {
-	return hex.EncodeToString(a.Value)
+func (a *AccountAddress) Hex() string {
+	return hex.EncodeToString(a.Value[:])
 }
 
 // NewAccountAddressFromHex creates account address from given hex string
@@ -54,16 +56,33 @@ func NewAccountAddressFromHex(address string) (*AccountAddress, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(bytes) != AccountAddressLength {
-		return nil, fmt.Errorf(
-			"Account address should be 16 bytes, but given %d bytes", len(bytes))
-	}
-	return &AccountAddress{bytes}, nil
+	return NewAccountAddressFromBytes(bytes)
 }
 
 // MustNewAccountAddressFromHex creates account address or panic for invalid address hex string
 func MustNewAccountAddressFromHex(address string) *AccountAddress {
 	ret, err := NewAccountAddressFromHex(address)
+	if err != nil {
+		panic(err)
+	}
+	return ret
+}
+
+// NewAccountAddressFromBytes creates `AccountAddress` from given bytes,
+// returns error if given bytes length != 16
+func NewAccountAddressFromBytes(bytes []byte) (*AccountAddress, error) {
+	if len(bytes) != AccountAddressLength {
+		return nil, fmt.Errorf(
+			"Account address should be 16 bytes, but given %d bytes", len(bytes))
+	}
+	address := &AccountAddress{}
+	copy(address.Value[:], bytes)
+	return address, nil
+}
+
+// MustNewAccountAddressFromBytes panics if given bytes length != 16
+func MustNewAccountAddressFromBytes(bytes []byte) *AccountAddress {
+	ret, err := NewAccountAddressFromBytes(bytes)
 	if err != nil {
 		panic(err)
 	}

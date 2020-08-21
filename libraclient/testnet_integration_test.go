@@ -10,7 +10,7 @@ import (
 	"github.com/libra/libra-client-sdk-go/jsonrpc"
 	"github.com/libra/libra-client-sdk-go/libraclient"
 	"github.com/libra/libra-client-sdk-go/librakeys"
-	"github.com/libra/libra-client-sdk-go/librastd"
+	"github.com/libra/libra-client-sdk-go/stdlib"
 	"github.com/libra/libra-client-sdk-go/testnet"
 
 	"github.com/stretchr/testify/assert"
@@ -199,8 +199,8 @@ func TestClient(t *testing.T) {
 				var amount uint64 = 10
 				account1 := genAccount(client, currencyCode)
 				account2 := genAccount(client, currencyCode)
-				script := librastd.EncodePeerToPeerWithMetadataScript(
-					librastd.CurrencyCode(currencyCode),
+				script := stdlib.EncodePeerToPeerWithMetadataScript(
+					stdlib.CurrencyCode(currencyCode),
 					account2.AccountAddress,
 					amount, []byte{}, []byte{})
 

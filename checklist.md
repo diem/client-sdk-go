@@ -7,7 +7,7 @@
     - jsonrpc: jsonrpc client
     - librakeys: keys utils, generate public & private keys for testing, create auth keys, and sign transaction
     - libraid: Libra Account Identifier and Intent URL encoding & decodeing
-    - librastd: move stdlib script utils.
+    - stdlib: move stdlib script utils.
     - testnet: testnet utils, should include FaucetService for handling testnet mint.
     - libratypes: Libra onchain data structure types.
 - [x] JSON-RPC 2.0 Spec:

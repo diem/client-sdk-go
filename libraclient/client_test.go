@@ -94,7 +94,7 @@ func TestWaitForTransaction(t *testing.T) {
 					uint64(time.Now().Add(time.Second).Unix()),
 					time.Second*5,
 				)
-				assert.EqualError(t, err, "transaction execution failed: map[abort_code:5 location:00000000000000000000000000000001::LibraAccount type:move_abort]")
+				assert.EqualError(t, err, "transaction execution failed: {move_abort 00000000000000000000000000000001::LibraAccount 5 0 0}")
 				assert.Nil(t, ret)
 			},
 		},

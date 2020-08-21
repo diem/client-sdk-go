@@ -47,16 +47,15 @@ type AccountRole struct {
 
 // Account is get_account method response
 type Account struct {
-	AuthenticationKey              string   `json:"authentication_key"`
-	Balances                       []Amount `json:"balances"`
-	DelegatedKeyRotationCapability bool     `json:"delegated_key_rotation_capability"`
-	DelegatedWithdrawalCapability  bool     `json:"delegated_withdrawal_capability"`
-	IsFrozen                       bool     `json:"is_frozen"`
-	ReceivedEventsKey              string   `json:"received_events_key"`
-	// Role                           AccountRole `json:"role"`
-	Role           interface{} `json:"role"`
-	SentEventsKey  string      `json:"sent_events_key"`
-	SequenceNumber uint64      `json:"sequence_number"`
+	AuthenticationKey              string      `json:"authentication_key"`
+	Balances                       []Amount    `json:"balances"`
+	DelegatedKeyRotationCapability bool        `json:"delegated_key_rotation_capability"`
+	DelegatedWithdrawalCapability  bool        `json:"delegated_withdrawal_capability"`
+	IsFrozen                       bool        `json:"is_frozen"`
+	ReceivedEventsKey              string      `json:"received_events_key"`
+	Role                           AccountRole `json:"role"`
+	SentEventsKey                  string      `json:"sent_events_key"`
+	SequenceNumber                 uint64      `json:"sequence_number"`
 }
 
 // EventData is event type specific data
@@ -164,8 +163,7 @@ type Transaction struct {
 	Hash        string          `json:"hash"`
 	Transaction TransactionData `json:"transaction"`
 	Version     uint64          `json:"version"`
-	VmStatus    interface{}     `json:"vm_status"`
-	// VmStatus    VmStatus        `json:"vm_status"`
+	VmStatus    VmStatus        `json:"vm_status"`
 }
 
 // StateProof is get_state_proof response

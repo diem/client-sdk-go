@@ -7,7 +7,6 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 
-	"github.com/libra/libra-client-sdk-go/libraid"
 	"github.com/libra/libra-client-sdk-go/libratypes"
 	"golang.org/x/crypto/sha3"
 )
@@ -141,12 +140,16 @@ func MustNewAuthKeyFromString(key string) AuthKey {
 // AccountAddress return account address from auth key
 func (k AuthKey) AccountAddress() *libratypes.AccountAddress {
 	return libratypes.MustNewAccountAddressFromBytes(
-		k[len(k)-libraid.AccountAddressLength:])
+		k[len(k)-libratypes.AccountAddressLength:])
 }
 
 // Hex returns hex encoded string for the AuthKey
 func (k AuthKey) Hex() string {
 	return hex.EncodeToString(k)
+}
+
+func (k AuthKey) Prefix() []uint8 {
+	return k[:libratypes.AccountAddressLength]
 }
 
 type singlePublicKey struct {

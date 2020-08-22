@@ -4,12 +4,15 @@
 package libraclient
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"sync"
 	"time"
 
+	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/lcs"
 	"github.com/libra/libra-client-sdk-go/jsonrpc"
+	"github.com/libra/libra-client-sdk-go/libratypes"
 )
 
 // List of supported methods
@@ -36,7 +39,8 @@ type Client interface {
 	GetAccountTransactions(Address, uint64, uint64, bool) ([]*Transaction, error)
 	GetTransactions(uint64, uint64, bool) ([]*Transaction, error)
 	GetEvents(string, uint64, uint64) ([]*Event, error)
-	Submit(string) error
+	Submit(signedTxnHex string) error
+
 	WaitForTransaction(
 		address Address,
 		seq uint64,
@@ -44,6 +48,15 @@ type Client interface {
 		expirationTimeSec uint64,
 		timeout time.Duration,
 	) (*Transaction, error)
+	WaitForTransaction2(
+		txn *libratypes.SignedTransaction,
+		timeout time.Duration,
+	) (*Transaction, error)
+	WaitForTransaction3(
+		signedTxnHex string,
+		timeout time.Duration,
+	) (*Transaction, error)
+
 	LastResponseLedgerState() LedgerState
 	UpdateLastResponseLedgerState(state LedgerState)
 }
@@ -86,6 +99,31 @@ func (c *client) UpdateLastResponseLedgerState(state LedgerState) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	c.last = state
+}
+
+// WaitForTransaction3 waits for given `SignedTransaction` hex string
+func (c *client) WaitForTransaction3(signedTxnHex string, timeout time.Duration) (*Transaction, error) {
+	bytes, err := hex.DecodeString(signedTxnHex)
+	if err != nil {
+		return nil, err
+	}
+	ds := lcs.NewDeserializer(bytes)
+	txn, err := libratypes.DeserializeSignedTransaction(ds)
+	if err != nil {
+		return nil, err
+	}
+	return c.WaitForTransaction2(&txn, timeout)
+}
+
+// WaitForTransaction2 waits for given `SignedTransaction` transaction.
+func (c *client) WaitForTransaction2(txn *libratypes.SignedTransaction, timeout time.Duration) (*Transaction, error) {
+	return c.WaitForTransaction(
+		txn.RawTxn.Sender.Hex(),
+		txn.RawTxn.SequenceNumber,
+		txn.HexSignature(),
+		txn.RawTxn.ExpirationTimestampSecs,
+		timeout,
+	)
 }
 
 // WaitForTransaction waits for given (address, sequence number, signature) transaction.

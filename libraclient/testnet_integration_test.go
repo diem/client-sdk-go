@@ -237,20 +237,6 @@ func TestClient(t *testing.T) {
 
 func genAccount(client libraclient.Client, currencyCode string) *librakeys.Keys {
 	keys := librakeys.MustGenKeys()
-	waitAccountSequence(client, testnet.MustMint(keys.AuthKey.Hex(), 1000, currencyCode))
+	testnet.MustMint(keys.AuthKey.Hex(), 1000, currencyCode)
 	return keys
-}
-
-func waitAccountSequence(client libraclient.Client, seq int) {
-	for i := 0; i < 100; i++ {
-		account, err := client.GetAccount("000000000000000000000000000000DD")
-		if err != nil {
-			panic(err)
-		}
-		if account.SequenceNumber >= uint64(seq) {
-			return
-		}
-		time.Sleep(100 * time.Millisecond)
-	}
-	panic("waiting for mint timeout")
 }

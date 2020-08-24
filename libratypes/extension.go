@@ -33,8 +33,8 @@ func (t *SignedTransaction) Hex() string {
 	return hex.EncodeToString(ToLCS(t))
 }
 
-// HexSignature returns transaction signature hex encoded string
-func (t *SignedTransaction) HexSignature() string {
+// SignatureHex returns transaction signature hex encoded string
+func (t *SignedTransaction) SignatureHex() string {
 	switch auth := t.Authenticator.(type) {
 	case *TransactionAuthenticator__Ed25519:
 		return hex.EncodeToString(auth.Signature.Value)

@@ -9,11 +9,18 @@ import (
 	"github.com/libra/libra-client-sdk-go/librakeys"
 	"github.com/libra/libra-client-sdk-go/testnet"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMint(t *testing.T) {
 	keys := librakeys.MustGenKeys()
 	testnet.MustMint(keys.AuthKey.Hex(), 1000, "LBR")
+	account, err := testnet.Client.GetAccount(keys.AccountAddress.Hex())
+	require.NoError(t, err)
+
+	assert.Len(t, account.Balances, 1)
+	assert.Equal(t, "LBR", account.Balances[0].Currency)
+	assert.Equal(t, uint64(1000), account.Balances[0].Amount)
 }
 
 func TestMustMintPanic(t *testing.T) {

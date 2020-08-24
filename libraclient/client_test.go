@@ -59,11 +59,11 @@ func TestWaitForTransaction(t *testing.T) {
 				ret, err := client.WaitForTransaction(
 					account.AccountAddress.Hex(),
 					0,
-					"mismatched sig",
+					"mismatched hash",
 					uint64(time.Now().Add(time.Second).Unix()),
 					time.Second*5,
 				)
-				assert.EqualError(t, err, "found transaction, but signature does not match")
+				assert.EqualError(t, err, "found transaction, but hash does not match, given \"mismatched hash\", but got \"0fa27a781a9086e80a870851ea4f1b14090fb8b5bd9933e27447ab806443e08e\"")
 				assert.Nil(t, ret)
 			},
 		},
@@ -90,7 +90,7 @@ func TestWaitForTransaction(t *testing.T) {
 				ret, err := client.WaitForTransaction(
 					account.AccountAddress.Hex(),
 					0,
-					"a181a036ba68fcd25a7ba9f3895caf720af7aee4bf86c4d798050a1101e75f71ccd891158c8fa0bf349bbb66fb0ba50b29b6fb29822dc04071aff831735e6402",
+					"0fa27a781a9086e80a870851ea4f1b14090fb8b5bd9933e27447ab806443e08e",
 					uint64(time.Now().Add(time.Second).Unix()),
 					time.Second*5,
 				)
@@ -109,7 +109,7 @@ func TestWaitForTransaction(t *testing.T) {
 				ret, err := client.WaitForTransaction(
 					account.AccountAddress.Hex(),
 					0,
-					"a181a036ba68fcd25a7ba9f3895caf720af7aee4bf86c4d798050a1101e75f71ccd891158c8fa0bf349bbb66fb0ba50b29b6fb29822dc04071aff831735e6402",
+					"0fa27a781a9086e80a870851ea4f1b14090fb8b5bd9933e27447ab806443e08e",
 					uint64(1597722856),
 					time.Second*5,
 				)
@@ -133,6 +133,26 @@ func TestWaitForTransaction(t *testing.T) {
 					time.Second*5,
 				)
 				assert.EqualError(t, err, "transaction expired")
+				assert.Nil(t, ret)
+			},
+		},
+		{
+			name:     "wait for transaction3 invalid hex string",
+			response: jsonrpc.Response{},
+			call: func(t *testing.T, client libraclient.Client) {
+				ret, err := client.WaitForTransaction3("invalid", time.Second)
+				require.EqualError(t, err, "encoding/hex: invalid byte: U+0069 'i'")
+				assert.Nil(t, ret)
+			},
+		},
+		{
+			name:     "wait for transaction3: not a signed transaction lcs",
+			response: jsonrpc.Response{},
+			call: func(t *testing.T, client libraclient.Client) {
+				account := librakeys.MustGenKeys()
+				ret, err := client.WaitForTransaction3(
+					account.AccountAddress.Hex(), time.Second)
+				require.EqualError(t, err, "Deserialize given hex string as SignedTransaction LCS failed: EOF")
 				assert.Nil(t, ret)
 			},
 		},

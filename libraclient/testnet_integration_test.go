@@ -214,13 +214,7 @@ func TestClient(t *testing.T) {
 				err := client.Submit(txn.Hex())
 				require.NoError(t, err)
 
-				ret, err := client.WaitForTransaction(
-					account1.AccountAddress.Hex(),
-					sequenceNum,
-					txn.HexSignature(),
-					uint64(time.Now().Add(time.Second).Unix()),
-					time.Second*5,
-				)
+				ret, err := client.WaitForTransaction3(txn.Hex(), time.Second*5)
 				require.NoError(t, err)
 				assert.NotNil(t, ret)
 			},

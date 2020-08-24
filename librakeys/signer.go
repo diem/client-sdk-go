@@ -5,7 +5,6 @@ package librakeys
 
 import (
 	"github.com/libra/libra-client-sdk-go/libratypes"
-	"golang.org/x/crypto/sha3"
 )
 
 // Sign transaction
@@ -26,10 +25,7 @@ func (keys *Keys) Sign(
 		ChainId:                 libratypes.ChainId{chainID},
 	}
 
-	hash := sha3.New256()
-	hash.Write([]byte("LIBRA::RawTransaction"))
-	rawTransactionPrefix := hash.Sum(nil)
-	signingMsg := append(rawTransactionPrefix, libratypes.ToLCS(&rawTxn)...)
+	signingMsg := append(libratypes.HashPrefix("RawTransaction"), libratypes.ToLCS(&rawTxn)...)
 	signature := keys.PrivateKey.Sign(signingMsg)
 
 	return &libratypes.SignedTransaction{

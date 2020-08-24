@@ -44,7 +44,7 @@ type Client interface {
 	WaitForTransaction(
 		address Address,
 		seq uint64,
-		signature string,
+		hash string,
 		expirationTimeSec uint64,
 		timeout time.Duration,
 	) (*Transaction, error)
@@ -110,7 +110,7 @@ func (c *client) WaitForTransaction3(signedTxnHex string, timeout time.Duration)
 	ds := lcs.NewDeserializer(bytes)
 	txn, err := libratypes.DeserializeSignedTransaction(ds)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Deserialize given hex string as SignedTransaction LCS failed: %v", err.Error())
 	}
 	return c.WaitForTransaction2(&txn, timeout)
 }
@@ -120,14 +120,14 @@ func (c *client) WaitForTransaction2(txn *libratypes.SignedTransaction, timeout 
 	return c.WaitForTransaction(
 		txn.RawTxn.Sender.Hex(),
 		txn.RawTxn.SequenceNumber,
-		txn.HexSignature(),
+		libratypes.TransactionHashHex(txn),
 		txn.RawTxn.ExpirationTimestampSecs,
 		timeout,
 	)
 }
 
-// WaitForTransaction waits for given (address, sequence number, signature) transaction.
-func (c *client) WaitForTransaction(address Address, seq uint64, signature string, expirationTimeSec uint64, timeout time.Duration) (*Transaction, error) {
+// WaitForTransaction waits for given (address, sequence number, hash) transaction.
+func (c *client) WaitForTransaction(address Address, seq uint64, hash string, expirationTimeSec uint64, timeout time.Duration) (*Transaction, error) {
 	step := time.Millisecond * 500
 	for i := time.Duration(0); i < timeout; i += step {
 		txn, err := c.GetAccountTransaction(address, seq, true)
@@ -135,8 +135,8 @@ func (c *client) WaitForTransaction(address Address, seq uint64, signature strin
 			return nil, err
 		}
 		if txn != nil {
-			if txn.Transaction.Signature != signature {
-				return nil, errors.New("found transaction, but signature does not match")
+			if txn.Hash != hash {
+				return nil, fmt.Errorf("found transaction, but hash does not match, given %#v, but got %#v", hash, txn.Hash)
 			}
 			if txn.VmStatus.Type != VmStatusExecuted {
 				return nil, fmt.Errorf("transaction execution failed: %v", txn.VmStatus)

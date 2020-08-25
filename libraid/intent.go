@@ -21,7 +21,7 @@ const (
 // Params for Intent
 type Params struct {
 	Currency string
-	Amount   *int
+	Amount   *uint64
 }
 
 // Intent captures all parts of intent identifier
@@ -64,14 +64,14 @@ func (i *Intent) Encode() (string, error) {
 		q.Add(CurrencyParamName, i.Params.Currency)
 	}
 	if i.Params.Amount != nil {
-		q.Add(AmountParamName, strconv.Itoa(*i.Params.Amount))
+		q.Add(AmountParamName, strconv.FormatUint(*i.Params.Amount, 10))
 	}
 	u.RawQuery = q.Encode()
 	return u.String(), nil
 }
 
-func toIntPtr(str string) *int {
-	ret, err := strconv.Atoi(str)
+func toIntPtr(str string) *uint64 {
+	ret, err := strconv.ParseUint(str, 10, 64)
 	if err != nil {
 		return nil
 	}

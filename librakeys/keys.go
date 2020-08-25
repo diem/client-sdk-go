@@ -148,6 +148,7 @@ func (k AuthKey) Hex() string {
 	return hex.EncodeToString(k)
 }
 
+// Prefix returns AuthKey's first 16 bytes
 func (k AuthKey) Prefix() []uint8 {
 	return k[:libratypes.AccountAddressLength]
 }
@@ -156,6 +157,7 @@ type singlePublicKey struct {
 	pk ed25519.PublicKey
 }
 
+// NewAuthenticator returns `libratypes.TransactionAuthenticator` with given signature bytes and public key
 func (k *singlePublicKey) NewAuthenticator(signature []byte) libratypes.TransactionAuthenticator {
 	return &libratypes.TransactionAuthenticator__Ed25519{
 		PublicKey: libratypes.Ed25519PublicKey{[]byte(k.pk)},
@@ -163,6 +165,7 @@ func (k *singlePublicKey) NewAuthenticator(signature []byte) libratypes.Transact
 	}
 }
 
+// NewAuthKey creates `AuthKey` from given public key and Ed25519Key scheme
 func (k *singlePublicKey) NewAuthKey() AuthKey {
 	hash := sha3.New256()
 	hash.Write([]byte(k.pk))
@@ -170,6 +173,7 @@ func (k *singlePublicKey) NewAuthKey() AuthKey {
 	return AuthKey(hash.Sum(nil))
 }
 
+// Hex returns hex string of the public key
 func (k *singlePublicKey) Hex() string {
 	return hex.EncodeToString(k.pk)
 }
@@ -178,10 +182,12 @@ type singlePrivateKey struct {
 	pk ed25519.PrivateKey
 }
 
+// Sign signs given message bytes by private key
 func (k *singlePrivateKey) Sign(msg []byte) []byte {
 	return ed25519.Sign(k.pk, msg)
 }
 
+// Hex returns hex string of private key, used for testing
 func (k *singlePrivateKey) Hex() string {
 	return hex.EncodeToString(k.pk)
 }

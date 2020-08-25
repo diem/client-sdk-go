@@ -32,7 +32,7 @@ func TestEncodeDecodeIntent(t *testing.T) {
 	})
 
 	t.Run("with params", func(t *testing.T) {
-		amount := 123
+		amount := uint64(123)
 		intent := libraid.Intent{
 			Account: *account,
 			Params: libraid.Params{

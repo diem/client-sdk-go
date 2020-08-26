@@ -202,7 +202,36 @@ func TestClient(t *testing.T) {
 				script := stdlib.EncodePeerToPeerWithMetadataScript(
 					stdlib.CurrencyCode(currencyCode),
 					account2.AccountAddress,
-					amount, []byte{}, []byte{})
+					amount, nil, nil)
+
+				txn := account1.Sign(
+					sequenceNum,
+					script,
+					10000, 0, currencyCode,
+					uint64(time.Now().Add(time.Second*30).Unix()),
+					testnet.ChainID,
+				)
+				err := client.Submit(txn.Hex())
+				require.NoError(t, err)
+
+				ret, err := client.WaitForTransaction3(txn.Hex(), time.Second*5)
+				require.NoError(t, err)
+				assert.NotNil(t, ret)
+			},
+		},
+		{
+			name: "submit transaction with multi-signatures",
+			call: func(t *testing.T, client libraclient.Client) {
+				var currencyCode = "LBR"
+				var sequenceNum uint64 = 0
+				var amount uint64 = 10
+				account1 := librakeys.MustGenMultiSigKeys()
+				testnet.MustMint(account1.AuthKey.Hex(), 1000, currencyCode)
+				account2 := genAccount(client, currencyCode)
+				script := stdlib.EncodePeerToPeerWithMetadataScript(
+					stdlib.CurrencyCode(currencyCode),
+					account2.AccountAddress,
+					amount, nil, nil)
 
 				txn := account1.Sign(
 					sequenceNum,

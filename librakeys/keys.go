@@ -5,21 +5,11 @@ package librakeys
 
 import (
 	"crypto/ed25519"
-	"encoding/hex"
+	"math/rand"
+	"time"
 
 	"github.com/libra/libra-client-sdk-go/libratypes"
-	"golang.org/x/crypto/sha3"
 )
-
-type KeyScheme byte
-
-const (
-	Ed25519Key      KeyScheme = 0
-	MultiEd25519Key KeyScheme = 1
-)
-
-// AuthKey is Libra account authentication key
-type AuthKey []byte
 
 // PublicKey is Libra account public key
 type PublicKey interface {
@@ -41,153 +31,44 @@ type Keys struct {
 	AccountAddress libratypes.AccountAddress
 }
 
+// NewKeysFromPublicAndPrivateKeys creates new `Keys` from given public key and private key
+func NewKeysFromPublicAndPrivateKeys(publicKey PublicKey, privateKey PrivateKey) *Keys {
+	authKey := publicKey.NewAuthKey()
+	return &Keys{
+		PublicKey:      publicKey,
+		PrivateKey:     privateKey,
+		AuthKey:        authKey,
+		AccountAddress: *authKey.AccountAddress(),
+	}
+}
+
 // MustGenKeys generates local account keys, panics if got error
 func MustGenKeys() *Keys {
 	publicKey, privateKey, err := ed25519.GenerateKey(nil)
 	if err != nil {
 		panic(err)
 	}
-	pk := NewPublicKey(publicKey)
-	authKey := pk.NewAuthKey()
-	return &Keys{
-		pk,
-		NewPrivateKey(privateKey),
-		authKey,
-		*authKey.AccountAddress(),
+	return NewKeysFromPublicAndPrivateKeys(
+		NewEd25519PublicKey(publicKey), NewEd25519PrivateKey(privateKey))
+}
+
+// MustGenMultiSigKeys generates `*Keys`, mostly for testing purpose.
+// It panics if got error while generating key
+func MustGenMultiSigKeys() *Keys {
+	rand.Seed(time.Now().UnixNano())
+	numOfKeys := 1 + rand.Intn(MaxNumOfKeys)
+	publicKeys := make([]ed25519.PublicKey, numOfKeys)
+	privateKeys := make([]ed25519.PrivateKey, numOfKeys)
+	var err error
+	for i := 0; i < numOfKeys; i++ {
+		publicKeys[i], privateKeys[i], err = ed25519.GenerateKey(nil)
+		if err != nil {
+			panic(err)
+		}
 	}
-}
-
-// MustNewKeysFromPublicAndPrivateKeyHexStrings creates `*Keys` from given public and private keys
-// it panics if given string is not valid hex-encoded bytes.
-func MustNewKeysFromPublicAndPrivateKeyHexStrings(publicKey string, privateKey string) *Keys {
-	pk := MustNewPublicKeyFromString(publicKey)
-	authKey := pk.NewAuthKey()
-	return &Keys{
-		pk,
-		MustNewPrivateKeyFromString(privateKey),
-		authKey,
-		*authKey.AccountAddress(),
-	}
-}
-
-// NewPrivateKey from single `ed25519.PrivateKey`
-func NewPrivateKey(key ed25519.PrivateKey) PrivateKey {
-	return &singlePrivateKey{key}
-}
-
-// NewPublicKey from single `ed25519.PublicKey`
-func NewPublicKey(key ed25519.PublicKey) PublicKey {
-	return &singlePublicKey{key}
-}
-
-// NewPrivateKeyFromString creates `PrivateKey` from given hex-encoded key string
-func NewPrivateKeyFromString(key string) (PrivateKey, error) {
-	bytes, err := hex.DecodeString(key)
-	if err != nil {
-		return nil, err
-	}
-	return &singlePrivateKey{bytes}, nil
-}
-
-// NewPublicKeyFromString creates `PublicKey` from given hex-encoded key string
-func NewPublicKeyFromString(key string) (PublicKey, error) {
-	bytes, err := hex.DecodeString(key)
-	if err != nil {
-		return nil, err
-	}
-	return &singlePublicKey{bytes}, nil
-}
-
-// NewAuthKeyFromString creates AuthKey from given hex-encoded key string.
-// Returns error if given string is not hex encoded.
-func NewAuthKeyFromString(key string) (AuthKey, error) {
-	bytes, err := hex.DecodeString(key)
-	if err != nil {
-		return nil, err
-	}
-	return AuthKey(bytes), nil
-}
-
-// MustNewPrivateKeyFromString creates `PrivateKey` from given hex-encoded key string
-// or panic
-func MustNewPrivateKeyFromString(key string) PrivateKey {
-	ret, err := NewPrivateKeyFromString(key)
-	if err != nil {
-		panic(err)
-	}
-	return ret
-}
-
-// MustNewPublicKeyFromString creates `PublicKey` from given hex-encoded key string
-// or panic
-func MustNewPublicKeyFromString(key string) PublicKey {
-	ret, err := NewPublicKeyFromString(key)
-	if err != nil {
-		panic(err)
-	}
-	return ret
-}
-
-// MustNewAuthKeyFromString parses given key or panic
-func MustNewAuthKeyFromString(key string) AuthKey {
-	ret, err := NewAuthKeyFromString(key)
-	if err != nil {
-		panic(err)
-	}
-	return ret
-}
-
-// AccountAddress return account address from auth key
-func (k AuthKey) AccountAddress() *libratypes.AccountAddress {
-	return libratypes.MustNewAccountAddressFromBytes(
-		k[len(k)-libratypes.AccountAddressLength:])
-}
-
-// Hex returns hex encoded string for the AuthKey
-func (k AuthKey) Hex() string {
-	return hex.EncodeToString(k)
-}
-
-// Prefix returns AuthKey's first 16 bytes
-func (k AuthKey) Prefix() []uint8 {
-	return k[:libratypes.AccountAddressLength]
-}
-
-type singlePublicKey struct {
-	pk ed25519.PublicKey
-}
-
-// NewAuthenticator returns `libratypes.TransactionAuthenticator` with given signature bytes and public key
-func (k *singlePublicKey) NewAuthenticator(signature []byte) libratypes.TransactionAuthenticator {
-	return &libratypes.TransactionAuthenticator__Ed25519{
-		PublicKey: libratypes.Ed25519PublicKey{[]byte(k.pk)},
-		Signature: libratypes.Ed25519Signature{signature},
-	}
-}
-
-// NewAuthKey creates `AuthKey` from given public key and Ed25519Key scheme
-func (k *singlePublicKey) NewAuthKey() AuthKey {
-	hash := sha3.New256()
-	hash.Write([]byte(k.pk))
-	hash.Write([]byte{byte(Ed25519Key)})
-	return AuthKey(hash.Sum(nil))
-}
-
-// Hex returns hex string of the public key
-func (k *singlePublicKey) Hex() string {
-	return hex.EncodeToString(k.pk)
-}
-
-type singlePrivateKey struct {
-	pk ed25519.PrivateKey
-}
-
-// Sign signs given message bytes by private key
-func (k *singlePrivateKey) Sign(msg []byte) []byte {
-	return ed25519.Sign(k.pk, msg)
-}
-
-// Hex returns hex string of private key, used for testing
-func (k *singlePrivateKey) Hex() string {
-	return hex.EncodeToString(k.pk)
+	threshold := 1 + rand.Intn(numOfKeys)
+	return NewKeysFromPublicAndPrivateKeys(
+		NewMultiEd25519PublicKey(publicKeys, byte(threshold)),
+		NewMultiEd25519PrivateKey(privateKeys, byte(threshold)),
+	)
 }

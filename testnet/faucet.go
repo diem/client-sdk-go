@@ -15,7 +15,7 @@ import (
 // MustMint mints coins with retry, and panics if all retries failed.
 // This func also wait for next account seq.
 func MustMint(authKey string, amount uint64, currencyCode string) {
-	retry := 3
+	retry := 5
 	var err error
 	var accountSeq int
 	for i := 0; i < retry; i++ {

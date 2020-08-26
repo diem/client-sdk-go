@@ -60,7 +60,7 @@ func (k *Ed25519PublicKey) NewAuthenticator(signature []byte) libratypes.Transac
 
 // NewAuthKey creates `AuthKey` from given public key and Ed25519Key scheme
 func (k *Ed25519PublicKey) NewAuthKey() AuthKey {
-	return NewAuthKeyFromPublicKeyAndScheme(k.pk, Ed25519Key)
+	return newAuthKeyFromPublicKeyAndScheme(k.pk, Ed25519Key)
 }
 
 // Hex returns hex string of the public key

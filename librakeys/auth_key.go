@@ -39,8 +39,8 @@ func MustNewAuthKeyFromString(key string) AuthKey {
 	return ret
 }
 
-// NewAuthKeyFromPublicKeyAndScheme creates AuthKey from public key(s) bytes and key scheme
-func NewAuthKeyFromPublicKeyAndScheme(publicKeyBytes []byte, scheme KeyScheme) AuthKey {
+// newAuthKeyFromPublicKeyAndScheme creates AuthKey from public key(s) bytes and key scheme
+func newAuthKeyFromPublicKeyAndScheme(publicKeyBytes []byte, scheme KeyScheme) AuthKey {
 	hash := sha3.New256()
 	hash.Write(publicKeyBytes)
 	hash.Write([]byte{byte(scheme)})

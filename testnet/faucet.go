@@ -17,16 +17,17 @@ import (
 func MustMint(authKey string, amount uint64, currencyCode string) {
 	retry := 3
 	var err error
+	var accountSeq int
 	for i := 0; i < retry; i++ {
-		ret, err := Mint(authKey, amount, currencyCode)
+		accountSeq, err = Mint(authKey, amount, currencyCode)
 		if err != nil {
 			time.Sleep(1100 * time.Millisecond)
 			continue
 		}
-		waitAccountSequence(ret)
+		waitAccountSequence(accountSeq)
 		return
 	}
-	panic(fmt.Sprintf("mint coins failed with retry: %s", err.Error()))
+	panic(fmt.Sprintf("mint coins failed with retry: %s", err))
 }
 
 // Mint mints coints once without retry

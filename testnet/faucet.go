@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/libra/libra-client-sdk-go/libraclient"
 )
 
 // MustMint mints coins with retry, and panics if all retries failed.
@@ -51,13 +53,16 @@ func Mint(authKey string, amount uint64, currencyCode string) (int, error) {
 func waitAccountSequence(seq int) {
 	for i := 0; i < 100; i++ {
 		account, err := Client.GetAccount(DDAcountAddress)
+		if _, ok := err.(*libraclient.StaleResponseError); ok {
+			continue
+		}
 		if err != nil {
 			panic(fmt.Errorf("get account failed: %v", err))
 		}
 		if account.SequenceNumber >= uint64(seq) {
 			return
 		}
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 	}
 	panic("waiting for mint timeout")
 }

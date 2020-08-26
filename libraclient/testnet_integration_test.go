@@ -214,7 +214,11 @@ func TestClient(t *testing.T) {
 				err := client.Submit(txn.Hex())
 				require.NoError(t, err)
 
+			Retry:
 				ret, err := client.WaitForTransaction3(txn.Hex(), time.Second*5)
+				if _, ok := err.(*libraclient.StaleResponseError); ok {
+					goto Retry
+				}
 				require.NoError(t, err)
 				assert.NotNil(t, ret)
 			},
@@ -242,8 +246,11 @@ func TestClient(t *testing.T) {
 				)
 				err := client.Submit(txn.Hex())
 				require.NoError(t, err)
-
+			Retry:
 				ret, err := client.WaitForTransaction3(txn.Hex(), time.Second*5)
+				if _, ok := err.(*libraclient.StaleResponseError); ok {
+					goto Retry
+				}
 				require.NoError(t, err)
 				assert.NotNil(t, ret)
 			},

@@ -22,22 +22,23 @@
 - [x] Handle stale responses:
   - [x] client tracks latest server response block version and timestamp, raise error when received server response contains stale version / timestamp.
   - [x] parse and use libra_chain_id, libra_ledger_version and libra_ledger_tiemstamp in the JSONRPC response.
-- [x] Parsing and gen Libra Account Identifier (see [LIP-5][2])
-  - bech32 addresses/subaddresses support
 - [x] language specific standard release publish: e.g. java maven central repo, python pip
 - [x] Multi-network: initialize Client with chain id, JSON-RPC server URL
+  - [x] Validate server chain id: client should be initialized with chain id and validate server response chain id is the same.
 - [x] Handle unsigned int64 data type properly
-- [x] Validate server chain id: client should be initialized with chain id and validate server response chain id is the same.
-- [ ] Validate input parameters, e.g. invalid account address: "kkk". Should return / raise InvalidArgumentError.
+- [x] [Multi-signatures support](https://github.com/libra/libra/blob/master/specifications/crypto/spec.md#multi-signatures)
 
-# High Level API
+# [LIP-4][7] support
 
-- [ ] transfer: wrap peer to peer transfer with metadata script and submit transaction
-  - may have the option to wait until the transaction executed successfully or failed.
-- [x] waitForTransactionExecuted(String accountAddress, long sequence, String signedTranscationHash, long timeout):
-  - for given signed transaction sender address, sequence number, expiration time (or 5 sec timeout) to wait and validate execution result is executed, otherwise return/raise an error / flag to tell it is not executed.
-  - when signedTransactionHash validation failed, it should return / raise TransactionSequenceNumberConflictError
-  - when transaction execution vm_status is not "executed", it should return / raise TransactionExecutionFailure
+- [ ] Non-custodial to custodial transaction
+- [ ] Custodial to non-custodial transaction
+- [ ] Custodial to Custodial transaction
+- [ ] Refund
+
+# [LIP-5][2] support
+
+- [x] Encode and decode account identifier
+- [x] Encode and decode intent identifier
 
 # Read from Blockchain
 
@@ -55,23 +56,26 @@
 
 - [x] Submit [p2p transfer][3] transaction
 - [x] Submit other [Move Stdlib scripts][4]
-- [x] Wait for transaction executed:
-  - wait for a transaction by get_transaction by account and transaction sequence, no validation of vm_status and signature. (low level API, consider not exposing, only for internal or test usage.)
+- [x] waitForTransaction(accountAddress, sequence, transcationHash, expirationTimeSec, timeout):
+  - for given signed transaction sender address, sequence number, expiration time (or 5 sec timeout) to wait and validate execution result is executed, otherwise return/raise an error / flag to tell it is not executed.
+  - when signedTransactionHash validation failed, it should return / raise TransactionSequenceNumberConflictError
+  - when transaction execution vm_status is not "executed", it should return / raise TransactionExecutionFailure
 
 # Testnet support
 
 - [x] Generate ed25519 private key, derive ed25519 public keys from private key.
 - [x] Generate Single auth-keys
-- [ ] Generate MultiSig auth-keys
+- [x] Generate MultiSig auth-keys
 - [x] Mint coins through [Faucet service][6]
 
 See [doc][5] for above concepts.
 
 # Examples
 
-- [ ] Query blockchain example
-- [ ] p2p transfer transaction example
-- [ ] create childVASP example
+- [x] [p2p transfer examples](https://github.com/libra/lip/blob/master/lips/lip-4.md#transaction-examples)
+- [ ] refund p2p transfer example
+- [x] create childVASP example
+- [x] Intent identifier encoding, decoding example
 
 # Nice to have
 
@@ -84,3 +88,4 @@ See [doc][5] for above concepts.
 [4]: https://github.com/libra/libra/tree/master/language/stdlib/transaction_scripts/doc "Move Stdlib scripts"
 [5]: https://github.com/libra/libra/blob/master/client/libra-dev/README.md "Libra Client Dev Doc"
 [6]: https://github.com/libra/libra/blob/master/json-rpc/docs/service_testnet_faucet.md "Faucet service"
+[7]: https://github.com/libra/lip/blob/master/lips/lip-4.md "Transaction Metadata Specification"

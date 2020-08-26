@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/lcs"
 	"github.com/libra/libra-client-sdk-go/libraid"
 	"github.com/libra/libra-client-sdk-go/librakeys"
 	"github.com/libra/libra-client-sdk-go/libratypes"
 	"github.com/libra/libra-client-sdk-go/stdlib"
 	"github.com/libra/libra-client-sdk-go/testnet"
+	"github.com/libra/libra-client-sdk-go/txnmetadata"
 	"gopkg.in/yaml.v3"
 )
 
@@ -29,32 +29,42 @@ func main() {
 	newTransactionSubmitAndWait(
 		"non custodial account to non custodial account transaction",
 		nonCustodialAccount,
-		newNonCustodialToNonCustodialTransactionScript(
+		stdlib.EncodePeerToPeerWithMetadataScript(
+			stdlib.CurrencyCode(currency),
 			nonCustodialAccount2.AccountAddress,
 			amount,
+			nil,
+			nil,
 		),
 	)
 
 	newTransactionSubmitAndWait(
 		"non custodial account to custodial account transaction",
 		nonCustodialAccount,
-		newNonCustodialToCustodialTransactionScript(
+		stdlib.EncodePeerToPeerWithMetadataScript(
+			stdlib.CurrencyCode(currency),
 			custodialAccountChildVasp.AccountAddress,
-			custodialAccountSubAddress,
 			amount,
+			txnmetadata.NewGeneralMetadataToSubAddress(custodialAccountSubAddress),
+			nil, // no metadata signature for GeneralMetadata
 		),
 	)
 
 	newTransactionSubmitAndWait(
 		"custodial account to non custodial account transaction",
 		custodialAccountChildVasp,
-		newCustodialToNonCustodialTransactionScript(
-			custodialAccountSubAddress,
+		stdlib.EncodePeerToPeerWithMetadataScript(
+			stdlib.CurrencyCode(currency),
 			nonCustodialAccount.AccountAddress,
 			amount,
+			txnmetadata.NewGeneralMetadataFromSubAddress(custodialAccountSubAddress),
+			nil, // no metadata signature for GeneralMetadata
 		),
 	)
 
+	// custodial account to custodial account transaction
+
+	// setup receiver compliance public & private keys
 	compliancePublicKey, compliancePrivateKey, _ := ed25519.GenerateKey(nil)
 	newTransactionSubmitAndWait(
 		"testnet created parent vasp has a fake compliance key, need rotate first",
@@ -65,108 +75,33 @@ func main() {
 		),
 	)
 
+	// setup sender account
 	_, senderCustodialAccountChildVasp, _ := createCustodialAccount()
-	newTransactionSubmitAndWait(
-		"custodial account to custodial account transaction",
-		senderCustodialAccountChildVasp,
-		newCustodialToCustodialTransactionScript(
-			senderCustodialAccountChildVasp.AccountAddress,
-			custodialAccountChildVasp.AccountAddress,
-			compliancePrivateKey,
-			amount,
-		),
-	)
-}
 
-func newNonCustodialToNonCustodialTransactionScript(
-	receiverAccountAddress libratypes.AccountAddress,
-	amount uint64,
-) libratypes.Script {
-	return stdlib.EncodePeerToPeerWithMetadataScript(
-		stdlib.CurrencyCode(currency),
-		receiverAccountAddress,
-		amount,
-		nil,
-		nil,
-	)
-}
-
-func newCustodialToCustodialTransactionScript(
-	senderAccountAddress libratypes.AccountAddress,
-	receiverAccountAddress libratypes.AccountAddress,
-	compliancePrivateKey ed25519.PrivateKey,
-	amount uint64,
-) libratypes.Script {
-	// from off chain APIs
+	// sender & receiver communicate by off chain APIs
 	offChainReferenceId := "32323abc"
-	metadata := libratypes.Metadata__TravelRuleMetadata{
-		Value: &libratypes.TravelRuleMetadata__TravelRuleMetadataVersion0{
-			Value: libratypes.TravelRuleMetadataV0{
-				OffChainReferenceId: &offChainReferenceId,
-			},
-		},
-	}
+
+	// metadata and signature message
+	metadata, sigMsg := txnmetadata.NewTravelRuleMetadata(
+		offChainReferenceId,
+		senderCustodialAccountChildVasp.AccountAddress,
+		amount,
+	)
 
 	// receiver_signature is passed to the sender via the off-chain APIs as per
 	// https://github.com/libra/lip/blob/master/lips/lip-1.mdx#recipient-signature
-	// receiver_lcs_data = lcs(metadata, sender_address, amount, "@@$$LIBRA_ATTEST$$@@" /*ASCII-encoded string*/);
+	recipientSignature := ed25519.Sign(compliancePrivateKey, sigMsg)
 
-	s := new(lcs.Serializer)
-	metadata.Serialize(s)
-	senderAccountAddress.Serialize(s)
-	s.SerializeU64(amount)
-	msg := append(s.GetBytes(), []byte("@@$$LIBRA_ATTEST$$@@")...)
-	recipientSignature := ed25519.Sign(compliancePrivateKey, msg)
-
-	// sender constructs transaction script
-	return stdlib.EncodePeerToPeerWithMetadataScript(
-		stdlib.CurrencyCode(currency),
-		receiverAccountAddress,
-		amount,
-		libratypes.ToLCS(&metadata),
-		recipientSignature,
-	)
-}
-
-func newNonCustodialToCustodialTransactionScript(
-	toCustodialAddress libratypes.AccountAddress,
-	toCustodialSubAddress []byte,
-	amount uint64,
-) libratypes.Script {
-	metadata := libratypes.Metadata__GeneralMetadata{
-		Value: &libratypes.GeneralMetadata__GeneralMetadataVersion0{
-			Value: libratypes.GeneralMetadataV0{
-				ToSubaddress: &toCustodialSubAddress,
-			},
-		},
-	}
-	return stdlib.EncodePeerToPeerWithMetadataScript(
-		stdlib.CurrencyCode(currency),
-		toCustodialAddress,
-		amount,
-		libratypes.ToLCS(&metadata),
-		nil, // no metadata signature for GeneralMetadata
-	)
-}
-
-func newCustodialToNonCustodialTransactionScript(
-	fromCustodialSubAddress []byte,
-	toNonCustodialAddress libratypes.AccountAddress,
-	amount uint64,
-) libratypes.Script {
-	metadata := libratypes.Metadata__GeneralMetadata{
-		Value: &libratypes.GeneralMetadata__GeneralMetadataVersion0{
-			Value: libratypes.GeneralMetadataV0{
-				FromSubaddress: &fromCustodialSubAddress,
-			},
-		},
-	}
-	return stdlib.EncodePeerToPeerWithMetadataScript(
-		stdlib.CurrencyCode(currency),
-		toNonCustodialAddress,
-		amount,
-		libratypes.ToLCS(&metadata),
-		nil, // no metadata signature for GeneralMetadata
+	newTransactionSubmitAndWait(
+		"custodial account to custodial account transaction",
+		senderCustodialAccountChildVasp,
+		stdlib.EncodePeerToPeerWithMetadataScript(
+			stdlib.CurrencyCode(currency),
+			custodialAccountChildVasp.AccountAddress, //receiverAccountAddress,
+			amount,
+			metadata,
+			recipientSignature,
+		),
 	)
 }
 

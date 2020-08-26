@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	URL                  = "https://client.testnet.libra.org/v1"
+	URL                  = "https://testnet.libra.org/v1"
 	ChainID         byte = 2
 	DDAcountAddress      = "000000000000000000000000000000DD"
 )

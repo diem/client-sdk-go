@@ -21,10 +21,10 @@ type Client interface {
 }
 
 // NewClient creates a new JSON-RPC Client.
-// Creates http.Transport with 10 max idel connections and 30 seconds idle timeout.
+// Creates http.Transport with 3 max idel connections and 30 seconds idle timeout.
 func NewClient(url string) Client {
 	return NewClientWithTransport(url, &http.Transport{
-		MaxIdleConns:    10,
+		MaxIdleConns:    3,
 		IdleConnTimeout: 30 * time.Second,
 	})
 }

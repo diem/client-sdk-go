@@ -29,6 +29,18 @@ const (
 	VmStatusExecuted = "executed"
 )
 
+// StaleResponseError is error for the case server response latest ledger state is older than
+// client knows
+type StaleResponseError struct {
+	Client LedgerState
+	Server LedgerState
+}
+
+// Error implements error interface
+func (e *StaleResponseError) Error() string {
+	return fmt.Sprintf("stale response error: expected server response ledger %v >= %v", e.Server, e.Client)
+}
+
 // Client is Libra client implements high level APIs
 type Client interface {
 	GetCurrencies() ([]*CurrencyInfo, error)
@@ -274,19 +286,8 @@ func (c *client) validateAndUpdateState(state LedgerState) error {
 	if last.Version == state.Version && last.TimestampUsec == state.TimestampUsec {
 		return nil
 	}
-	if last.Version > state.Version {
-		return fmt.Errorf(
-			"stale response error: expected server response ledger %s >= %d, but got %d",
-			"version",
-			last.Version,
-			state.Version)
-	}
-	if last.TimestampUsec > state.TimestampUsec {
-		return fmt.Errorf(
-			"stale response error: expected server response ledger %s >= %d, but got %d",
-			"timestamp(usec)",
-			last.TimestampUsec,
-			state.TimestampUsec)
+	if last.Version > state.Version || last.TimestampUsec > state.TimestampUsec {
+		return &StaleResponseError{Client: last, Server: state}
 	}
 	c.UpdateLastResponseLedgerState(state)
 	return nil

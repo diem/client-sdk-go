@@ -56,6 +56,8 @@ func validate(keysLen int, threshold byte) {
 	}
 }
 
+// NewAuthenticator implements `PublicKey` interface returns `libratypes.TransactionAuthenticator__MultiEd25519`
+// as `libratypes.TransactionAuthenticator` for `SignedTransaction`
 func (k *MultiEd25519PublicKey) NewAuthenticator(signature []byte) libratypes.TransactionAuthenticator {
 	return &libratypes.TransactionAuthenticator__MultiEd25519{
 		PublicKey: libratypes.MultiEd25519PublicKey{k.ToBytes()},
@@ -63,14 +65,17 @@ func (k *MultiEd25519PublicKey) NewAuthenticator(signature []byte) libratypes.Tr
 	}
 }
 
+// NewAuthKey implements `PublicKey` interface returns `AuthKey` generated from this `*MultiEd25519PublicKey`
 func (k *MultiEd25519PublicKey) NewAuthKey() AuthKey {
-	return NewAuthKeyFromPublicKeyAndScheme(k.ToBytes(), MultiEd25519Key)
+	return newAuthKeyFromPublicKeyAndScheme(k.ToBytes(), MultiEd25519Key)
 }
 
+// Hex implements `PublicKey` interface returns hex-encoded string of public keys' bytes
 func (k *MultiEd25519PublicKey) Hex() string {
 	return hex.EncodeToString(k.ToBytes())
 }
 
+// ToBytes returns bytes representation of Libra MultiEd25519 public key
 func (k *MultiEd25519PublicKey) ToBytes() []byte {
 	var ret []byte
 	for _, key := range k.keys {
@@ -79,6 +84,7 @@ func (k *MultiEd25519PublicKey) ToBytes() []byte {
 	return append(ret, k.threshold)
 }
 
+// Sign implements `PrivateKey` interface, signs arbitrary message bytes and return it's signature.
 func (k *MultiEd25519PrivateKey) Sign(msg []byte) []byte {
 	var bitmap [BitmapNumOfBytes]byte
 	var ret []byte

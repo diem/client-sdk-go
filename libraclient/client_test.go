@@ -193,7 +193,7 @@ func TestHandleStaleResponse(t *testing.T) {
 					TimestampUsec: 1597722856123477,
 				})
 				ret, err := client.GetMetadata()
-				assert.EqualError(t, err, "stale response error: expected server response ledger version >= 10, but got 9")
+				assert.EqualError(t, err, "stale response error: expected server response ledger {1597722856123456 9} >= {1597722856123477 10}")
 				assert.Nil(t, ret)
 			},
 		},
@@ -214,7 +214,7 @@ func TestHandleStaleResponse(t *testing.T) {
 					TimestampUsec: 1597722856123477,
 				})
 				ret, err := client.GetMetadata()
-				assert.EqualError(t, err, "stale response error: expected server response ledger timestamp(usec) >= 1597722856123477, but got 1597722856123456")
+				assert.EqualError(t, err, "stale response error: expected server response ledger {1597722856123456 10} >= {1597722856123477 10}")
 				assert.Nil(t, ret)
 			},
 		},

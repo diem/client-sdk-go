@@ -33,7 +33,7 @@ func MustMint(authKey string, amount uint64, currencyCode string) {
 // Mint mints coints once without retry
 func Mint(authKey string, amount uint64, currencyCode string) (int, error) {
 	url := fmt.Sprintf(
-		"http://faucet.testnet.libra.org/?amount=%d&auth_key=%s&currency_code=%s",
+		"http://testnet.libra.org/mint?amount=%d&auth_key=%s&currency_code=%s",
 		amount, authKey, currencyCode)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer([]byte{}))
 	if err != nil {

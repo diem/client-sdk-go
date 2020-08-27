@@ -9,7 +9,8 @@ import (
 
 	"github.com/libra/libra-client-sdk-go/jsonrpc"
 	"github.com/libra/libra-client-sdk-go/libraclient"
-	"github.com/libra/libra-client-sdk-go/librakeys"
+	"github.com/libra/libra-client-sdk-go/librasigner"
+	"github.com/libra/libra-client-sdk-go/libratypes"
 	"github.com/libra/libra-client-sdk-go/stdlib"
 	"github.com/libra/libra-client-sdk-go/testnet"
 
@@ -192,65 +193,63 @@ func TestClient(t *testing.T) {
 			},
 		},
 		{
-			name: "submit transaction",
+			name: "submit: transaction hex-encoded bytes",
 			call: func(t *testing.T, client libraclient.Client) {
 				var currencyCode = "LBR"
 				var sequenceNum uint64 = 0
 				var amount uint64 = 10
-				account1 := genAccount(client, currencyCode)
-				account2 := genAccount(client, currencyCode)
+				account1 := testnet.GenAccount()
+				account2 := testnet.GenAccount()
 				script := stdlib.EncodePeerToPeerWithMetadataScript(
-					stdlib.CurrencyCode(currencyCode),
-					account2.AccountAddress,
+					libratypes.Currency(currencyCode),
+					account2.AccountAddress(),
 					amount, nil, nil)
 
-				txn := account1.Sign(
+				txn := librasigner.Sign(
+					account1,
+					account1.AccountAddress(),
 					sequenceNum,
 					script,
 					10000, 0, currencyCode,
 					uint64(time.Now().Add(time.Second*30).Unix()),
 					testnet.ChainID,
 				)
-				err := client.Submit(txn.Hex())
+				err := client.Submit(txn.ToHex())
 				require.NoError(t, err)
 
-			Retry:
-				ret, err := client.WaitForTransaction3(txn.Hex(), time.Second*5)
-				if _, ok := err.(*libraclient.StaleResponseError); ok {
-					goto Retry
-				}
+				ret, err := client.WaitForTransaction3(
+					txn.ToHex(), time.Second*5)
 				require.NoError(t, err)
 				assert.NotNil(t, ret)
 			},
 		},
 		{
-			name: "submit transaction with multi-signatures",
+			name: "submit transaction: with multi-signatures",
 			call: func(t *testing.T, client libraclient.Client) {
 				var currencyCode = "LBR"
 				var sequenceNum uint64 = 0
 				var amount uint64 = 10
-				account1 := librakeys.MustGenMultiSigKeys()
-				testnet.MustMint(account1.AuthKey.Hex(), 1000, currencyCode)
-				account2 := genAccount(client, currencyCode)
+				account1 := testnet.GenMultiSigAccount()
+				address1 := account1.AccountAddress()
+
+				account2 := testnet.GenAccount()
 				script := stdlib.EncodePeerToPeerWithMetadataScript(
-					stdlib.CurrencyCode(currencyCode),
-					account2.AccountAddress,
+					libratypes.Currency(currencyCode),
+					account2.AccountAddress(),
 					amount, nil, nil)
 
-				txn := account1.Sign(
+				txn := librasigner.Sign(
+					account1,
+					address1,
 					sequenceNum,
 					script,
 					10000, 0, currencyCode,
 					uint64(time.Now().Add(time.Second*30).Unix()),
 					testnet.ChainID,
 				)
-				err := client.Submit(txn.Hex())
+				err := client.SubmitTransaction(txn)
 				require.NoError(t, err)
-			Retry:
-				ret, err := client.WaitForTransaction3(txn.Hex(), time.Second*5)
-				if _, ok := err.(*libraclient.StaleResponseError); ok {
-					goto Retry
-				}
+				ret, err := client.WaitForTransaction2(txn, time.Second*5)
 				require.NoError(t, err)
 				assert.NotNil(t, ret)
 			},
@@ -263,10 +262,4 @@ func TestClient(t *testing.T) {
 			tc.call(t, client)
 		})
 	}
-}
-
-func genAccount(client libraclient.Client, currencyCode string) *librakeys.Keys {
-	keys := librakeys.MustGenKeys()
-	testnet.MustMint(keys.AuthKey.Hex(), 1000, currencyCode)
-	return keys
 }

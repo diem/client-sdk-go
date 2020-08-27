@@ -7,9 +7,10 @@
 package libraid
 
 import (
+	"encoding/hex"
 	"errors"
 
-	"github.com/libra/libra-client-sdk-go/libratypes"
+	"github.com/libra/libra-client-sdk-go/libraclient"
 	"github.com/sipa/bech32/ref/go/src/bech32"
 )
 
@@ -23,7 +24,7 @@ const (
 	V1 byte = 1
 
 	// account address length
-	AccountAddressLength = libratypes.AccountAddressLength
+	AccountAddressLength = 16
 )
 
 // EmptySubAddress represents empty sub-address, used for creating account identifier without sub-address
@@ -36,13 +37,13 @@ type NetworkPrefix string
 type Account struct {
 	Prefix         NetworkPrefix
 	Version        byte
-	AccountAddress libratypes.AccountAddress
+	AccountAddress libraclient.Address
 	SubAddress     SubAddress
 }
 
 // NewAccount create new Account with version set to v1.
 // Set subAddress == nil for no sub-address case.
-func NewAccount(prefix NetworkPrefix, accountAddress libratypes.AccountAddress, subAddress SubAddress) *Account {
+func NewAccount(prefix NetworkPrefix, accountAddress libraclient.Address, subAddress SubAddress) *Account {
 	if subAddress == nil {
 		subAddress = EmptySubAddress
 	}
@@ -56,7 +57,7 @@ func NewAccount(prefix NetworkPrefix, accountAddress libratypes.AccountAddress, 
 
 // EncodeAccount creates account v1 encode string
 // Set subAddress == nil for no sub-address case.
-func EncodeAccount(prefix NetworkPrefix, accountAddress libratypes.AccountAddress, subAddress SubAddress) (string, error) {
+func EncodeAccount(prefix NetworkPrefix, accountAddress libraclient.Address, subAddress SubAddress) (string, error) {
 	return NewAccount(prefix, accountAddress, subAddress).Encode()
 }
 
@@ -73,11 +74,10 @@ func DecodeToAccount(prefix NetworkPrefix, encodedAccountIdentifier string) (*Ac
 	}
 
 	return &Account{
-		Prefix:  prefix,
-		Version: byte(version),
-		AccountAddress: *libratypes.MustNewAccountAddressFromBytes(
-			ints2bytes(data[:AccountAddressLength])),
-		SubAddress: SubAddress(ints2bytes(data[AccountAddressLength:])),
+		Prefix:         prefix,
+		Version:        byte(version),
+		AccountAddress: hex.EncodeToString(ints2bytes(data[:AccountAddressLength])),
+		SubAddress:     SubAddress(ints2bytes(data[AccountAddressLength:])),
 	}, nil
 }
 
@@ -87,7 +87,11 @@ func (ai *Account) Encode() (string, error) {
 		return "", errors.New("invalid sub address")
 	}
 	data := make([]byte, 0, AccountAddressLength+SubAddressLength)
-	data = append(data, ai.AccountAddress[:]...)
+	bytes, err := hex.DecodeString(ai.AccountAddress)
+	if err != nil {
+		return "", err
+	}
+	data = append(data, bytes...)
 	data = append(data, ai.SubAddress...)
 
 	return bech32.SegwitAddrEncode(string(ai.Prefix), int(ai.Version), bytes2ints(data))

@@ -11,11 +11,14 @@ import (
 	"github.com/libra/libra-client-sdk-go/libratypes"
 )
 
+// Address represents 16 bytes hex-encoded account address
+type Address = string
+
 // PublicKey is Libra account public key
 type PublicKey interface {
-	NewAuthenticator(sig []byte) libratypes.TransactionAuthenticator
-	NewAuthKey() AuthKey
+	IsMulti() bool
 	Hex() string
+	Bytes() []byte
 }
 
 // PrivateKey is Libra account private key
@@ -25,20 +28,24 @@ type PrivateKey interface {
 
 // Keys holds Libra local account keys
 type Keys struct {
-	PublicKey      PublicKey
-	PrivateKey     PrivateKey
-	AuthKey        AuthKey
-	AccountAddress libratypes.AccountAddress
+	PublicKey  PublicKey
+	PrivateKey PrivateKey
+}
+
+// AccountAddress return account address from auth key
+func (k *Keys) AccountAddress() libratypes.AccountAddress {
+	return k.AuthKey().AccountAddress()
+}
+
+func (k *Keys) AuthKey() AuthKey {
+	return NewAuthKey(k.PublicKey)
 }
 
 // NewKeysFromPublicAndPrivateKeys creates new `Keys` from given public key and private key
 func NewKeysFromPublicAndPrivateKeys(publicKey PublicKey, privateKey PrivateKey) *Keys {
-	authKey := publicKey.NewAuthKey()
 	return &Keys{
-		PublicKey:      publicKey,
-		PrivateKey:     privateKey,
-		AuthKey:        authKey,
-		AccountAddress: *authKey.AccountAddress(),
+		PublicKey:  publicKey,
+		PrivateKey: privateKey,
 	}
 }
 

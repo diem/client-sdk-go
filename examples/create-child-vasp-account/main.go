@@ -8,27 +8,29 @@ import (
 	"time"
 
 	"github.com/libra/libra-client-sdk-go/librakeys"
+	"github.com/libra/libra-client-sdk-go/librasigner"
 	"github.com/libra/libra-client-sdk-go/stdlib"
 	"github.com/libra/libra-client-sdk-go/testnet"
 	"gopkg.in/yaml.v3"
 )
 
 func main() {
-	parentVASP := librakeys.MustGenKeys()
-	testnet.MustMint(parentVASP.AuthKey.Hex(), 1000000, "LBR")
-
-	account, err := testnet.Client.GetAccount(parentVASP.AccountAddress.Hex())
+	parentVASP := testnet.GenAccount()
+	parentVASPAddress := parentVASP.AccountAddress()
+	account, err := testnet.Client.GetAccount(parentVASPAddress.Hex())
 	if err != nil {
 		panic(err)
 	}
 	print("Parent VASP account", account)
 
 	childVASPAccount := librakeys.MustGenKeys()
+	childVASPAddress := childVASPAccount.AccountAddress()
+	childAuthKey := childVASPAccount.AuthKey()
 
 	script := stdlib.EncodeCreateChildVaspAccountScript(
 		testnet.LBR,
-		childVASPAccount.AccountAddress,
-		childVASPAccount.AuthKey.Prefix(),
+		childVASPAddress,
+		childAuthKey.Prefix(),
 		false,
 		uint64(1000),
 	)
@@ -36,14 +38,16 @@ func main() {
 	sequenceNum := uint64(0) // we just generated new parentVASP, hence it is 0
 	expirationDuration := time.Second * 30
 	expiration := uint64(time.Now().Add(expirationDuration).Unix())
-	txn := parentVASP.Sign(
+	txn := librasigner.Sign(
+		parentVASP,
+		parentVASPAddress,
 		sequenceNum,
 		script,
 		10000, 0, "LBR",
 		expiration,
 		testnet.ChainID,
 	)
-	err = testnet.Client.Submit(txn.Hex())
+	err = testnet.Client.SubmitTransaction(txn)
 	if err != nil {
 		panic(err)
 	}
@@ -54,7 +58,7 @@ func main() {
 	}
 	print("Create child VASP account transaction", transaction)
 
-	child, err := testnet.Client.GetAccount(childVASPAccount.AccountAddress.Hex())
+	child, err := testnet.Client.GetAccount(childVASPAddress.Hex())
 	if err != nil {
 		panic(err)
 	}

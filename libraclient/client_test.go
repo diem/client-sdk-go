@@ -21,23 +21,7 @@ func TestWaitForTransaction(t *testing.T) {
 		call     func(t *testing.T, client libraclient.Client)
 	}{
 		{
-			name:     "wait for transaction: timeout",
-			response: jsonrpc.Response{},
-			call: func(t *testing.T, client libraclient.Client) {
-				account := librakeys.MustGenKeys()
-				ret, err := client.WaitForTransaction(
-					account.AccountAddress.Hex(),
-					0,
-					"sig",
-					uint64(time.Now().Add(2*time.Second).Unix()),
-					time.Second*1,
-				)
-				require.EqualError(t, err, "transaction not found within timeout period: 1s")
-				assert.Nil(t, ret)
-			},
-		},
-		{
-			name: "wait for transaction: signature mismatch",
+			name: "wait for transaction: success",
 			response: jsonrpc.Response{
 				Result: toPtr(json.RawMessage(`{
     "events": [],
@@ -57,7 +41,91 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					account.AccountAddress.Hex(),
+					account.AccountAddress().Hex(),
+					0,
+					"0fa27a781a9086e80a870851ea4f1b14090fb8b5bd9933e27447ab806443e08e",
+					uint64(time.Now().Add(2*time.Second).Unix()),
+					time.Second*1,
+				)
+				require.NoError(t, err)
+				assert.NotNil(t, ret)
+			},
+		},
+		{
+			name: "wait for transaction: timeout when server response stale version",
+			response: jsonrpc.Response{
+				LibraLedgerVersion:       10,
+				LibraLedgerTimestampusec: 1597722856123456,
+				Result: toPtr(json.RawMessage(`{
+    "events": [],
+    "gas_used": 175,
+    "hash": "0fa27a781a9086e80a870851ea4f1b14090fb8b5bd9933e27447ab806443e08e",
+    "transaction": {
+      "chain_id": 2,
+      "expiration_timestamp_secs": 100000000000,
+      "sequence_number": 0,
+      "signature": "a181a036ba68fcd25a7ba9f3895caf720af7aee4bf86c4d798050a1101e75f71ccd891158c8fa0bf349bbb66fb0ba50b29b6fb29822dc04071aff831735e6402",
+      "type": "user"
+    },
+    "version": 106548,
+    "vm_status": { "type": "executed" }
+}`)),
+			},
+			call: func(t *testing.T, client libraclient.Client) {
+				client.UpdateLastResponseLedgerState(libraclient.LedgerState{
+					Version:       11,
+					TimestampUsec: 1597722856123457,
+				})
+				account := librakeys.MustGenKeys()
+				ret, err := client.WaitForTransaction(
+					account.AccountAddress().Hex(),
+					0,
+					"0fa27a781a9086e80a870851ea4f1b14090fb8b5bd9933e27447ab806443e08e",
+					uint64(time.Now().Add(2*time.Second).Unix()),
+					time.Second*1,
+				)
+				require.EqualError(t, err, "transaction not found within timeout period: 1s")
+				assert.Nil(t, ret)
+			},
+		},
+		{
+			name:     "wait for transaction: timeout",
+			response: jsonrpc.Response{},
+			call: func(t *testing.T, client libraclient.Client) {
+				account := librakeys.MustGenKeys()
+				ret, err := client.WaitForTransaction(
+					account.AccountAddress().Hex(),
+					0,
+					"invalid-hash",
+					uint64(time.Now().Add(2*time.Second).Unix()),
+					time.Second*1,
+				)
+				require.EqualError(t, err, "transaction not found within timeout period: 1s")
+				assert.Nil(t, ret)
+			},
+		},
+		{
+			name: "wait for transaction: hash mismatch",
+			response: jsonrpc.Response{
+				Result: toPtr(json.RawMessage(`{
+    "events": [],
+    "gas_used": 175,
+    "hash": "0fa27a781a9086e80a870851ea4f1b14090fb8b5bd9933e27447ab806443e08e",
+    "transaction": {
+      "chain_id": 2,
+      "expiration_timestamp_secs": 100000000000,
+      "sequence_number": 0,
+      "signature": "a181a036ba68fcd25a7ba9f3895caf720af7aee4bf86c4d798050a1101e75f71ccd891158c8fa0bf349bbb66fb0ba50b29b6fb29822dc04071aff831735e6402",
+      "type": "user"
+    },
+    "version": 106548,
+    "vm_status": { "type": "executed" }
+}`)),
+			},
+			call: func(t *testing.T, client libraclient.Client) {
+				account := librakeys.MustGenKeys()
+				ret, err := client.WaitForTransaction(
+					account.AccountAddress().Hex(),
 					0,
 					"mismatched hash",
 					uint64(time.Now().Add(time.Second).Unix()),
@@ -88,7 +156,7 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					account.AccountAddress.Hex(),
+					account.AccountAddress().Hex(),
 					0,
 					"0fa27a781a9086e80a870851ea4f1b14090fb8b5bd9933e27447ab806443e08e",
 					uint64(time.Now().Add(time.Second).Unix()),
@@ -107,7 +175,7 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					account.AccountAddress.Hex(),
+					account.AccountAddress().Hex(),
 					0,
 					"0fa27a781a9086e80a870851ea4f1b14090fb8b5bd9933e27447ab806443e08e",
 					uint64(1597722856),
@@ -126,7 +194,7 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					account.AccountAddress.Hex(),
+					account.AccountAddress().Hex(),
 					0,
 					"a181a036ba68fcd25a7ba9f3895caf720af7aee4bf86c4d798050a1101e75f71ccd891158c8fa0bf349bbb66fb0ba50b29b6fb29822dc04071aff831735e6402",
 					uint64(1597722856),
@@ -151,7 +219,8 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction3(
-					account.AccountAddress.Hex(), time.Second)
+					account.AccountAddress().Hex(),
+					time.Second)
 				require.EqualError(t, err, "Deserialize given hex string as SignedTransaction LCS failed: EOF")
 				assert.Nil(t, ret)
 			},

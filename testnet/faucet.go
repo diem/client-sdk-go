@@ -12,7 +12,22 @@ import (
 	"time"
 
 	"github.com/libra/libra-client-sdk-go/libraclient"
+	"github.com/libra/libra-client-sdk-go/librakeys"
 )
+
+// GenAccount generate account with single keys
+func GenAccount() *librakeys.Keys {
+	keys := librakeys.MustGenKeys()
+	MustMint(keys.AuthKey().Hex(), 1000000, "LBR")
+	return keys
+}
+
+// GenMultiSigAccount generate account with multi sig keys
+func GenMultiSigAccount() *librakeys.Keys {
+	keys := librakeys.MustGenMultiSigKeys()
+	MustMint(keys.AuthKey().Hex(), 2000000, "LBR")
+	return keys
+}
 
 // MustMint mints coins with retry, and panics if all retries failed.
 // This func also wait for next account seq.

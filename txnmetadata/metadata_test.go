@@ -11,10 +11,10 @@ import (
 )
 
 func TestNewTravelRuleMetadata(t *testing.T) {
-	address, _ := libratypes.NewAccountAddressFromHex("f72589b71ff4f8d139674a3f7369c69b")
+	address, _ := libratypes.MakeAccountAddress("f72589b71ff4f8d139674a3f7369c69b")
 	metadata, sigMsg := txnmetadata.NewTravelRuleMetadata(
 		"off chain reference id",
-		*address,
+		address,
 		1000)
 	assert.Equal(t, "020001166f666620636861696e207265666572656e6365206964", hex.EncodeToString(metadata))
 	assert.Equal(t, "020001166f666620636861696e207265666572656e6365206964f72589b71ff4f8d139674a3f7369c69be803000000000000404024244c494252415f41545445535424244040", hex.EncodeToString(sigMsg))

@@ -13,9 +13,10 @@ import (
 
 func main() {
 	merchant := librakeys.MustGenKeys()
+	address := merchant.AccountAddress().Hex()
 	currency := "LBR"
 	amount := uint64(5000)
-	account := libraid.NewAccount(libraid.TestnetPrefix, merchant.AccountAddress, nil)
+	account := libraid.NewAccount(libraid.TestnetPrefix, address, nil)
 	intent := libraid.Intent{
 		Account: *account,
 		Params: libraid.Params{

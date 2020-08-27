@@ -10,6 +10,7 @@ import (
 
 	"github.com/libra/libra-client-sdk-go/libraid"
 	"github.com/libra/libra-client-sdk-go/librakeys"
+	"github.com/libra/libra-client-sdk-go/librasigner"
 	"github.com/libra/libra-client-sdk-go/libratypes"
 	"github.com/libra/libra-client-sdk-go/stdlib"
 	"github.com/libra/libra-client-sdk-go/testnet"
@@ -30,8 +31,8 @@ func main() {
 		"non custodial account to non custodial account transaction",
 		nonCustodialAccount,
 		stdlib.EncodePeerToPeerWithMetadataScript(
-			stdlib.CurrencyCode(currency),
-			nonCustodialAccount2.AccountAddress,
+			libratypes.Currency(currency),
+			nonCustodialAccount2.AccountAddress(),
 			amount,
 			nil,
 			nil,
@@ -42,8 +43,8 @@ func main() {
 		"non custodial account to custodial account transaction",
 		nonCustodialAccount,
 		stdlib.EncodePeerToPeerWithMetadataScript(
-			stdlib.CurrencyCode(currency),
-			custodialAccountChildVasp.AccountAddress,
+			libratypes.Currency(currency),
+			custodialAccountChildVasp.AccountAddress(),
 			amount,
 			txnmetadata.NewGeneralMetadataToSubAddress(custodialAccountSubAddress),
 			nil, // no metadata signature for GeneralMetadata
@@ -54,8 +55,8 @@ func main() {
 		"custodial account to non custodial account transaction",
 		custodialAccountChildVasp,
 		stdlib.EncodePeerToPeerWithMetadataScript(
-			stdlib.CurrencyCode(currency),
-			nonCustodialAccount.AccountAddress,
+			libratypes.Currency(currency),
+			nonCustodialAccount.AccountAddress(),
 			amount,
 			txnmetadata.NewGeneralMetadataFromSubAddress(custodialAccountSubAddress),
 			nil, // no metadata signature for GeneralMetadata
@@ -84,7 +85,7 @@ func main() {
 	// metadata and signature message
 	metadata, sigMsg := txnmetadata.NewTravelRuleMetadata(
 		offChainReferenceId,
-		senderCustodialAccountChildVasp.AccountAddress,
+		senderCustodialAccountChildVasp.AccountAddress(),
 		amount,
 	)
 
@@ -96,8 +97,8 @@ func main() {
 		"custodial account to custodial account transaction",
 		senderCustodialAccountChildVasp,
 		stdlib.EncodePeerToPeerWithMetadataScript(
-			stdlib.CurrencyCode(currency),
-			custodialAccountChildVasp.AccountAddress, //receiverAccountAddress,
+			libratypes.Currency(currency),
+			custodialAccountChildVasp.AccountAddress(), //receiverAccountAddress,
 			amount,
 			metadata,
 			recipientSignature,
@@ -106,21 +107,24 @@ func main() {
 }
 
 func newTransactionSubmitAndWait(title string, sender *librakeys.Keys, script libratypes.Script) {
-	account, err := testnet.Client.GetAccount(sender.AccountAddress.Hex())
+	address := sender.AccountAddress()
+	account, err := testnet.Client.GetAccount(address.Hex())
 	if err != nil {
 		panic(err)
 	}
 	sequenceNum := account.SequenceNumber
 	expirationDuration := 30 * time.Second
 	expiration := uint64(time.Now().Add(expirationDuration).Unix())
-	txn := sender.Sign(
+	txn := librasigner.Sign(
+		sender,
+		address,
 		sequenceNum,
 		script,
 		100000, 0, currency,
 		expiration,
 		testnet.ChainID,
 	)
-	err = testnet.Client.Submit(txn.Hex())
+	err = testnet.Client.SubmitTransaction(txn)
 	if err != nil {
 		panic(err)
 	}
@@ -134,9 +138,7 @@ func newTransactionSubmitAndWait(title string, sender *librakeys.Keys, script li
 }
 
 func createNonCustodialAccount() *librakeys.Keys {
-	keys := librakeys.MustGenKeys()
-	testnet.MustMint(keys.AuthKey.Hex(), 1000000, currency)
-	return keys
+	return testnet.GenAccount()
 }
 
 func createCustodialAccount() (*librakeys.Keys, *librakeys.Keys, libraid.SubAddress) {
@@ -144,22 +146,24 @@ func createCustodialAccount() (*librakeys.Keys, *librakeys.Keys, libraid.SubAddr
 	childVASPAccount := librakeys.MustGenKeys()
 	script := stdlib.EncodeCreateChildVaspAccountScript(
 		testnet.LBR,
-		childVASPAccount.AccountAddress,
-		childVASPAccount.AuthKey.Prefix(),
+		childVASPAccount.AccountAddress(),
+		childVASPAccount.AuthKey().Prefix(),
 		false,
 		uint64(100000),
 	)
 	sequenceNum := uint64(0) // we just generated new parentVASP, hence it is 0
 	expirationDuration := time.Second * 30
 	expiration := uint64(time.Now().Add(expirationDuration).Unix())
-	txn := parentVASP.Sign(
+	txn := librasigner.Sign(
+		parentVASP,
+		parentVASP.AccountAddress(),
 		sequenceNum,
 		script,
 		10000, 0, currency,
 		expiration,
 		testnet.ChainID,
 	)
-	err := testnet.Client.Submit(txn.Hex())
+	err := testnet.Client.SubmitTransaction(txn)
 	if err != nil {
 		panic(err)
 	}

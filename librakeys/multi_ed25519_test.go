@@ -10,7 +10,6 @@ import (
 
 	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/lcs"
 	"github.com/libra/libra-client-sdk-go/librakeys"
-	"github.com/libra/libra-client-sdk-go/libratypes"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,19 +28,13 @@ func TestMultiEd25519PublicKey(t *testing.T) {
 
 	pk := librakeys.NewMultiEd25519PublicKey(publicKeys, byte(2))
 
-	t.Run("new auth key", func(t *testing.T) {
-		expectedBytes := "4b09784ca88af28c16b6e8cf24c36c45c8b5290aa97c1d392679f636790fa5de"
-		assert.Equal(t, expectedBytes, pk.NewAuthKey().Hex())
-	})
 	t.Run("hex", func(t *testing.T) {
 		expectedBytes := "20fdbac9b10b7587bba7b5bc163bce69e796d71e4ed44c10fcb4488689f7a14475e4174dd58822548086f17b037cecb0ee86516b7d13400a80c856b4bdaf7fe1631c1541f3a4bf44d4d897061564aa8495d766f6191a3ff61562003f184b8c6502"
 		assert.Equal(t, expectedBytes, pk.Hex())
 	})
 
-	t.Run("new authenticator", func(t *testing.T) {
-		expectedLCS := "016120fdbac9b10b7587bba7b5bc163bce69e796d71e4ed44c10fcb4488689f7a14475e4174dd58822548086f17b037cecb0ee86516b7d13400a80c856b4bdaf7fe1631c1541f3a4bf44d4d897061564aa8495d766f6191a3ff61562003f184b8c650200"
-		assert.Equal(t, expectedLCS, hex.EncodeToString(
-			libratypes.ToLCS(pk.NewAuthenticator(nil))))
+	t.Run("is multi", func(t *testing.T) {
+		assert.True(t, pk.IsMulti())
 	})
 
 }

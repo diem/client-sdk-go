@@ -6,8 +6,6 @@ package librakeys
 import (
 	"crypto/ed25519"
 	"encoding/hex"
-
-	"github.com/libra/libra-client-sdk-go/libratypes"
 )
 
 const (
@@ -56,27 +54,18 @@ func validate(keysLen int, threshold byte) {
 	}
 }
 
-// NewAuthenticator implements `PublicKey` interface returns `libratypes.TransactionAuthenticator__MultiEd25519`
-// as `libratypes.TransactionAuthenticator` for `SignedTransaction`
-func (k *MultiEd25519PublicKey) NewAuthenticator(signature []byte) libratypes.TransactionAuthenticator {
-	return &libratypes.TransactionAuthenticator__MultiEd25519{
-		PublicKey: libratypes.MultiEd25519PublicKey(k.ToBytes()),
-		Signature: libratypes.MultiEd25519Signature(signature),
-	}
-}
-
-// NewAuthKey implements `PublicKey` interface returns `AuthKey` generated from this `*MultiEd25519PublicKey`
-func (k *MultiEd25519PublicKey) NewAuthKey() AuthKey {
-	return newAuthKeyFromPublicKeyAndScheme(k.ToBytes(), MultiEd25519Key)
+// IsMulti returns true
+func (k *MultiEd25519PublicKey) IsMulti() bool {
+	return true
 }
 
 // Hex implements `PublicKey` interface returns hex-encoded string of public keys' bytes
 func (k *MultiEd25519PublicKey) Hex() string {
-	return hex.EncodeToString(k.ToBytes())
+	return hex.EncodeToString(k.Bytes())
 }
 
-// ToBytes returns bytes representation of Libra MultiEd25519 public key
-func (k *MultiEd25519PublicKey) ToBytes() []byte {
+// Bytes returns bytes representation of Libra MultiEd25519 public key
+func (k *MultiEd25519PublicKey) Bytes() []byte {
 	var ret []byte
 	for _, key := range k.keys {
 		ret = append(ret, key...)

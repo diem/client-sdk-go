@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/libra/libra-client-sdk-go/librakeys"
-	"github.com/libra/libra-client-sdk-go/libratypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -16,19 +15,15 @@ import (
 func TestEd25519PublicKey(t *testing.T) {
 	keyHex := "447fc3be296803c2303951c7816624c7566730a5cc6860a4a1bd3c04731569f5"
 	publicKey, _ := librakeys.NewEd25519PublicKeyFromString(keyHex)
-	t.Run("NewAuthKey", func(t *testing.T) {
-		authKey := publicKey.NewAuthKey()
-		assert.Equal(t,
-			"459c77a38803bd53f3adee52703810e3a74fd7c46952c497e75afb0a7932586d",
-			authKey.Hex())
-	})
 	t.Run("Hex", func(t *testing.T) {
 		assert.Equal(t, keyHex, publicKey.Hex())
 	})
-	t.Run("NewAuthenticator", func(t *testing.T) {
-		expectedLCS := "0020447fc3be296803c2303951c7816624c7566730a5cc6860a4a1bd3c04731569f500"
-		lcs := libratypes.ToLCS(publicKey.NewAuthenticator(nil))
-		assert.Equal(t, expectedLCS, hex.EncodeToString(lcs))
+	t.Run("IsMulti", func(t *testing.T) {
+		assert.False(t, publicKey.IsMulti())
+	})
+	t.Run("Bytes", func(t *testing.T) {
+		bytes, _ := hex.DecodeString(keyHex)
+		assert.Equal(t, bytes, publicKey.Bytes())
 	})
 }
 

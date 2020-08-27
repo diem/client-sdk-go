@@ -5,7 +5,7 @@ package testnet
 
 import (
 	"github.com/libra/libra-client-sdk-go/libraclient"
-	"github.com/libra/libra-client-sdk-go/stdlib"
+	"github.com/libra/libra-client-sdk-go/libratypes"
 )
 
 const (
@@ -20,7 +20,7 @@ var Client = libraclient.New(ChainID, URL)
 
 // Currencies
 var (
-	LBR   = stdlib.CurrencyCode("LBR")
-	Coin1 = stdlib.CurrencyCode("Coin1")
-	Coin2 = stdlib.CurrencyCode("Coin2")
+	LBR   = libratypes.Currency("LBR")
+	Coin1 = libratypes.Currency("Coin1")
+	Coin2 = libratypes.Currency("Coin2")
 )

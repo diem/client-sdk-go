@@ -52,6 +52,7 @@ type Client interface {
 	GetTransactions(uint64, uint64, bool) ([]*Transaction, error)
 	GetEvents(string, uint64, uint64) ([]*Event, error)
 	Submit(signedTxnHex string) error
+	SubmitTransaction(txn *libratypes.SignedTransaction) error
 
 	WaitForTransaction(
 		address Address,
@@ -127,12 +128,12 @@ func (c *client) WaitForTransaction3(signedTxnHex string, timeout time.Duration)
 	return c.WaitForTransaction2(&txn, timeout)
 }
 
-// WaitForTransaction2 waits for given `SignedTransaction` transaction.
+// WaitForTransaction2 waits for given `SignedTransaction`
 func (c *client) WaitForTransaction2(txn *libratypes.SignedTransaction, timeout time.Duration) (*Transaction, error) {
 	return c.WaitForTransaction(
-		txn.RawTxn.Sender.Hex(),
+		hex.EncodeToString(txn.RawTxn.Sender[:]),
 		txn.RawTxn.SequenceNumber,
-		libratypes.TransactionHashHex(txn),
+		txn.TransactionHash(),
 		txn.RawTxn.ExpirationTimestampSecs,
 		timeout,
 	)
@@ -141,8 +142,15 @@ func (c *client) WaitForTransaction2(txn *libratypes.SignedTransaction, timeout 
 // WaitForTransaction waits for given (address, sequence number, hash) transaction.
 func (c *client) WaitForTransaction(address Address, seq uint64, hash string, expirationTimeSec uint64, timeout time.Duration) (*Transaction, error) {
 	step := time.Millisecond * 500
-	for i := time.Duration(0); i < timeout; i += step {
+	start := time.Now()
+	for {
+		if time.Since(start) > timeout {
+			break
+		}
 		txn, err := c.GetAccountTransaction(address, seq, true)
+		if _, ok := err.(*StaleResponseError); ok {
+			continue
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -247,6 +255,10 @@ func (c *client) Submit(data string) error {
 		return err
 	}
 	return nil
+}
+
+func (c *client) SubmitTransaction(txn *libratypes.SignedTransaction) error {
+	return c.Submit(txn.ToHex())
 }
 
 func (c *client) call(method jsonrpc.Method, ret interface{}, params ...jsonrpc.Param) (bool, error) {

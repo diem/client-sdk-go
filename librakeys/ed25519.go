@@ -6,8 +6,6 @@ package librakeys
 import (
 	"crypto/ed25519"
 	"encoding/hex"
-
-	"github.com/libra/libra-client-sdk-go/libratypes"
 )
 
 // Ed25519PublicKey implements `PublicKey` interface for ed25519 public key
@@ -50,22 +48,19 @@ func NewEd25519PrivateKeyFromString(key string) (*Ed25519PrivateKey, error) {
 	return NewEd25519PrivateKey(ed25519.PrivateKey(bytes)), nil
 }
 
-// NewAuthenticator returns `libratypes.TransactionAuthenticator` with given signature bytes and public key
-func (k *Ed25519PublicKey) NewAuthenticator(signature []byte) libratypes.TransactionAuthenticator {
-	return &libratypes.TransactionAuthenticator__Ed25519{
-		PublicKey: libratypes.Ed25519PublicKey([]byte(k.pk)),
-		Signature: libratypes.Ed25519Signature(signature),
-	}
-}
-
-// NewAuthKey creates `AuthKey` from given public key and Ed25519Key scheme
-func (k *Ed25519PublicKey) NewAuthKey() AuthKey {
-	return newAuthKeyFromPublicKeyAndScheme(k.pk, Ed25519Key)
+// IsMulti returns false
+func (k *Ed25519PublicKey) IsMulti() bool {
+	return false
 }
 
 // Hex returns hex string of the public key
 func (k *Ed25519PublicKey) Hex() string {
 	return hex.EncodeToString(k.pk)
+}
+
+// Bytes returns public key bytes
+func (k *Ed25519PublicKey) Bytes() []byte {
+	return []byte(k.pk)
 }
 
 // Sign signs given message bytes by private key

@@ -14,8 +14,8 @@ import (
 
 func TestMint(t *testing.T) {
 	keys := librakeys.MustGenKeys()
-	testnet.MustMint(keys.AuthKey.Hex(), 1000, "LBR")
-	account, err := testnet.Client.GetAccount(keys.AccountAddress.Hex())
+	testnet.MustMint(keys.AuthKey().Hex(), 1000, "LBR")
+	account, err := testnet.Client.GetAccount(keys.AccountAddress().Hex())
 	require.NoError(t, err)
 
 	assert.Len(t, account.Balances, 1)

@@ -4,6 +4,7 @@
 package libraid_test
 
 import (
+	"encoding/hex"
 	"testing"
 
 	"github.com/libra/libra-client-sdk-go/libraid"
@@ -23,7 +24,7 @@ func TestGenSubAddress(t *testing.T) {
 }
 
 func TestEncodeDecodeAccountIdentifier(t *testing.T) {
-	address := *libratypes.MustNewAccountAddressFromHex("f72589b71ff4f8d139674a3f7369c69b")
+	address := "f72589b71ff4f8d139674a3f7369c69b"
 	subAddress := libraid.MustNewSubAddressFromHex("cf64428bdeb62af2")
 
 	ret, err := libraid.EncodeAccount(libraid.MainnetPrefix, address, subAddress)
@@ -32,14 +33,14 @@ func TestEncodeDecodeAccountIdentifier(t *testing.T) {
 
 	id, err := libraid.DecodeToAccount(libraid.MainnetPrefix, ret)
 	require.NoError(t, err)
-	assert.Equal(t, "f72589b71ff4f8d139674a3f7369c69b", id.AccountAddress.Hex())
+	assert.Equal(t, "f72589b71ff4f8d139674a3f7369c69b", id.AccountAddress)
 	assert.Equal(t, "cf64428bdeb62af2", id.SubAddress.Hex())
 	assert.Equal(t, byte(1), id.Version)
 	assert.Equal(t, libraid.MainnetPrefix, id.Prefix)
 }
 
 func TestEncodeDecodeAccountIdentifierWithoutSubAddress(t *testing.T) {
-	address := *libratypes.MustNewAccountAddressFromHex("f72589b71ff4f8d139674a3f7369c69b")
+	address := "f72589b71ff4f8d139674a3f7369c69b"
 
 	ret, err := libraid.EncodeAccount(libraid.MainnetPrefix, address, nil)
 	require.NoError(t, err)
@@ -47,7 +48,7 @@ func TestEncodeDecodeAccountIdentifierWithoutSubAddress(t *testing.T) {
 
 	id, err := libraid.DecodeToAccount(libraid.MainnetPrefix, ret)
 	require.NoError(t, err)
-	assert.Equal(t, "f72589b71ff4f8d139674a3f7369c69b", id.AccountAddress.Hex())
+	assert.Equal(t, "f72589b71ff4f8d139674a3f7369c69b", id.AccountAddress)
 	assert.Equal(t, "0000000000000000", id.SubAddress.Hex())
 	assert.Equal(t, byte(1), id.Version)
 	assert.Equal(t, libraid.MainnetPrefix, id.Prefix)
@@ -55,7 +56,7 @@ func TestEncodeDecodeAccountIdentifierWithoutSubAddress(t *testing.T) {
 
 func TestEncodeShouldValidateAddressLen(t *testing.T) {
 	t.Run("invalid sub account address", func(t *testing.T) {
-		address := *libratypes.MustNewAccountAddressFromHex("f72589b71ff4f8d139674a3f7369c69b")
+		address := "f72589b71ff4f8d139674a3f7369c69b"
 		subAddress := libraid.SubAddress([]byte{1})
 
 		ret, err := libraid.EncodeAccount(libraid.MainnetPrefix, address, subAddress)
@@ -65,7 +66,7 @@ func TestEncodeShouldValidateAddressLen(t *testing.T) {
 }
 
 func TestDecodeInvalidAccountIdentifierString(t *testing.T) {
-	address := *libratypes.MustNewAccountAddressFromHex("f72589b71ff4f8d139674a3f7369c69b")
+	address := "f72589b71ff4f8d139674a3f7369c69b"
 	subAddress := libraid.MustNewSubAddressFromHex("cf64428bdeb62af2")
 	t.Run("invalid checksum", func(t *testing.T) {
 		ret, err := libraid.EncodeAccount(libraid.MainnetPrefix, address, subAddress)
@@ -77,7 +78,8 @@ func TestDecodeInvalidAccountIdentifierString(t *testing.T) {
 	})
 	t.Run("invalid account address length", func(t *testing.T) {
 		data := make([]int, libratypes.AccountAddressLength)
-		for i, b := range address {
+		addressBytes, _ := hex.DecodeString(address)
+		for i, b := range addressBytes {
 			data[i] = int(b)
 		}
 

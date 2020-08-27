@@ -1,14 +1,11 @@
 test:
+	go list ./... | grep examples | grep -v transaction-builder | xargs go build
 	go list ./... | grep -v /examples/ | xargs go test
 
 cover:
 	mkdir -p .tmp
 	go test -covermode=count -coverprofile=.tmp/count.out ./...
 	go tool cover -html=.tmp/count.out
-
-fetch-libra-testnet:
-	cd libra && git fetch && git reset --hard origin/testnet
-
 
 gen:
 	cd libra && cargo build -p transaction-builder-generator && target/debug/generate-transaction-builders \

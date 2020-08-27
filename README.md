@@ -8,7 +8,8 @@ libra-client-sdk-go is the official Libra Client SDK for the Go programming lang
 
 - libraclient: libra JSON-RPC APIs client
 - jsonrpc: a JSON-RPC 2.0 SPEC client
-- librakeys: keys utils, including generating public & private keys for testing, creating auth keys, and signing transaction
+- librakeys: keys utils, including generating public & private keys for testing, creating auth key and account address from public key.
+- librasigner: sign transaction logic
 - libraid: encoding & decodeing Libra Account Identifier and Intent URL
 - testnet: testnet utils
 - stdlib: move stdlib script utils. This is generated code, for constructing transaction script playload.
@@ -35,16 +36,10 @@ To update the SDK use `go get -u` to retrieve the latest version of the SDK.
 make test
 ```
 
-*Upgrade to latest libra testnet release*
-
-```
-make fetch-libra-testnet
-
-```
-
 *Generate libratypes & move stdlib script encoder & decoder*
 
 ```
+git submodule update
 make gen
 ```
 

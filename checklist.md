@@ -5,7 +5,8 @@
   - libra
     - libraclient: high level APIs interface, should support application to do easy mock / stub development.
     - jsonrpc: jsonrpc client
-    - librakeys: keys utils, generate public & private keys for testing, create auth keys, and sign transaction
+    - librakeys: keys utils, generate public & private keys for testing, create auth key and account address.
+    - librasigner: sign transaction logic
     - libraid: Libra Account Identifier and Intent URL encoding & decodeing
     - stdlib: move stdlib script utils.
     - testnet: testnet utils, should include FaucetService for handling testnet mint.

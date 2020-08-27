@@ -37,9 +37,9 @@ func (t *SignedTransaction) Hex() string {
 func (t *SignedTransaction) SignatureHex() string {
 	switch auth := t.Authenticator.(type) {
 	case *TransactionAuthenticator__Ed25519:
-		return hex.EncodeToString(auth.Signature.Value)
+		return hex.EncodeToString(auth.Signature)
 	case *TransactionAuthenticator__MultiEd25519:
-		return hex.EncodeToString(auth.Signature.Value)
+		return hex.EncodeToString(auth.Signature)
 	default:
 		panic(fmt.Sprintf("unknown Authenticator type: %v", auth))
 	}
@@ -47,7 +47,7 @@ func (t *SignedTransaction) SignatureHex() string {
 
 // Hex returns hex encoded string for the AccountAddress
 func (a *AccountAddress) Hex() string {
-	return hex.EncodeToString(a.Value[:])
+	return hex.EncodeToString(a[:])
 }
 
 // NewAccountAddressFromHex creates account address from given hex string
@@ -76,7 +76,7 @@ func NewAccountAddressFromBytes(bytes []byte) (*AccountAddress, error) {
 			"Account address should be 16 bytes, but given %d bytes", len(bytes))
 	}
 	address := &AccountAddress{}
-	copy(address.Value[:], bytes)
+	copy(address[:], bytes)
 	return address, nil
 }
 

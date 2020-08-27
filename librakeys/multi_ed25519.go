@@ -60,8 +60,8 @@ func validate(keysLen int, threshold byte) {
 // as `libratypes.TransactionAuthenticator` for `SignedTransaction`
 func (k *MultiEd25519PublicKey) NewAuthenticator(signature []byte) libratypes.TransactionAuthenticator {
 	return &libratypes.TransactionAuthenticator__MultiEd25519{
-		PublicKey: libratypes.MultiEd25519PublicKey{k.ToBytes()},
-		Signature: libratypes.MultiEd25519Signature{signature},
+		PublicKey: libratypes.MultiEd25519PublicKey(k.ToBytes()),
+		Signature: libratypes.MultiEd25519Signature(signature),
 	}
 }
 

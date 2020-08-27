@@ -30,9 +30,9 @@
 
 # [LIP-4][7] support
 
-- [ ] Non-custodial to custodial transaction
-- [ ] Custodial to non-custodial transaction
-- [ ] Custodial to Custodial transaction
+- [x] Non-custodial to custodial transaction
+- [x] Custodial to non-custodial transaction
+- [x] Custodial to Custodial transaction
 - [ ] Refund
 
 # [LIP-5][2] support

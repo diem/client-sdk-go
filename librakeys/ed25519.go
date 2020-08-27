@@ -53,8 +53,8 @@ func NewEd25519PrivateKeyFromString(key string) (*Ed25519PrivateKey, error) {
 // NewAuthenticator returns `libratypes.TransactionAuthenticator` with given signature bytes and public key
 func (k *Ed25519PublicKey) NewAuthenticator(signature []byte) libratypes.TransactionAuthenticator {
 	return &libratypes.TransactionAuthenticator__Ed25519{
-		PublicKey: libratypes.Ed25519PublicKey{[]byte(k.pk)},
-		Signature: libratypes.Ed25519Signature{signature},
+		PublicKey: libratypes.Ed25519PublicKey([]byte(k.pk)),
+		Signature: libratypes.Ed25519Signature(signature),
 	}
 }
 

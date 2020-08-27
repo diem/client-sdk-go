@@ -1,5 +1,5 @@
 test:
-	go test ./...
+	go list ./... | grep -v /examples/ | xargs go test
 
 cover:
 	mkdir -p .tmp

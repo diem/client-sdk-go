@@ -22,7 +22,7 @@ func (keys *Keys) Sign(
 		GasUnitPrice:            gasUnitPrice,
 		GasCurrencyCode:         gasCurrencyCode,
 		ExpirationTimestampSecs: expirationTimeSec,
-		ChainId:                 libratypes.ChainId{chainID},
+		ChainId:                 libratypes.ChainId(chainID),
 	}
 
 	signingMsg := append(libratypes.HashPrefix("RawTransaction"), libratypes.ToLCS(&rawTxn)...)

@@ -129,7 +129,7 @@ func (*ScriptCall__CreateDesignatedDealer) isScriptCall() {}
 // Create an account with the ParentVASP role at `address` with authentication key
 // `auth_key_prefix` | `new_account_address` and a 0 balance of type `currency`. If
 // `add_all_currencies` is true, 0 balances for all available currencies in the system will
-// also be added. This can only be invoked by an Association account.
+// also be added. This can only be invoked by an TreasuryCompliance account.
 // `sliding_nonce` is a unique nonce for operation, see sliding_nonce.move for details.
 type ScriptCall__CreateParentVaspAccount struct {
 	CoinType libratypes.TypeTag
@@ -258,10 +258,8 @@ func (*ScriptCall__PublishSharedEd25519PublicKey) isScriptCall() {}
 type ScriptCall__RegisterValidatorConfig struct {
 	ValidatorAccount libratypes.AccountAddress
 	ConsensusPubkey []byte
-	ValidatorNetworkIdentityPubkey []byte
-	ValidatorNetworkAddress []byte
-	FullnodesNetworkIdentityPubkey []byte
-	FullnodesNetworkAddress []byte
+	ValidatorNetworkAddresses []byte
+	FullnodeNetworkAddresses []byte
 }
 
 func (*ScriptCall__RegisterValidatorConfig) isScriptCall() {}
@@ -351,10 +349,8 @@ func (*ScriptCall__RotateSharedEd25519PublicKey) isScriptCall() {}
 type ScriptCall__SetValidatorConfigAndReconfigure struct {
 	ValidatorAccount libratypes.AccountAddress
 	ConsensusPubkey []byte
-	ValidatorNetworkIdentityPubkey []byte
-	ValidatorNetworkAddress []byte
-	FullnodesNetworkIdentityPubkey []byte
-	FullnodesNetworkAddress []byte
+	ValidatorNetworkAddresses []byte
+	FullnodeNetworkAddresses []byte
 }
 
 func (*ScriptCall__SetValidatorConfigAndReconfigure) isScriptCall() {}
@@ -485,7 +481,7 @@ func EncodeScript(call ScriptCall) libratypes.Script {
 	case *ScriptCall__PublishSharedEd25519PublicKey:
 		return EncodePublishSharedEd25519PublicKeyScript(call.PublicKey)
 	case *ScriptCall__RegisterValidatorConfig:
-		return EncodeRegisterValidatorConfigScript(call.ValidatorAccount, call.ConsensusPubkey, call.ValidatorNetworkIdentityPubkey, call.ValidatorNetworkAddress, call.FullnodesNetworkIdentityPubkey, call.FullnodesNetworkAddress)
+		return EncodeRegisterValidatorConfigScript(call.ValidatorAccount, call.ConsensusPubkey, call.ValidatorNetworkAddresses, call.FullnodeNetworkAddresses)
 	case *ScriptCall__RemoveValidatorAndReconfigure:
 		return EncodeRemoveValidatorAndReconfigureScript(call.SlidingNonce, call.ValidatorName, call.ValidatorAddress)
 	case *ScriptCall__RotateAuthenticationKey:
@@ -501,7 +497,7 @@ func EncodeScript(call ScriptCall) libratypes.Script {
 	case *ScriptCall__RotateSharedEd25519PublicKey:
 		return EncodeRotateSharedEd25519PublicKeyScript(call.PublicKey)
 	case *ScriptCall__SetValidatorConfigAndReconfigure:
-		return EncodeSetValidatorConfigAndReconfigureScript(call.ValidatorAccount, call.ConsensusPubkey, call.ValidatorNetworkIdentityPubkey, call.ValidatorNetworkAddress, call.FullnodesNetworkIdentityPubkey, call.FullnodesNetworkAddress)
+		return EncodeSetValidatorConfigAndReconfigureScript(call.ValidatorAccount, call.ConsensusPubkey, call.ValidatorNetworkAddresses, call.FullnodeNetworkAddresses)
 	case *ScriptCall__SetValidatorOperator:
 		return EncodeSetValidatorOperatorScript(call.OperatorName, call.OperatorAccount)
 	case *ScriptCall__SetValidatorOperatorWithNonceAdmin:
@@ -566,7 +562,7 @@ func EncodeAddToScriptAllowListScript(hash []byte, sliding_nonce uint64) libraty
 	return libratypes.Script {
 		Code: append([]byte(nil), add_to_script_allow_list_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U8Vector{hash}, &libratypes.TransactionArgument__U64{sliding_nonce}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U8Vector)(&hash), (*libratypes.TransactionArgument__U64)(&sliding_nonce)},
 	}
 }
 
@@ -578,7 +574,7 @@ func EncodeAddValidatorAndReconfigureScript(sliding_nonce uint64, validator_name
 	return libratypes.Script {
 		Code: append([]byte(nil), add_validator_and_reconfigure_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__U8Vector{validator_name}, &libratypes.TransactionArgument__Address{validator_address}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), (*libratypes.TransactionArgument__U8Vector)(&validator_name), &libratypes.TransactionArgument__Address{validator_address}},
 	}
 }
 
@@ -590,7 +586,7 @@ func EncodeBurnScript(token libratypes.TypeTag, sliding_nonce uint64, preburn_ad
 	return libratypes.Script {
 		Code: append([]byte(nil), burn_code...),
 		TyArgs: []libratypes.TypeTag{token},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__Address{preburn_address}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), &libratypes.TransactionArgument__Address{preburn_address}},
 	}
 }
 
@@ -635,7 +631,7 @@ func EncodeCreateChildVaspAccountScript(coin_type libratypes.TypeTag, child_addr
 	return libratypes.Script {
 		Code: append([]byte(nil), create_child_vasp_account_code...),
 		TyArgs: []libratypes.TypeTag{coin_type},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__Address{child_address}, &libratypes.TransactionArgument__U8Vector{auth_key_prefix}, &libratypes.TransactionArgument__Bool{add_all_currencies}, &libratypes.TransactionArgument__U64{child_initial_balance}},
+		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__Address{child_address}, (*libratypes.TransactionArgument__U8Vector)(&auth_key_prefix), (*libratypes.TransactionArgument__Bool)(&add_all_currencies), (*libratypes.TransactionArgument__U64)(&child_initial_balance)},
 	}
 }
 
@@ -647,20 +643,20 @@ func EncodeCreateDesignatedDealerScript(currency libratypes.TypeTag, sliding_non
 	return libratypes.Script {
 		Code: append([]byte(nil), create_designated_dealer_code...),
 		TyArgs: []libratypes.TypeTag{currency},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__Address{addr}, &libratypes.TransactionArgument__U8Vector{auth_key_prefix}, &libratypes.TransactionArgument__U8Vector{human_name}, &libratypes.TransactionArgument__Bool{add_all_currencies}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), &libratypes.TransactionArgument__Address{addr}, (*libratypes.TransactionArgument__U8Vector)(&auth_key_prefix), (*libratypes.TransactionArgument__U8Vector)(&human_name), (*libratypes.TransactionArgument__Bool)(&add_all_currencies)},
 	}
 }
 
 // Create an account with the ParentVASP role at `address` with authentication key
 // `auth_key_prefix` | `new_account_address` and a 0 balance of type `currency`. If
 // `add_all_currencies` is true, 0 balances for all available currencies in the system will
-// also be added. This can only be invoked by an Association account.
+// also be added. This can only be invoked by an TreasuryCompliance account.
 // `sliding_nonce` is a unique nonce for operation, see sliding_nonce.move for details.
 func EncodeCreateParentVaspAccountScript(coin_type libratypes.TypeTag, sliding_nonce uint64, new_account_address libratypes.AccountAddress, auth_key_prefix []byte, human_name []byte, add_all_currencies bool) libratypes.Script {
 	return libratypes.Script {
 		Code: append([]byte(nil), create_parent_vasp_account_code...),
 		TyArgs: []libratypes.TypeTag{coin_type},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__Address{new_account_address}, &libratypes.TransactionArgument__U8Vector{auth_key_prefix}, &libratypes.TransactionArgument__U8Vector{human_name}, &libratypes.TransactionArgument__Bool{add_all_currencies}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), &libratypes.TransactionArgument__Address{new_account_address}, (*libratypes.TransactionArgument__U8Vector)(&auth_key_prefix), (*libratypes.TransactionArgument__U8Vector)(&human_name), (*libratypes.TransactionArgument__Bool)(&add_all_currencies)},
 	}
 }
 
@@ -682,7 +678,7 @@ func EncodeCreateValidatorAccountScript(sliding_nonce uint64, new_account_addres
 	return libratypes.Script {
 		Code: append([]byte(nil), create_validator_account_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__Address{new_account_address}, &libratypes.TransactionArgument__U8Vector{auth_key_prefix}, &libratypes.TransactionArgument__U8Vector{human_name}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), &libratypes.TransactionArgument__Address{new_account_address}, (*libratypes.TransactionArgument__U8Vector)(&auth_key_prefix), (*libratypes.TransactionArgument__U8Vector)(&human_name)},
 	}
 }
 
@@ -691,7 +687,7 @@ func EncodeCreateValidatorOperatorAccountScript(sliding_nonce uint64, new_accoun
 	return libratypes.Script {
 		Code: append([]byte(nil), create_validator_operator_account_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__Address{new_account_address}, &libratypes.TransactionArgument__U8Vector{auth_key_prefix}, &libratypes.TransactionArgument__U8Vector{human_name}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), &libratypes.TransactionArgument__Address{new_account_address}, (*libratypes.TransactionArgument__U8Vector)(&auth_key_prefix), (*libratypes.TransactionArgument__U8Vector)(&human_name)},
 	}
 }
 
@@ -701,7 +697,7 @@ func EncodeFreezeAccountScript(sliding_nonce uint64, to_freeze_account libratype
 	return libratypes.Script {
 		Code: append([]byte(nil), freeze_account_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__Address{to_freeze_account}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), &libratypes.TransactionArgument__Address{to_freeze_account}},
 	}
 }
 
@@ -711,7 +707,7 @@ func EncodeMintLbrScript(amount_lbr uint64) libratypes.Script {
 	return libratypes.Script {
 		Code: append([]byte(nil), mint_lbr_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{amount_lbr}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&amount_lbr)},
 	}
 }
 
@@ -753,7 +749,7 @@ func EncodePeerToPeerWithMetadataScript(currency libratypes.TypeTag, payee libra
 	return libratypes.Script {
 		Code: append([]byte(nil), peer_to_peer_with_metadata_code...),
 		TyArgs: []libratypes.TypeTag{currency},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__Address{payee}, &libratypes.TransactionArgument__U64{amount}, &libratypes.TransactionArgument__U8Vector{metadata}, &libratypes.TransactionArgument__U8Vector{metadata_signature}},
+		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__Address{payee}, (*libratypes.TransactionArgument__U64)(&amount), (*libratypes.TransactionArgument__U8Vector)(&metadata), (*libratypes.TransactionArgument__U8Vector)(&metadata_signature)},
 	}
 }
 
@@ -763,7 +759,7 @@ func EncodePreburnScript(token libratypes.TypeTag, amount uint64) libratypes.Scr
 	return libratypes.Script {
 		Code: append([]byte(nil), preburn_code...),
 		TyArgs: []libratypes.TypeTag{token},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{amount}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&amount)},
 	}
 }
 
@@ -776,17 +772,17 @@ func EncodePublishSharedEd25519PublicKeyScript(public_key []byte) libratypes.Scr
 	return libratypes.Script {
 		Code: append([]byte(nil), publish_shared_ed25519_public_key_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U8Vector{public_key}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U8Vector)(&public_key)},
 	}
 }
 
 // Set validator's config locally.
 // Does not emit NewEpochEvent, the config is NOT changed in the validator set.
-func EncodeRegisterValidatorConfigScript(validator_account libratypes.AccountAddress, consensus_pubkey []byte, validator_network_identity_pubkey []byte, validator_network_address []byte, fullnodes_network_identity_pubkey []byte, fullnodes_network_address []byte) libratypes.Script {
+func EncodeRegisterValidatorConfigScript(validator_account libratypes.AccountAddress, consensus_pubkey []byte, validator_network_addresses []byte, fullnode_network_addresses []byte) libratypes.Script {
 	return libratypes.Script {
 		Code: append([]byte(nil), register_validator_config_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__Address{validator_account}, &libratypes.TransactionArgument__U8Vector{consensus_pubkey}, &libratypes.TransactionArgument__U8Vector{validator_network_identity_pubkey}, &libratypes.TransactionArgument__U8Vector{validator_network_address}, &libratypes.TransactionArgument__U8Vector{fullnodes_network_identity_pubkey}, &libratypes.TransactionArgument__U8Vector{fullnodes_network_address}},
+		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__Address{validator_account}, (*libratypes.TransactionArgument__U8Vector)(&consensus_pubkey), (*libratypes.TransactionArgument__U8Vector)(&validator_network_addresses), (*libratypes.TransactionArgument__U8Vector)(&fullnode_network_addresses)},
 	}
 }
 
@@ -797,7 +793,7 @@ func EncodeRemoveValidatorAndReconfigureScript(sliding_nonce uint64, validator_n
 	return libratypes.Script {
 		Code: append([]byte(nil), remove_validator_and_reconfigure_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__U8Vector{validator_name}, &libratypes.TransactionArgument__Address{validator_address}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), (*libratypes.TransactionArgument__U8Vector)(&validator_name), &libratypes.TransactionArgument__Address{validator_address}},
 	}
 }
 
@@ -810,7 +806,7 @@ func EncodeRotateAuthenticationKeyScript(new_key []byte) libratypes.Script {
 	return libratypes.Script {
 		Code: append([]byte(nil), rotate_authentication_key_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U8Vector{new_key}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U8Vector)(&new_key)},
 	}
 }
 
@@ -821,7 +817,7 @@ func EncodeRotateAuthenticationKeyWithNonceScript(sliding_nonce uint64, new_key 
 	return libratypes.Script {
 		Code: append([]byte(nil), rotate_authentication_key_with_nonce_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__U8Vector{new_key}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), (*libratypes.TransactionArgument__U8Vector)(&new_key)},
 	}
 }
 
@@ -832,7 +828,7 @@ func EncodeRotateAuthenticationKeyWithNonceAdminScript(sliding_nonce uint64, new
 	return libratypes.Script {
 		Code: append([]byte(nil), rotate_authentication_key_with_nonce_admin_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__U8Vector{new_key}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), (*libratypes.TransactionArgument__U8Vector)(&new_key)},
 	}
 }
 
@@ -848,7 +844,7 @@ func EncodeRotateAuthenticationKeyWithRecoveryAddressScript(recovery_address lib
 	return libratypes.Script {
 		Code: append([]byte(nil), rotate_authentication_key_with_recovery_address_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__Address{recovery_address}, &libratypes.TransactionArgument__Address{to_recover}, &libratypes.TransactionArgument__U8Vector{new_key}},
+		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__Address{recovery_address}, &libratypes.TransactionArgument__Address{to_recover}, (*libratypes.TransactionArgument__U8Vector)(&new_key)},
 	}
 }
 
@@ -859,7 +855,7 @@ func EncodeRotateDualAttestationInfoScript(new_url []byte, new_key []byte) libra
 	return libratypes.Script {
 		Code: append([]byte(nil), rotate_dual_attestation_info_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U8Vector{new_url}, &libratypes.TransactionArgument__U8Vector{new_key}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U8Vector)(&new_url), (*libratypes.TransactionArgument__U8Vector)(&new_key)},
 	}
 }
 
@@ -873,17 +869,17 @@ func EncodeRotateSharedEd25519PublicKeyScript(public_key []byte) libratypes.Scri
 	return libratypes.Script {
 		Code: append([]byte(nil), rotate_shared_ed25519_public_key_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U8Vector{public_key}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U8Vector)(&public_key)},
 	}
 }
 
 // Set validator's config and updates the config in the validator set.
 // NewEpochEvent is emitted.
-func EncodeSetValidatorConfigAndReconfigureScript(validator_account libratypes.AccountAddress, consensus_pubkey []byte, validator_network_identity_pubkey []byte, validator_network_address []byte, fullnodes_network_identity_pubkey []byte, fullnodes_network_address []byte) libratypes.Script {
+func EncodeSetValidatorConfigAndReconfigureScript(validator_account libratypes.AccountAddress, consensus_pubkey []byte, validator_network_addresses []byte, fullnode_network_addresses []byte) libratypes.Script {
 	return libratypes.Script {
 		Code: append([]byte(nil), set_validator_config_and_reconfigure_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__Address{validator_account}, &libratypes.TransactionArgument__U8Vector{consensus_pubkey}, &libratypes.TransactionArgument__U8Vector{validator_network_identity_pubkey}, &libratypes.TransactionArgument__U8Vector{validator_network_address}, &libratypes.TransactionArgument__U8Vector{fullnodes_network_identity_pubkey}, &libratypes.TransactionArgument__U8Vector{fullnodes_network_address}},
+		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__Address{validator_account}, (*libratypes.TransactionArgument__U8Vector)(&consensus_pubkey), (*libratypes.TransactionArgument__U8Vector)(&validator_network_addresses), (*libratypes.TransactionArgument__U8Vector)(&fullnode_network_addresses)},
 	}
 }
 
@@ -892,7 +888,7 @@ func EncodeSetValidatorOperatorScript(operator_name []byte, operator_account lib
 	return libratypes.Script {
 		Code: append([]byte(nil), set_validator_operator_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U8Vector{operator_name}, &libratypes.TransactionArgument__Address{operator_account}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U8Vector)(&operator_name), &libratypes.TransactionArgument__Address{operator_account}},
 	}
 }
 
@@ -903,7 +899,7 @@ func EncodeSetValidatorOperatorWithNonceAdminScript(sliding_nonce uint64, operat
 	return libratypes.Script {
 		Code: append([]byte(nil), set_validator_operator_with_nonce_admin_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__U8Vector{operator_name}, &libratypes.TransactionArgument__Address{operator_account}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), (*libratypes.TransactionArgument__U8Vector)(&operator_name), &libratypes.TransactionArgument__Address{operator_account}},
 	}
 }
 
@@ -915,7 +911,7 @@ func EncodeTieredMintScript(coin_type libratypes.TypeTag, sliding_nonce uint64, 
 	return libratypes.Script {
 		Code: append([]byte(nil), tiered_mint_code...),
 		TyArgs: []libratypes.TypeTag{coin_type},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__Address{designated_dealer_address}, &libratypes.TransactionArgument__U64{mint_amount}, &libratypes.TransactionArgument__U64{tier_index}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), &libratypes.TransactionArgument__Address{designated_dealer_address}, (*libratypes.TransactionArgument__U64)(&mint_amount), (*libratypes.TransactionArgument__U64)(&tier_index)},
 	}
 }
 
@@ -925,7 +921,7 @@ func EncodeUnfreezeAccountScript(sliding_nonce uint64, to_unfreeze_account libra
 	return libratypes.Script {
 		Code: append([]byte(nil), unfreeze_account_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__Address{to_unfreeze_account}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), &libratypes.TransactionArgument__Address{to_unfreeze_account}},
 	}
 }
 
@@ -935,7 +931,7 @@ func EncodeUnmintLbrScript(amount_lbr uint64) libratypes.Script {
 	return libratypes.Script {
 		Code: append([]byte(nil), unmint_lbr_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{amount_lbr}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&amount_lbr)},
 	}
 }
 
@@ -944,7 +940,7 @@ func EncodeUpdateDualAttestationLimitScript(sliding_nonce uint64, new_micro_lbr_
 	return libratypes.Script {
 		Code: append([]byte(nil), update_dual_attestation_limit_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__U64{new_micro_lbr_limit}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), (*libratypes.TransactionArgument__U64)(&new_micro_lbr_limit)},
 	}
 }
 
@@ -954,7 +950,7 @@ func EncodeUpdateExchangeRateScript(currency libratypes.TypeTag, sliding_nonce u
 	return libratypes.Script {
 		Code: append([]byte(nil), update_exchange_rate_code...),
 		TyArgs: []libratypes.TypeTag{currency},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__U64{new_exchange_rate_numerator}, &libratypes.TransactionArgument__U64{new_exchange_rate_denominator}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), (*libratypes.TransactionArgument__U64)(&new_exchange_rate_numerator), (*libratypes.TransactionArgument__U64)(&new_exchange_rate_denominator)},
 	}
 }
 
@@ -964,7 +960,7 @@ func EncodeUpdateLibraVersionScript(sliding_nonce uint64, major uint64) libratyp
 	return libratypes.Script {
 		Code: append([]byte(nil), update_libra_version_code...),
 		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__U64{sliding_nonce}, &libratypes.TransactionArgument__U64{major}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), (*libratypes.TransactionArgument__U64)(&major)},
 	}
 }
 
@@ -973,7 +969,7 @@ func EncodeUpdateMintingAbilityScript(currency libratypes.TypeTag, allow_minting
 	return libratypes.Script {
 		Code: append([]byte(nil), update_minting_ability_code...),
 		TyArgs: []libratypes.TypeTag{currency},
-		Args: []libratypes.TransactionArgument{&libratypes.TransactionArgument__Bool{allow_minting}},
+		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__Bool)(&allow_minting)},
 	}
 }
 
@@ -1354,7 +1350,7 @@ func decode_publish_shared_ed25519_public_key_script(script *libratypes.Script) 
 
 func decode_register_validator_config_script(script *libratypes.Script) (ScriptCall, error) {
 	if len(script.TyArgs) < 0 { return nil, fmt.Errorf("Was expecting 0 type arguments") }
-	if len(script.Args) < 6 { return nil, fmt.Errorf("Was expecting 6 regular arguments") }
+	if len(script.Args) < 4 { return nil, fmt.Errorf("Was expecting 4 regular arguments") }
 	var call ScriptCall__RegisterValidatorConfig
 	if val, err := decode_address_argument(script.Args[0]); err == nil {
 		call.ValidatorAccount = val
@@ -1369,25 +1365,13 @@ func decode_register_validator_config_script(script *libratypes.Script) (ScriptC
 	}
 
 	if val, err := decode_u8vector_argument(script.Args[2]); err == nil {
-		call.ValidatorNetworkIdentityPubkey = val
+		call.ValidatorNetworkAddresses = val
 	} else {
 		return nil, err
 	}
 
 	if val, err := decode_u8vector_argument(script.Args[3]); err == nil {
-		call.ValidatorNetworkAddress = val
-	} else {
-		return nil, err
-	}
-
-	if val, err := decode_u8vector_argument(script.Args[4]); err == nil {
-		call.FullnodesNetworkIdentityPubkey = val
-	} else {
-		return nil, err
-	}
-
-	if val, err := decode_u8vector_argument(script.Args[5]); err == nil {
-		call.FullnodesNetworkAddress = val
+		call.FullnodeNetworkAddresses = val
 	} else {
 		return nil, err
 	}
@@ -1530,7 +1514,7 @@ func decode_rotate_shared_ed25519_public_key_script(script *libratypes.Script) (
 
 func decode_set_validator_config_and_reconfigure_script(script *libratypes.Script) (ScriptCall, error) {
 	if len(script.TyArgs) < 0 { return nil, fmt.Errorf("Was expecting 0 type arguments") }
-	if len(script.Args) < 6 { return nil, fmt.Errorf("Was expecting 6 regular arguments") }
+	if len(script.Args) < 4 { return nil, fmt.Errorf("Was expecting 4 regular arguments") }
 	var call ScriptCall__SetValidatorConfigAndReconfigure
 	if val, err := decode_address_argument(script.Args[0]); err == nil {
 		call.ValidatorAccount = val
@@ -1545,25 +1529,13 @@ func decode_set_validator_config_and_reconfigure_script(script *libratypes.Scrip
 	}
 
 	if val, err := decode_u8vector_argument(script.Args[2]); err == nil {
-		call.ValidatorNetworkIdentityPubkey = val
+		call.ValidatorNetworkAddresses = val
 	} else {
 		return nil, err
 	}
 
 	if val, err := decode_u8vector_argument(script.Args[3]); err == nil {
-		call.ValidatorNetworkAddress = val
-	} else {
-		return nil, err
-	}
-
-	if val, err := decode_u8vector_argument(script.Args[4]); err == nil {
-		call.FullnodesNetworkIdentityPubkey = val
-	} else {
-		return nil, err
-	}
-
-	if val, err := decode_u8vector_argument(script.Args[5]); err == nil {
-		call.FullnodesNetworkAddress = val
+		call.FullnodeNetworkAddresses = val
 	} else {
 		return nil, err
 	}
@@ -1793,7 +1765,7 @@ var preburn_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 7, 1, 0, 2, 2, 2, 4, 3,
 
 var publish_shared_ed25519_public_key_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 5, 1, 0, 2, 3, 2, 5, 5, 7, 6, 7, 13, 31, 8, 44, 16, 0, 0, 0, 1, 0, 1, 0, 2, 6, 12, 10, 2, 0, 22, 83, 104, 97, 114, 101, 100, 69, 100, 50, 53, 53, 49, 57, 80, 117, 98, 108, 105, 99, 75, 101, 121, 7, 112, 117, 98, 108, 105, 115, 104, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 4, 11, 0, 11, 1, 17, 0, 2};
 
-var register_validator_config_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 5, 1, 0, 2, 3, 2, 5, 5, 7, 15, 7, 22, 27, 8, 49, 16, 0, 0, 0, 1, 0, 1, 0, 7, 6, 12, 5, 10, 2, 10, 2, 10, 2, 10, 2, 10, 2, 0, 15, 86, 97, 108, 105, 100, 97, 116, 111, 114, 67, 111, 110, 102, 105, 103, 10, 115, 101, 116, 95, 99, 111, 110, 102, 105, 103, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 9, 11, 0, 10, 1, 11, 2, 11, 3, 11, 4, 11, 5, 11, 6, 17, 0, 2};
+var register_validator_config_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 5, 1, 0, 2, 3, 2, 5, 5, 7, 11, 7, 18, 27, 8, 45, 16, 0, 0, 0, 1, 0, 1, 0, 5, 6, 12, 5, 10, 2, 10, 2, 10, 2, 0, 15, 86, 97, 108, 105, 100, 97, 116, 111, 114, 67, 111, 110, 102, 105, 103, 10, 115, 101, 116, 95, 99, 111, 110, 102, 105, 103, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 7, 11, 0, 10, 1, 11, 2, 11, 3, 11, 4, 17, 0, 2};
 
 var remove_validator_and_reconfigure_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 5, 1, 0, 6, 3, 6, 15, 5, 21, 24, 7, 45, 95, 8, 140, 1, 16, 0, 0, 0, 1, 0, 2, 1, 3, 0, 1, 0, 2, 4, 2, 3, 0, 0, 5, 4, 1, 0, 2, 6, 12, 3, 0, 1, 5, 1, 10, 2, 2, 6, 12, 5, 4, 6, 12, 3, 10, 2, 5, 2, 1, 3, 11, 76, 105, 98, 114, 97, 83, 121, 115, 116, 101, 109, 12, 83, 108, 105, 100, 105, 110, 103, 78, 111, 110, 99, 101, 15, 86, 97, 108, 105, 100, 97, 116, 111, 114, 67, 111, 110, 102, 105, 103, 21, 114, 101, 99, 111, 114, 100, 95, 110, 111, 110, 99, 101, 95, 111, 114, 95, 97, 98, 111, 114, 116, 14, 103, 101, 116, 95, 104, 117, 109, 97, 110, 95, 110, 97, 109, 101, 16, 114, 101, 109, 111, 118, 101, 95, 118, 97, 108, 105, 100, 97, 116, 111, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 5, 6, 18, 10, 0, 10, 1, 17, 0, 10, 3, 17, 1, 11, 2, 33, 12, 4, 11, 4, 3, 14, 11, 0, 1, 6, 0, 0, 0, 0, 0, 0, 0, 0, 39, 11, 0, 10, 3, 17, 2, 2};
 
@@ -1809,7 +1781,7 @@ var rotate_dual_attestation_info_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 5,
 
 var rotate_shared_ed25519_public_key_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 5, 1, 0, 2, 3, 2, 5, 5, 7, 6, 7, 13, 34, 8, 47, 16, 0, 0, 0, 1, 0, 1, 0, 2, 6, 12, 10, 2, 0, 22, 83, 104, 97, 114, 101, 100, 69, 100, 50, 53, 53, 49, 57, 80, 117, 98, 108, 105, 99, 75, 101, 121, 10, 114, 111, 116, 97, 116, 101, 95, 107, 101, 121, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 4, 11, 0, 11, 1, 17, 0, 2};
 
-var set_validator_config_and_reconfigure_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 5, 1, 0, 4, 3, 4, 10, 5, 14, 19, 7, 33, 69, 8, 102, 16, 0, 0, 0, 1, 1, 2, 0, 1, 0, 0, 3, 2, 1, 0, 7, 6, 12, 5, 10, 2, 10, 2, 10, 2, 10, 2, 10, 2, 0, 2, 6, 12, 5, 11, 76, 105, 98, 114, 97, 83, 121, 115, 116, 101, 109, 15, 86, 97, 108, 105, 100, 97, 116, 111, 114, 67, 111, 110, 102, 105, 103, 10, 115, 101, 116, 95, 99, 111, 110, 102, 105, 103, 29, 117, 112, 100, 97, 116, 101, 95, 99, 111, 110, 102, 105, 103, 95, 97, 110, 100, 95, 114, 101, 99, 111, 110, 102, 105, 103, 117, 114, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 12, 10, 0, 10, 1, 11, 2, 11, 3, 11, 4, 11, 5, 11, 6, 17, 0, 11, 0, 10, 1, 17, 1, 2};
+var set_validator_config_and_reconfigure_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 5, 1, 0, 4, 3, 4, 10, 5, 14, 15, 7, 29, 69, 8, 98, 16, 0, 0, 0, 1, 1, 2, 0, 1, 0, 0, 3, 2, 1, 0, 5, 6, 12, 5, 10, 2, 10, 2, 10, 2, 0, 2, 6, 12, 5, 11, 76, 105, 98, 114, 97, 83, 121, 115, 116, 101, 109, 15, 86, 97, 108, 105, 100, 97, 116, 111, 114, 67, 111, 110, 102, 105, 103, 10, 115, 101, 116, 95, 99, 111, 110, 102, 105, 103, 29, 117, 112, 100, 97, 116, 101, 95, 99, 111, 110, 102, 105, 103, 95, 97, 110, 100, 95, 114, 101, 99, 111, 110, 102, 105, 103, 117, 114, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 10, 10, 0, 10, 1, 11, 2, 11, 3, 11, 4, 17, 0, 11, 0, 10, 1, 17, 1, 2};
 
 var set_validator_operator_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 5, 1, 0, 4, 3, 4, 10, 5, 14, 19, 7, 33, 68, 8, 101, 16, 0, 0, 0, 1, 1, 2, 0, 1, 0, 0, 3, 2, 3, 0, 1, 5, 1, 10, 2, 2, 6, 12, 5, 0, 3, 6, 12, 10, 2, 5, 2, 1, 3, 15, 86, 97, 108, 105, 100, 97, 116, 111, 114, 67, 111, 110, 102, 105, 103, 23, 86, 97, 108, 105, 100, 97, 116, 111, 114, 79, 112, 101, 114, 97, 116, 111, 114, 67, 111, 110, 102, 105, 103, 14, 103, 101, 116, 95, 104, 117, 109, 97, 110, 95, 110, 97, 109, 101, 12, 115, 101, 116, 95, 111, 112, 101, 114, 97, 116, 111, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 4, 5, 15, 10, 2, 17, 0, 11, 1, 33, 12, 3, 11, 3, 3, 11, 11, 0, 1, 6, 0, 0, 0, 0, 0, 0, 0, 0, 39, 11, 0, 10, 2, 17, 1, 2};
 
@@ -1870,7 +1842,7 @@ var script_decoder_map = map[string]func(*libratypes.Script) (ScriptCall, error)
 
 func decode_bool_argument(arg libratypes.TransactionArgument) (value bool, err error) {
 	if arg, ok := arg.(*libratypes.TransactionArgument__Bool); ok {
-		value = arg.Value
+		value = bool(*arg)
 	} else {
 		err = fmt.Errorf("Was expecting a Bool argument")
 	}
@@ -1880,7 +1852,7 @@ func decode_bool_argument(arg libratypes.TransactionArgument) (value bool, err e
 
 func decode_u64_argument(arg libratypes.TransactionArgument) (value uint64, err error) {
 	if arg, ok := arg.(*libratypes.TransactionArgument__U64); ok {
-		value = arg.Value
+		value = uint64(*arg)
 	} else {
 		err = fmt.Errorf("Was expecting a U64 argument")
 	}
@@ -1900,7 +1872,7 @@ func decode_address_argument(arg libratypes.TransactionArgument) (value libratyp
 
 func decode_u8vector_argument(arg libratypes.TransactionArgument) (value []byte, err error) {
 	if arg, ok := arg.(*libratypes.TransactionArgument__U8Vector); ok {
-		value = arg.Value
+		value = []byte(*arg)
 	} else {
 		err = fmt.Errorf("Was expecting a U8Vector argument")
 	}

@@ -77,7 +77,7 @@ func TestDecodeInvalidAccountIdentifierString(t *testing.T) {
 	})
 	t.Run("invalid account address length", func(t *testing.T) {
 		data := make([]int, libratypes.AccountAddressLength)
-		for i, b := range address.Value {
+		for i, b := range address {
 			data[i] = int(b)
 		}
 

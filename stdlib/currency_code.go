@@ -17,11 +17,9 @@ var codeAddress = [16]uint8{
 func CurrencyCode(code string) libratypes.TypeTag {
 	return &libratypes.TypeTag__Struct{
 		Value: libratypes.StructTag{
-			Address: libratypes.AccountAddress{
-				Value: codeAddress,
-			},
-			Module:     libratypes.Identifier{Value: code},
-			Name:       libratypes.Identifier{Value: code},
+			Address:    codeAddress,
+			Module:     libratypes.Identifier(code),
+			Name:       libratypes.Identifier(code),
 			TypeParams: []libratypes.TypeTag{},
 		},
 	}

@@ -87,7 +87,7 @@ func (ai *Account) Encode() (string, error) {
 		return "", errors.New("invalid sub address")
 	}
 	data := make([]byte, 0, AccountAddressLength+SubAddressLength)
-	data = append(data, ai.AccountAddress.Value[:]...)
+	data = append(data, ai.AccountAddress[:]...)
 	data = append(data, ai.SubAddress...)
 
 	return bech32.SegwitAddrEncode(string(ai.Prefix), int(ai.Version), bytes2ints(data))

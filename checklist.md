@@ -7,7 +7,8 @@
     - jsonrpc: jsonrpc client
     - librakeys: keys utils, generate public & private keys for testing, create auth key and account address.
     - librasigner: sign transaction logic
-    - libraid: Libra Account Identifier and Intent URL encoding & decodeing
+    - txnmetadata: utils for creating peer to peer transaction metadata. (LIP-4)
+    - libraid: encoding & decodeing Libra Account Identifier and Intent URL. (LIP-5)
     - stdlib: move stdlib script utils.
     - testnet: testnet utils, should include FaucetService for handling testnet mint.
     - libratypes: Libra onchain data structure types.
@@ -34,7 +35,7 @@
 - [x] Non-custodial to custodial transaction
 - [x] Custodial to non-custodial transaction
 - [x] Custodial to Custodial transaction
-- [ ] Refund
+- [x] Refund
 
 # [LIP-5][2] support
 
@@ -74,7 +75,7 @@ See [doc][5] for above concepts.
 # Examples
 
 - [x] [p2p transfer examples](https://github.com/libra/lip/blob/master/lips/lip-4.md#transaction-examples)
-- [ ] refund p2p transfer example
+- [x] refund p2p transfer example
 - [x] create childVASP example
 - [x] Intent identifier encoding, decoding example
 

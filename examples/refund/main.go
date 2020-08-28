@@ -19,9 +19,7 @@ func main() {
 	receiver := testnet.GenAccount()
 	amount := uint64(1000)
 
-	fmt.Println("*** before transfer ***")
-	printAccountBalance("receiver balance:", receiver)
-	printAccountBalance("sender balance:", sender)
+	exampleutils.PrintAccountsBalances("before transafer", sender, receiver)
 	txnVersion := exampleutils.SubmitAndWait(
 		"p2p transfer",
 		sender,
@@ -34,9 +32,7 @@ func main() {
 		),
 	)
 
-	fmt.Println("*** after transfer ***")
-	printAccountBalance("receiver balance:", receiver)
-	printAccountBalance("sender balance:", sender)
+	exampleutils.PrintAccountsBalances("after transfer, before refund", sender, receiver)
 	// refund start
 RetryGetTransactions:
 	// find transaction back with events info
@@ -71,19 +67,7 @@ RetryGetTransactions:
 			nil, // no metadata signature for GeneralMetadata
 		),
 	)
-	fmt.Println("*** after refund ***")
-	printAccountBalance("receiver balance:", receiver)
-	printAccountBalance("sender balance:", sender)
-}
-
-func printAccountBalance(name string, account *librakeys.Keys) {
-RetryGetAccount:
-	ret, err := exampleutils.Client.GetAccount(account.AccountAddress().Hex())
-	if _, ok := err.(*libraclient.StaleResponseError); ok {
-		// retry to hit another server if got stale response
-		goto RetryGetAccount
-	}
-	fmt.Println(name, ret.Balances[0])
+	exampleutils.PrintAccountsBalances("after transfer", sender, receiver)
 }
 
 func createCustodialAccount() (*librakeys.Keys, libratypes.SubAddress) {

@@ -23,6 +23,8 @@ func main() {
 	custodialAccountParentVasp, custodialAccountChildVasp, custodialAccountSubAddress := createCustodialAccount()
 	amount := uint64(10000)
 
+	// Non custodial to non custodial has no requirement on metadata
+	exampleutils.PrintAccountsBalances("before transfer", nonCustodialAccount, nonCustodialAccount2)
 	exampleutils.SubmitAndWait(
 		"non custodial account to non custodial account transaction",
 		nonCustodialAccount,
@@ -34,7 +36,11 @@ func main() {
 			nil,
 		),
 	)
+	exampleutils.PrintAccountsBalances("after transfer", nonCustodialAccount, nonCustodialAccount2)
 
+	// Non custodial account to custodial account requires target custodial account subaddress,
+	// hence we need construct a general metadata includes to_subaddress
+	exampleutils.PrintAccountsBalances("before transfer", nonCustodialAccount, custodialAccountChildVasp)
 	exampleutils.SubmitAndWait(
 		"non custodial account to custodial account transaction",
 		nonCustodialAccount,
@@ -46,7 +52,11 @@ func main() {
 			nil, // no metadata signature for GeneralMetadata
 		),
 	)
+	exampleutils.PrintAccountsBalances("after transfer", nonCustodialAccount, custodialAccountChildVasp)
 
+	// Custodial account to non-custodial account requires sender's custodial account subaddress,
+	// hence we need construct a general metadata includes from_subaddress
+	exampleutils.PrintAccountsBalances("before transfer", custodialAccountChildVasp, nonCustodialAccount)
 	exampleutils.SubmitAndWait(
 		"custodial account to non custodial account transaction",
 		custodialAccountChildVasp,
@@ -58,8 +68,34 @@ func main() {
 			nil, // no metadata signature for GeneralMetadata
 		),
 	)
+	exampleutils.PrintAccountsBalances("after transfer", custodialAccountChildVasp, nonCustodialAccount)
 
-	// custodial account to custodial account transaction
+	// Custodial account to custodial account transaction has 2 cases
+
+	// setup sender custodial account
+	_, senderCustodialAccountChildVasp, senderCustodialAccountSubAddress := createCustodialAccount()
+
+	// Case 1: For transactions under the travel rule threshold, transaction metadata inclusive of both to_subaddress and from_subaddress should be composed.
+	exampleutils.PrintAccountsBalances("before transfer",
+		senderCustodialAccountChildVasp, custodialAccountChildVasp)
+	exampleutils.SubmitAndWait(
+		"custodial account to custodial account transaction under travel rule threshold",
+		senderCustodialAccountChildVasp,
+		stdlib.EncodePeerToPeerWithMetadataScript(
+			libratypes.Currency(currency),
+			custodialAccountChildVasp.AccountAddress(),
+			amount,
+			txnmetadata.NewGeneralMetadataWithFromToSubaddresses(
+				senderCustodialAccountSubAddress,
+				custodialAccountSubAddress,
+			),
+			nil, // no metadata signature for GeneralMetadata
+		),
+	)
+	exampleutils.PrintAccountsBalances("after transfer",
+		senderCustodialAccountChildVasp, custodialAccountChildVasp)
+
+	// Case 2: For transactions over the travel rule limit, custodial to custodial transactions must exchange travel rule compliance data off-chain
 
 	// setup receiver compliance public & private keys
 	compliancePublicKey, compliancePrivateKey, _ := ed25519.GenerateKey(nil)
@@ -71,9 +107,6 @@ func main() {
 			[]byte(compliancePublicKey),
 		),
 	)
-
-	// setup sender account
-	_, senderCustodialAccountChildVasp, _ := createCustodialAccount()
 
 	// sender & receiver communicate by off chain APIs
 	offChainReferenceId := "32323abc"
@@ -89,6 +122,8 @@ func main() {
 	// https://github.com/libra/lip/blob/master/lips/lip-1.mdx#recipient-signature
 	recipientSignature := ed25519.Sign(compliancePrivateKey, sigMsg)
 
+	exampleutils.PrintAccountsBalances("before transfer",
+		senderCustodialAccountChildVasp, custodialAccountChildVasp)
 	exampleutils.SubmitAndWait(
 		"custodial account to custodial account transaction",
 		senderCustodialAccountChildVasp,
@@ -100,6 +135,8 @@ func main() {
 			recipientSignature,
 		),
 	)
+	exampleutils.PrintAccountsBalances("after transfer",
+		senderCustodialAccountChildVasp, custodialAccountChildVasp)
 }
 
 func createCustodialAccount() (*librakeys.Keys, *librakeys.Keys, libratypes.SubAddress) {

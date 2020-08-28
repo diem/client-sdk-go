@@ -44,14 +44,7 @@ func NewTravelRuleMetadata(
 // This is used for peer to peer transfer from non-custodial account to custodial account.
 func NewGeneralMetadataToSubAddress(toSubAddress libratypes.SubAddress) []byte {
 	to := toSubAddress[:]
-	metadata := libratypes.Metadata__GeneralMetadata{
-		Value: &libratypes.GeneralMetadata__GeneralMetadataVersion0{
-			Value: libratypes.GeneralMetadataV0{
-				ToSubaddress: &to,
-			},
-		},
-	}
-	return libratypes.ToLCS(&metadata)
+	return newGeneralMetadata(nil, &to)
 }
 
 // NewGeneralMetadataFromSubAddress creates metadata for creating peer to peer
@@ -59,10 +52,26 @@ func NewGeneralMetadataToSubAddress(toSubAddress libratypes.SubAddress) []byte {
 // This is used for peer to peer transfer from custodial account to non-custodial account.
 func NewGeneralMetadataFromSubAddress(fromSubAddress libratypes.SubAddress) []byte {
 	from := fromSubAddress[:]
+	return newGeneralMetadata(&from, nil)
+}
+
+// NewGeneralMetadataWithFromToSubaddresses creates metadata for creating peer to peer
+// transaction script with fromSubaddress and toSubaddress.
+// Use this function to create metadata with from and to subaddresses for peer to peer transfer
+// from custodial account to custodial account under travel rule threshold.
+func NewGeneralMetadataWithFromToSubaddresses(fromSubAddress libratypes.SubAddress, toSubAddress libratypes.SubAddress) []byte {
+	from := fromSubAddress[:]
+	to := toSubAddress[:]
+	return newGeneralMetadata(&from, &to)
+}
+
+// newGeneralMetadata is internal methods for constructing with *[]byte as from and to subaddress type
+func newGeneralMetadata(fromSubAddress *[]byte, toSubAddress *[]byte) []byte {
 	metadata := libratypes.Metadata__GeneralMetadata{
 		Value: &libratypes.GeneralMetadata__GeneralMetadataVersion0{
 			Value: libratypes.GeneralMetadataV0{
-				FromSubaddress: &from,
+				FromSubaddress: fromSubAddress,
+				ToSubaddress:   toSubAddress,
 			},
 		},
 	}

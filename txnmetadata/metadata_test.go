@@ -36,6 +36,13 @@ func TestNewGeneralMetadataFromSubAddress(t *testing.T) {
 	assert.Equal(t, "01000001088f8b82153010a1bd00", hex.EncodeToString(ret))
 }
 
+func TestNewGeneralMetadataWithFromToSubaddresses(t *testing.T) {
+	subAddress1, _ := libratypes.MakeSubAddress("8f8b82153010a1bd")
+	subAddress2, _ := libratypes.MakeSubAddress("111111153010a111")
+	ret := txnmetadata.NewGeneralMetadataWithFromToSubaddresses(subAddress1, subAddress2)
+	assert.Equal(t, "01000108111111153010a11101088f8b82153010a1bd00", hex.EncodeToString(ret))
+}
+
 func TestNewNonCustodyToCustodyRefundMetadataFromEvent(t *testing.T) {
 	subAddress, _ := libratypes.MakeSubAddress("8f8b82153010a1bd")
 	bytes := txnmetadata.NewGeneralMetadataFromSubAddress(subAddress)

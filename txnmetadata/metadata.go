@@ -59,7 +59,7 @@ func NewGeneralMetadataFromSubAddress(fromSubAddress libratypes.SubAddress) []by
 // transaction script with fromSubaddress and toSubaddress.
 // Use this function to create metadata with from and to subaddresses for peer to peer transfer
 // from custodial account to custodial account under travel rule threshold.
-func NewGeneralMetadataWithFromToSubaddresses(fromSubAddress libratypes.SubAddress, toSubAddress libratypes.SubAddress) []byte {
+func NewGeneralMetadataWithFromToSubAddresses(fromSubAddress libratypes.SubAddress, toSubAddress libratypes.SubAddress) []byte {
 	from := fromSubAddress[:]
 	to := toSubAddress[:]
 	return newGeneralMetadata(&from, &to)
@@ -94,13 +94,16 @@ func FindRefundReferenceEventFromTransaction(txn *libraclient.Transaction, recei
 	return nil
 }
 
-// NewNonCustodyToCustodyRefundMetadataFromEvent creates GeneralMetadata for refund
-// given event.
-// The given event must be custody to non-custody payment event with
-// `libratypes.Metadata__GeneralMetadata` includes `FromSubaddress` as metadata.
-func NewNonCustodyToCustodyRefundMetadataFromEvent(event *libraclient.Event) ([]byte, error) {
+// DeserializeMetadata decodes given event's metadata.
+// Returns error if given event is nil
+// Returns nil without error if given event has no metadata
+// Returns error if deserialization failed.
+func DeserializeMetadata(event *libraclient.Event) (libratypes.Metadata, error) {
 	if event == nil {
 		return nil, errors.New("must provide refund reference event")
+	}
+	if event.Data.Metadata == "" {
+		return nil, nil
 	}
 	bytes, err := hex.DecodeString(event.Data.Metadata)
 	if err != nil {
@@ -108,43 +111,33 @@ func NewNonCustodyToCustodyRefundMetadataFromEvent(event *libraclient.Event) ([]
 	}
 	metadata, err := libratypes.DeserializeMetadata(lcs.NewDeserializer(bytes))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can't deserialize metadata: %v", err)
 	}
-	gm, ok := metadata.(*libratypes.Metadata__GeneralMetadata)
-	if !ok {
-		return nil, fmt.Errorf("unexpected metadata: %v", metadata)
+	return metadata, nil
+}
+
+// NewRefundMetadataFromEventMetadata creates GeneralMetadata for refunding a receivedpayment event.
+// Returns error if given `gm` is nil.
+// Returns InvalidGeneralMetadataError if given event metadata is not
+// `*libratypes.GeneralMetadata__GeneralMetadataVersion0`.
+//
+// Note: for a receivedpayment event with TravelRuleMetadata, refund transaction is same with transfer money
+// transaction, no need refund metadata constructed like this function does.
+func NewRefundMetadataFromEventMetadata(eventSequenceNumber uint64, gm *libratypes.Metadata__GeneralMetadata) ([]byte, error) {
+	if gm == nil {
+		return nil, errors.New("must provide refund event general metadata")
 	}
 	gmv0, ok := gm.Value.(*libratypes.GeneralMetadata__GeneralMetadataVersion0)
 	if !ok {
-		return nil, fmt.Errorf("unexpected metadata: %v", metadata)
+		return nil, fmt.Errorf("can't handle GeneralMetadata: %T", gm.Value)
 	}
-
-	if gmv0.Value.FromSubaddress == nil {
-		return nil, errors.New("event metadata FromSubaddress is not set")
-	}
-	subaddress, err := libratypes.MakeSubAddressFromBytes(*gmv0.Value.FromSubaddress)
-	if err != nil {
-		return nil, err
-	}
-	return NewNonCustodyToCustodyRefundMetadata(subaddress, event.SequenceNumber), nil
-}
-
-// NewNonCustodyToCustodyRefundMetadata creates metadata
-// for creating refund peer to peer transaction script.
-// Only required for refund a transaction that is transfer from custodial account to
-// non-custodial account.
-func NewNonCustodyToCustodyRefundMetadata(
-	toSubAddress libratypes.SubAddress,
-	referencedEventSequenceNumber uint64,
-) []byte {
-	to := toSubAddress[:]
-	metadata := libratypes.Metadata__GeneralMetadata{
+	return libratypes.ToLCS(&libratypes.Metadata__GeneralMetadata{
 		Value: &libratypes.GeneralMetadata__GeneralMetadataVersion0{
 			Value: libratypes.GeneralMetadataV0{
-				ToSubaddress:    &to,
-				ReferencedEvent: &referencedEventSequenceNumber,
+				FromSubaddress:  gmv0.Value.ToSubaddress,
+				ToSubaddress:    gmv0.Value.FromSubaddress,
+				ReferencedEvent: &eventSequenceNumber,
 			},
 		},
-	}
-	return libratypes.ToLCS(&metadata)
+	}), nil
 }

@@ -15,9 +15,9 @@ func TestGenSubAddress(t *testing.T) {
 	address, err := libratypes.GenSubAddress()
 	assert.NoError(t, err)
 	assert.Len(t, address, 8)
-	// for i := 0; i < 10000; i++ {
-	// 	require.NotEqual(t, address, libratypes.MustGenSubAddress())
-	// }
+	for i := 0; i < 10000; i++ {
+		require.NotEqual(t, address, libratypes.MustGenSubAddress())
+	}
 }
 
 func TestNewSubAddressErrorsForInvalidSubAddress(t *testing.T) {

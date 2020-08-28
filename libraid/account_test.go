@@ -4,7 +4,6 @@
 package libraid_test
 
 import (
-	"encoding/hex"
 	"testing"
 
 	"github.com/libra/libra-client-sdk-go/libraid"
@@ -14,18 +13,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGenSubAddress(t *testing.T) {
-	address, err := libraid.GenSubAddress()
-	assert.NoError(t, err)
-	assert.Len(t, address, 8)
-	for i := 0; i < 10000; i++ {
-		require.NotEqual(t, address, libraid.MustGenSubAddress())
-	}
-}
-
 func TestEncodeDecodeAccountIdentifier(t *testing.T) {
-	address := "f72589b71ff4f8d139674a3f7369c69b"
-	subAddress := libraid.MustNewSubAddressFromHex("cf64428bdeb62af2")
+	address, _ := libratypes.MakeAccountAddress("f72589b71ff4f8d139674a3f7369c69b")
+	subAddress, _ := libratypes.MakeSubAddress("cf64428bdeb62af2")
 
 	ret, err := libraid.EncodeAccount(libraid.MainnetPrefix, address, subAddress)
 	require.NoError(t, err)
@@ -33,41 +23,30 @@ func TestEncodeDecodeAccountIdentifier(t *testing.T) {
 
 	id, err := libraid.DecodeToAccount(libraid.MainnetPrefix, ret)
 	require.NoError(t, err)
-	assert.Equal(t, "f72589b71ff4f8d139674a3f7369c69b", id.AccountAddress)
+	assert.Equal(t, "f72589b71ff4f8d139674a3f7369c69b", id.AccountAddress.Hex())
 	assert.Equal(t, "cf64428bdeb62af2", id.SubAddress.Hex())
 	assert.Equal(t, byte(1), id.Version)
 	assert.Equal(t, libraid.MainnetPrefix, id.Prefix)
 }
 
 func TestEncodeDecodeAccountIdentifierWithoutSubAddress(t *testing.T) {
-	address := "f72589b71ff4f8d139674a3f7369c69b"
+	address, _ := libratypes.MakeAccountAddress("f72589b71ff4f8d139674a3f7369c69b")
 
-	ret, err := libraid.EncodeAccount(libraid.MainnetPrefix, address, nil)
+	ret, err := libraid.EncodeAccount(libraid.MainnetPrefix, address, libratypes.EmptySubAddress)
 	require.NoError(t, err)
 	assert.Equal(t, "lbr1p7ujcndcl7nudzwt8fglhx6wxnvqqqqqqqqqqqqqflf8ma", string(ret))
 
 	id, err := libraid.DecodeToAccount(libraid.MainnetPrefix, ret)
 	require.NoError(t, err)
-	assert.Equal(t, "f72589b71ff4f8d139674a3f7369c69b", id.AccountAddress)
+	assert.Equal(t, "f72589b71ff4f8d139674a3f7369c69b", id.AccountAddress.Hex())
 	assert.Equal(t, "0000000000000000", id.SubAddress.Hex())
 	assert.Equal(t, byte(1), id.Version)
 	assert.Equal(t, libraid.MainnetPrefix, id.Prefix)
 }
 
-func TestEncodeShouldValidateAddressLen(t *testing.T) {
-	t.Run("invalid sub account address", func(t *testing.T) {
-		address := "f72589b71ff4f8d139674a3f7369c69b"
-		subAddress := libraid.SubAddress([]byte{1})
-
-		ret, err := libraid.EncodeAccount(libraid.MainnetPrefix, address, subAddress)
-		require.Error(t, err)
-		assert.Equal(t, "", ret)
-	})
-}
-
 func TestDecodeInvalidAccountIdentifierString(t *testing.T) {
-	address := "f72589b71ff4f8d139674a3f7369c69b"
-	subAddress := libraid.MustNewSubAddressFromHex("cf64428bdeb62af2")
+	address, _ := libratypes.MakeAccountAddress("f72589b71ff4f8d139674a3f7369c69b")
+	subAddress, _ := libratypes.MakeSubAddress("cf64428bdeb62af2")
 	t.Run("invalid checksum", func(t *testing.T) {
 		ret, err := libraid.EncodeAccount(libraid.MainnetPrefix, address, subAddress)
 		require.NoError(t, err)
@@ -78,8 +57,7 @@ func TestDecodeInvalidAccountIdentifierString(t *testing.T) {
 	})
 	t.Run("invalid account address length", func(t *testing.T) {
 		data := make([]int, libratypes.AccountAddressLength)
-		addressBytes, _ := hex.DecodeString(address)
-		for i, b := range addressBytes {
+		for i, b := range address {
 			data[i] = int(b)
 		}
 
@@ -90,36 +68,5 @@ func TestDecodeInvalidAccountIdentifierString(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, id)
 		assert.Contains(t, err.Error(), "invalid account identifier")
-	})
-}
-
-func TestMustNewSubAddressFromHexPanicsForInvalidSubAddress(t *testing.T) {
-	t.Run("invalid hex-encoded string", func(t *testing.T) {
-		defer func() {
-			if r := recover(); r != nil {
-				return
-			}
-			assert.Fail(t, "should panic, but not")
-		}()
-		libraid.MustNewSubAddressFromHex("invalid")
-	})
-	t.Run("invalid bytes length: too long", func(t *testing.T) {
-		defer func() {
-			if r := recover(); r != nil {
-				return
-			}
-			assert.Fail(t, "should panic, but not")
-		}()
-		libraid.MustNewSubAddressFromHex("f72589b71ff4f8d139674a3f7369c69b")
-	})
-
-	t.Run("invalid bytes length: too short", func(t *testing.T) {
-		defer func() {
-			if r := recover(); r != nil {
-				return
-			}
-			assert.Fail(t, "should panic, but not")
-		}()
-		libraid.MustNewSubAddressFromHex("f72589b")
 	})
 }

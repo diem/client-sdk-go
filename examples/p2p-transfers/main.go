@@ -5,29 +5,25 @@ package main
 
 import (
 	"crypto/ed25519"
-	"fmt"
-	"time"
 
-	"github.com/libra/libra-client-sdk-go/libraid"
+	"github.com/libra/libra-client-sdk-go/examples/exampleutils"
 	"github.com/libra/libra-client-sdk-go/librakeys"
-	"github.com/libra/libra-client-sdk-go/librasigner"
 	"github.com/libra/libra-client-sdk-go/libratypes"
 	"github.com/libra/libra-client-sdk-go/stdlib"
 	"github.com/libra/libra-client-sdk-go/testnet"
 	"github.com/libra/libra-client-sdk-go/txnmetadata"
-	"gopkg.in/yaml.v3"
 )
 
 const currency = "LBR"
 
 func main() {
-	nonCustodialAccount := createNonCustodialAccount()
-	nonCustodialAccount2 := createNonCustodialAccount()
+	nonCustodialAccount := testnet.GenAccount()
+	nonCustodialAccount2 := testnet.GenAccount()
 
 	custodialAccountParentVasp, custodialAccountChildVasp, custodialAccountSubAddress := createCustodialAccount()
 	amount := uint64(10000)
 
-	newTransactionSubmitAndWait(
+	exampleutils.SubmitAndWait(
 		"non custodial account to non custodial account transaction",
 		nonCustodialAccount,
 		stdlib.EncodePeerToPeerWithMetadataScript(
@@ -39,7 +35,7 @@ func main() {
 		),
 	)
 
-	newTransactionSubmitAndWait(
+	exampleutils.SubmitAndWait(
 		"non custodial account to custodial account transaction",
 		nonCustodialAccount,
 		stdlib.EncodePeerToPeerWithMetadataScript(
@@ -51,7 +47,7 @@ func main() {
 		),
 	)
 
-	newTransactionSubmitAndWait(
+	exampleutils.SubmitAndWait(
 		"custodial account to non custodial account transaction",
 		custodialAccountChildVasp,
 		stdlib.EncodePeerToPeerWithMetadataScript(
@@ -67,8 +63,8 @@ func main() {
 
 	// setup receiver compliance public & private keys
 	compliancePublicKey, compliancePrivateKey, _ := ed25519.GenerateKey(nil)
-	newTransactionSubmitAndWait(
-		"testnet created parent vasp has a fake compliance key, need rotate first",
+	exampleutils.SubmitAndWait(
+		"setup parent vasp compliance key, testnet defaults it to fake key.",
 		custodialAccountParentVasp,
 		stdlib.EncodeRotateDualAttestationInfoScript(
 			[]byte("http://helloworld.com"),
@@ -93,7 +89,7 @@ func main() {
 	// https://github.com/libra/lip/blob/master/lips/lip-1.mdx#recipient-signature
 	recipientSignature := ed25519.Sign(compliancePrivateKey, sigMsg)
 
-	newTransactionSubmitAndWait(
+	exampleutils.SubmitAndWait(
 		"custodial account to custodial account transaction",
 		senderCustodialAccountChildVasp,
 		stdlib.EncodePeerToPeerWithMetadataScript(
@@ -106,72 +102,20 @@ func main() {
 	)
 }
 
-func newTransactionSubmitAndWait(title string, sender *librakeys.Keys, script libratypes.Script) {
-	address := sender.AccountAddress()
-	account, err := testnet.Client.GetAccount(address.Hex())
-	if err != nil {
-		panic(err)
-	}
-	sequenceNum := account.SequenceNumber
-	expirationDuration := 30 * time.Second
-	expiration := uint64(time.Now().Add(expirationDuration).Unix())
-	txn := librasigner.Sign(
-		sender,
-		address,
-		sequenceNum,
-		script,
-		100000, 0, currency,
-		expiration,
-		testnet.ChainID,
-	)
-	err = testnet.Client.SubmitTransaction(txn)
-	if err != nil {
-		panic(err)
-	}
-	transaction, err := testnet.Client.WaitForTransaction2(txn, 5*time.Second)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("\n====== %v ======\n", title)
-	yaml, _ := yaml.Marshal(transaction)
-	fmt.Println(string(yaml))
-}
-
-func createNonCustodialAccount() *librakeys.Keys {
-	return testnet.GenAccount()
-}
-
-func createCustodialAccount() (*librakeys.Keys, *librakeys.Keys, libraid.SubAddress) {
-	parentVASP := createNonCustodialAccount()
+func createCustodialAccount() (*librakeys.Keys, *librakeys.Keys, libratypes.SubAddress) {
+	parentVASP := testnet.GenAccount()
 	childVASPAccount := librakeys.MustGenKeys()
-	script := stdlib.EncodeCreateChildVaspAccountScript(
-		testnet.LBR,
-		childVASPAccount.AccountAddress(),
-		childVASPAccount.AuthKey().Prefix(),
-		false,
-		uint64(100000),
-	)
-	sequenceNum := uint64(0) // we just generated new parentVASP, hence it is 0
-	expirationDuration := time.Second * 30
-	expiration := uint64(time.Now().Add(expirationDuration).Unix())
-	txn := librasigner.Sign(
+	exampleutils.SubmitAndWait(
+		"create child vasp for custodial account",
 		parentVASP,
-		parentVASP.AccountAddress(),
-		sequenceNum,
-		script,
-		10000, 0, currency,
-		expiration,
-		testnet.ChainID,
+		stdlib.EncodeCreateChildVaspAccountScript(
+			testnet.LBR,
+			childVASPAccount.AccountAddress(),
+			childVASPAccount.AuthKey().Prefix(),
+			false,
+			uint64(100000),
+		),
 	)
-	err := testnet.Client.SubmitTransaction(txn)
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = testnet.Client.WaitForTransaction2(txn, 5*time.Second)
-	if err != nil {
-		panic(err)
-	}
-	custodialAccountSubAddress := libraid.MustGenSubAddress()
+	custodialAccountSubAddress := libratypes.MustGenSubAddress()
 	return parentVASP, childVASPAccount, custodialAccountSubAddress
 }

@@ -1,13 +1,17 @@
+// Copyright (c) The Libra Core Contributors
+// SPDX-License-Identifier: Apache-2.0
+
 package txnmetadata_test
 
 import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/libra/libra-client-sdk-go/libraid"
+	"github.com/libra/libra-client-sdk-go/libraclient"
 	"github.com/libra/libra-client-sdk-go/libratypes"
 	"github.com/libra/libra-client-sdk-go/txnmetadata"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewTravelRuleMetadata(t *testing.T) {
@@ -21,13 +25,26 @@ func TestNewTravelRuleMetadata(t *testing.T) {
 }
 
 func TestNewGeneralMetadataToSubAddress(t *testing.T) {
-	subAddress := libraid.MustNewSubAddressFromHex("8f8b82153010a1bd")
+	subAddress, _ := libratypes.MakeSubAddress("8f8b82153010a1bd")
 	ret := txnmetadata.NewGeneralMetadataToSubAddress(subAddress)
 	assert.Equal(t, "010001088f8b82153010a1bd0000", hex.EncodeToString(ret))
 }
 
 func TestNewGeneralMetadataFromSubAddress(t *testing.T) {
-	subAddress := libraid.MustNewSubAddressFromHex("8f8b82153010a1bd")
+	subAddress, _ := libratypes.MakeSubAddress("8f8b82153010a1bd")
 	ret := txnmetadata.NewGeneralMetadataFromSubAddress(subAddress)
 	assert.Equal(t, "01000001088f8b82153010a1bd00", hex.EncodeToString(ret))
+}
+
+func TestNewNonCustodyToCustodyRefundMetadataFromEvent(t *testing.T) {
+	subAddress, _ := libratypes.MakeSubAddress("8f8b82153010a1bd")
+	bytes := txnmetadata.NewGeneralMetadataFromSubAddress(subAddress)
+	ret, err := txnmetadata.NewNonCustodyToCustodyRefundMetadataFromEvent(&libraclient.Event{
+		Data: libraclient.EventData{
+			Metadata: hex.EncodeToString(bytes),
+		},
+		SequenceNumber: 123,
+	})
+	require.NoError(t, err)
+	assert.NotEmpty(t, ret)
 }

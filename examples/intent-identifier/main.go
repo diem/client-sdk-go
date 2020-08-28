@@ -8,15 +8,17 @@ import (
 
 	"github.com/libra/libra-client-sdk-go/libraid"
 	"github.com/libra/libra-client-sdk-go/librakeys"
+	"github.com/libra/libra-client-sdk-go/libratypes"
 	"gopkg.in/yaml.v3"
 )
 
 func main() {
 	merchant := librakeys.MustGenKeys()
-	address := merchant.AccountAddress().Hex()
+	address := merchant.AccountAddress()
 	currency := "LBR"
 	amount := uint64(5000)
-	account := libraid.NewAccount(libraid.TestnetPrefix, address, nil)
+	account := libraid.NewAccount(
+		libraid.TestnetPrefix, address, libratypes.EmptySubAddress)
 	intent := libraid.Intent{
 		Account: *account,
 		Params: libraid.Params{

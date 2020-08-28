@@ -4,8 +4,12 @@
 package txnmetadata
 
 import (
+	"encoding/hex"
+	"errors"
+	"fmt"
+
 	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/lcs"
-	"github.com/libra/libra-client-sdk-go/libraid"
+	"github.com/libra/libra-client-sdk-go/libraclient"
 	"github.com/libra/libra-client-sdk-go/libratypes"
 )
 
@@ -38,8 +42,8 @@ func NewTravelRuleMetadata(
 // NewGeneralMetadataToSubAddress creates metadata for creating peer to peer
 // transaction script with ToSubaddress
 // This is used for peer to peer transfer from non-custodial account to custodial account.
-func NewGeneralMetadataToSubAddress(toSubAddress libraid.SubAddress) []byte {
-	to := []byte(toSubAddress)
+func NewGeneralMetadataToSubAddress(toSubAddress libratypes.SubAddress) []byte {
+	to := toSubAddress[:]
 	metadata := libratypes.Metadata__GeneralMetadata{
 		Value: &libratypes.GeneralMetadata__GeneralMetadataVersion0{
 			Value: libratypes.GeneralMetadataV0{
@@ -53,12 +57,83 @@ func NewGeneralMetadataToSubAddress(toSubAddress libraid.SubAddress) []byte {
 // NewGeneralMetadataFromSubAddress creates metadata for creating peer to peer
 // transaction script with FromSubaddress
 // This is used for peer to peer transfer from custodial account to non-custodial account.
-func NewGeneralMetadataFromSubAddress(fromSubAddress libraid.SubAddress) []byte {
-	from := []byte(fromSubAddress)
+func NewGeneralMetadataFromSubAddress(fromSubAddress libratypes.SubAddress) []byte {
+	from := fromSubAddress[:]
 	metadata := libratypes.Metadata__GeneralMetadata{
 		Value: &libratypes.GeneralMetadata__GeneralMetadataVersion0{
 			Value: libratypes.GeneralMetadataV0{
 				FromSubaddress: &from,
+			},
+		},
+	}
+	return libratypes.ToLCS(&metadata)
+}
+
+// FindRefundReferenceEventFromTransaction looks for receivedpayment type event in the
+// given transaction and event receiver is given receiver account address.
+func FindRefundReferenceEventFromTransaction(txn *libraclient.Transaction, receiver libratypes.AccountAddress) *libraclient.Event {
+	if txn == nil {
+		return nil
+	}
+	address := receiver.Hex()
+	for i, event := range txn.Events {
+		if event.Data.Type == "receivedpayment" &&
+			event.Data.Receiver == address {
+			return &txn.Events[i]
+		}
+	}
+	return nil
+}
+
+// NewNonCustodyToCustodyRefundMetadataFromEvent creates GeneralMetadata for refund
+// given event.
+// The given event must be custody to non-custody payment event with
+// `libratypes.Metadata__GeneralMetadata` includes `FromSubaddress` as metadata.
+func NewNonCustodyToCustodyRefundMetadataFromEvent(event *libraclient.Event) ([]byte, error) {
+	if event == nil {
+		return nil, errors.New("must provide refund reference event")
+	}
+	bytes, err := hex.DecodeString(event.Data.Metadata)
+	if err != nil {
+		return nil, fmt.Errorf("decode event metadata failed: %v", err.Error())
+	}
+	metadata, err := libratypes.DeserializeMetadata(lcs.NewDeserializer(bytes))
+	if err != nil {
+		return nil, err
+	}
+	gm, ok := metadata.(*libratypes.Metadata__GeneralMetadata)
+	if !ok {
+		return nil, fmt.Errorf("unexpected metadata: %v", metadata)
+	}
+	gmv0, ok := gm.Value.(*libratypes.GeneralMetadata__GeneralMetadataVersion0)
+	if !ok {
+		return nil, fmt.Errorf("unexpected metadata: %v", metadata)
+	}
+
+	if gmv0.Value.FromSubaddress == nil {
+		return nil, errors.New("event metadata FromSubaddress is not set")
+	}
+	subaddress, err := libratypes.MakeSubAddressFromBytes(*gmv0.Value.FromSubaddress)
+	if err != nil {
+		return nil, err
+	}
+	return NewNonCustodyToCustodyRefundMetadata(subaddress, event.SequenceNumber), nil
+}
+
+// NewNonCustodyToCustodyRefundMetadata creates metadata
+// for creating refund peer to peer transaction script.
+// Only required for refund a transaction that is transfer from custodial account to
+// non-custodial account.
+func NewNonCustodyToCustodyRefundMetadata(
+	toSubAddress libratypes.SubAddress,
+	referencedEventSequenceNumber uint64,
+) []byte {
+	to := toSubAddress[:]
+	metadata := libratypes.Metadata__GeneralMetadata{
+		Value: &libratypes.GeneralMetadata__GeneralMetadataVersion0{
+			Value: libratypes.GeneralMetadataV0{
+				ToSubaddress:    &to,
+				ReferencedEvent: &referencedEventSequenceNumber,
 			},
 		},
 	}

@@ -85,7 +85,7 @@ func main() {
 			libratypes.Currency(currency),
 			custodialAccountChildVasp.AccountAddress(),
 			amount,
-			txnmetadata.NewGeneralMetadataWithFromToSubaddresses(
+			txnmetadata.NewGeneralMetadataWithFromToSubAddresses(
 				senderCustodialAccountSubAddress,
 				custodialAccountSubAddress,
 			),

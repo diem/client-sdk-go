@@ -7,7 +7,6 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/lcs"
 	"github.com/libra/libra-client-sdk-go/libraclient"
 	"github.com/libra/libra-client-sdk-go/libraclient/libraclienttest"
 	"github.com/libra/libra-client-sdk-go/librakeys"
@@ -180,7 +179,7 @@ func TestNewRefundMetadataFromEvent(t *testing.T) {
 				assert.EqualError(t, err, tc.expectedErrorMsg)
 			} else if tc.expected != nil {
 				require.NoError(t, err)
-				ret, err := libratypes.DeserializeMetadata(lcs.NewDeserializer(ret))
+				ret, err := libratypes.LcsDeserializeMetadata(ret)
 				require.NoError(t, err)
 				assert.EqualValues(t, tc.expected, ret)
 			} else {

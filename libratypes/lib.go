@@ -3,7 +3,8 @@ package libratypes
 
 import (
 	"fmt"
-	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/serde"
+	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/serde"
+	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/lcs"
 )
 
 
@@ -18,11 +19,26 @@ func (obj *AccessPath) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *AccessPath) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeAccessPath(deserializer serde.Deserializer) (AccessPath, error) {
 	var obj AccessPath
 	if val, err := DeserializeAccountAddress(deserializer); err == nil { obj.Address = val } else { return obj, err }
 	if val, err := deserializer.DeserializeBytes(); err == nil { obj.Path = val } else { return obj, err }
 	return obj, nil
+}
+
+func LcsDeserializeAccessPath(input []byte) (AccessPath, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeAccessPath(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
 }
 
 type AccountAddress [16]uint8
@@ -32,10 +48,25 @@ func (obj *AccountAddress) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *AccountAddress) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeAccountAddress(deserializer serde.Deserializer) (AccountAddress, error) {
 	var obj [16]uint8
 	if val, err := deserialize_array16_u8_array(deserializer); err == nil { obj = val } else { return ((AccountAddress)(obj)), err }
 	return (AccountAddress)(obj), nil
+}
+
+func LcsDeserializeAccountAddress(input []byte) (AccountAddress, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeAccountAddress(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
 }
 
 type BlockMetadata struct {
@@ -55,6 +86,12 @@ func (obj *BlockMetadata) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *BlockMetadata) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeBlockMetadata(deserializer serde.Deserializer) (BlockMetadata, error) {
 	var obj BlockMetadata
 	if val, err := DeserializeHashValue(deserializer); err == nil { obj.Id = val } else { return obj, err }
@@ -65,6 +102,15 @@ func DeserializeBlockMetadata(deserializer serde.Deserializer) (BlockMetadata, e
 	return obj, nil
 }
 
+func LcsDeserializeBlockMetadata(input []byte) (BlockMetadata, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeBlockMetadata(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type ChainId uint8
 
 func (obj *ChainId) Serialize(serializer serde.Serializer) error {
@@ -72,10 +118,25 @@ func (obj *ChainId) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *ChainId) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeChainId(deserializer serde.Deserializer) (ChainId, error) {
 	var obj uint8
 	if val, err := deserializer.DeserializeU8(); err == nil { obj = val } else { return ((ChainId)(obj)), err }
 	return (ChainId)(obj), nil
+}
+
+func LcsDeserializeChainId(input []byte) (ChainId, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeChainId(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
 }
 
 type ChangeSet struct {
@@ -89,6 +150,12 @@ func (obj *ChangeSet) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *ChangeSet) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeChangeSet(deserializer serde.Deserializer) (ChangeSet, error) {
 	var obj ChangeSet
 	if val, err := DeserializeWriteSet(deserializer); err == nil { obj.WriteSet = val } else { return obj, err }
@@ -96,9 +163,19 @@ func DeserializeChangeSet(deserializer serde.Deserializer) (ChangeSet, error) {
 	return obj, nil
 }
 
+func LcsDeserializeChangeSet(input []byte) (ChangeSet, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeChangeSet(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type ContractEvent interface {
 	isContractEvent()
 	Serialize(serializer serde.Serializer) error
+	LcsSerialize() ([]byte, error)
 }
 
 func DeserializeContractEvent(deserializer serde.Deserializer) (ContractEvent, error) {
@@ -118,6 +195,15 @@ func DeserializeContractEvent(deserializer serde.Deserializer) (ContractEvent, e
 	}
 }
 
+func LcsDeserializeContractEvent(input []byte) (ContractEvent, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeContractEvent(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type ContractEvent__V0 struct {
 	Value ContractEventV0
 }
@@ -128,6 +214,12 @@ func (obj *ContractEvent__V0) Serialize(serializer serde.Serializer) error {
 	serializer.SerializeVariantIndex(0)
 	if err := obj.Value.Serialize(serializer); err != nil { return err }
 	return nil
+}
+
+func (obj *ContractEvent__V0) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_ContractEvent__V0(deserializer serde.Deserializer) (ContractEvent__V0, error) {
@@ -151,6 +243,12 @@ func (obj *ContractEventV0) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *ContractEventV0) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeContractEventV0(deserializer serde.Deserializer) (ContractEventV0, error) {
 	var obj ContractEventV0
 	if val, err := DeserializeEventKey(deserializer); err == nil { obj.Key = val } else { return obj, err }
@@ -160,6 +258,15 @@ func DeserializeContractEventV0(deserializer serde.Deserializer) (ContractEventV
 	return obj, nil
 }
 
+func LcsDeserializeContractEventV0(input []byte) (ContractEventV0, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeContractEventV0(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type Ed25519PublicKey []byte
 
 func (obj *Ed25519PublicKey) Serialize(serializer serde.Serializer) error {
@@ -167,10 +274,25 @@ func (obj *Ed25519PublicKey) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *Ed25519PublicKey) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeEd25519PublicKey(deserializer serde.Deserializer) (Ed25519PublicKey, error) {
 	var obj []byte
 	if val, err := deserializer.DeserializeBytes(); err == nil { obj = val } else { return ((Ed25519PublicKey)(obj)), err }
 	return (Ed25519PublicKey)(obj), nil
+}
+
+func LcsDeserializeEd25519PublicKey(input []byte) (Ed25519PublicKey, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeEd25519PublicKey(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
 }
 
 type Ed25519Signature []byte
@@ -180,10 +302,25 @@ func (obj *Ed25519Signature) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *Ed25519Signature) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeEd25519Signature(deserializer serde.Deserializer) (Ed25519Signature, error) {
 	var obj []byte
 	if val, err := deserializer.DeserializeBytes(); err == nil { obj = val } else { return ((Ed25519Signature)(obj)), err }
 	return (Ed25519Signature)(obj), nil
+}
+
+func LcsDeserializeEd25519Signature(input []byte) (Ed25519Signature, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeEd25519Signature(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
 }
 
 type EventKey []byte
@@ -193,15 +330,31 @@ func (obj *EventKey) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *EventKey) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeEventKey(deserializer serde.Deserializer) (EventKey, error) {
 	var obj []byte
 	if val, err := deserializer.DeserializeBytes(); err == nil { obj = val } else { return ((EventKey)(obj)), err }
 	return (EventKey)(obj), nil
 }
 
+func LcsDeserializeEventKey(input []byte) (EventKey, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeEventKey(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type GeneralMetadata interface {
 	isGeneralMetadata()
 	Serialize(serializer serde.Serializer) error
+	LcsSerialize() ([]byte, error)
 }
 
 func DeserializeGeneralMetadata(deserializer serde.Deserializer) (GeneralMetadata, error) {
@@ -221,6 +374,15 @@ func DeserializeGeneralMetadata(deserializer serde.Deserializer) (GeneralMetadat
 	}
 }
 
+func LcsDeserializeGeneralMetadata(input []byte) (GeneralMetadata, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeGeneralMetadata(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type GeneralMetadata__GeneralMetadataVersion0 struct {
 	Value GeneralMetadataV0
 }
@@ -231,6 +393,12 @@ func (obj *GeneralMetadata__GeneralMetadataVersion0) Serialize(serializer serde.
 	serializer.SerializeVariantIndex(0)
 	if err := obj.Value.Serialize(serializer); err != nil { return err }
 	return nil
+}
+
+func (obj *GeneralMetadata__GeneralMetadataVersion0) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_GeneralMetadata__GeneralMetadataVersion0(deserializer serde.Deserializer) (GeneralMetadata__GeneralMetadataVersion0, error) {
@@ -252,12 +420,27 @@ func (obj *GeneralMetadataV0) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *GeneralMetadataV0) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeGeneralMetadataV0(deserializer serde.Deserializer) (GeneralMetadataV0, error) {
 	var obj GeneralMetadataV0
 	if val, err := deserialize_option_bytes(deserializer); err == nil { obj.ToSubaddress = val } else { return obj, err }
 	if val, err := deserialize_option_bytes(deserializer); err == nil { obj.FromSubaddress = val } else { return obj, err }
 	if val, err := deserialize_option_u64(deserializer); err == nil { obj.ReferencedEvent = val } else { return obj, err }
 	return obj, nil
+}
+
+func LcsDeserializeGeneralMetadataV0(input []byte) (GeneralMetadataV0, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeGeneralMetadataV0(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
 }
 
 type HashValue []byte
@@ -267,10 +450,25 @@ func (obj *HashValue) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *HashValue) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeHashValue(deserializer serde.Deserializer) (HashValue, error) {
 	var obj []byte
 	if val, err := deserializer.DeserializeBytes(); err == nil { obj = val } else { return ((HashValue)(obj)), err }
 	return (HashValue)(obj), nil
+}
+
+func LcsDeserializeHashValue(input []byte) (HashValue, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeHashValue(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
 }
 
 type Identifier string
@@ -280,15 +478,31 @@ func (obj *Identifier) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *Identifier) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeIdentifier(deserializer serde.Deserializer) (Identifier, error) {
 	var obj string
 	if val, err := deserializer.DeserializeStr(); err == nil { obj = val } else { return ((Identifier)(obj)), err }
 	return (Identifier)(obj), nil
 }
 
+func LcsDeserializeIdentifier(input []byte) (Identifier, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeIdentifier(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type Metadata interface {
 	isMetadata()
 	Serialize(serializer serde.Serializer) error
+	LcsSerialize() ([]byte, error)
 }
 
 func DeserializeMetadata(deserializer serde.Deserializer) (Metadata, error) {
@@ -329,6 +543,15 @@ func DeserializeMetadata(deserializer serde.Deserializer) (Metadata, error) {
 	}
 }
 
+func LcsDeserializeMetadata(input []byte) (Metadata, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeMetadata(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type Metadata__Undefined struct {
 }
 
@@ -337,6 +560,12 @@ func (*Metadata__Undefined) isMetadata() {}
 func (obj *Metadata__Undefined) Serialize(serializer serde.Serializer) error {
 	serializer.SerializeVariantIndex(0)
 	return nil
+}
+
+func (obj *Metadata__Undefined) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_Metadata__Undefined(deserializer serde.Deserializer) (Metadata__Undefined, error) {
@@ -354,6 +583,12 @@ func (obj *Metadata__GeneralMetadata) Serialize(serializer serde.Serializer) err
 	serializer.SerializeVariantIndex(1)
 	if err := obj.Value.Serialize(serializer); err != nil { return err }
 	return nil
+}
+
+func (obj *Metadata__GeneralMetadata) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_Metadata__GeneralMetadata(deserializer serde.Deserializer) (Metadata__GeneralMetadata, error) {
@@ -374,6 +609,12 @@ func (obj *Metadata__TravelRuleMetadata) Serialize(serializer serde.Serializer) 
 	return nil
 }
 
+func (obj *Metadata__TravelRuleMetadata) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func load_Metadata__TravelRuleMetadata(deserializer serde.Deserializer) (Metadata__TravelRuleMetadata, error) {
 	var obj Metadata__TravelRuleMetadata
 	if val, err := DeserializeTravelRuleMetadata(deserializer); err == nil { obj.Value = val } else { return obj, err }
@@ -392,6 +633,12 @@ func (obj *Metadata__UnstructuredBytesMetadata) Serialize(serializer serde.Seria
 	return nil
 }
 
+func (obj *Metadata__UnstructuredBytesMetadata) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func load_Metadata__UnstructuredBytesMetadata(deserializer serde.Deserializer) (Metadata__UnstructuredBytesMetadata, error) {
 	var obj Metadata__UnstructuredBytesMetadata
 	if val, err := DeserializeUnstructuredBytesMetadata(deserializer); err == nil { obj.Value = val } else { return obj, err }
@@ -407,10 +654,25 @@ func (obj *Module) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *Module) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeModule(deserializer serde.Deserializer) (Module, error) {
 	var obj Module
 	if val, err := deserializer.DeserializeBytes(); err == nil { obj.Code = val } else { return obj, err }
 	return obj, nil
+}
+
+func LcsDeserializeModule(input []byte) (Module, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeModule(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
 }
 
 type MultiEd25519PublicKey []byte
@@ -420,10 +682,25 @@ func (obj *MultiEd25519PublicKey) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *MultiEd25519PublicKey) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeMultiEd25519PublicKey(deserializer serde.Deserializer) (MultiEd25519PublicKey, error) {
 	var obj []byte
 	if val, err := deserializer.DeserializeBytes(); err == nil { obj = val } else { return ((MultiEd25519PublicKey)(obj)), err }
 	return (MultiEd25519PublicKey)(obj), nil
+}
+
+func LcsDeserializeMultiEd25519PublicKey(input []byte) (MultiEd25519PublicKey, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeMultiEd25519PublicKey(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
 }
 
 type MultiEd25519Signature []byte
@@ -433,10 +710,25 @@ func (obj *MultiEd25519Signature) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *MultiEd25519Signature) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeMultiEd25519Signature(deserializer serde.Deserializer) (MultiEd25519Signature, error) {
 	var obj []byte
 	if val, err := deserializer.DeserializeBytes(); err == nil { obj = val } else { return ((MultiEd25519Signature)(obj)), err }
 	return (MultiEd25519Signature)(obj), nil
+}
+
+func LcsDeserializeMultiEd25519Signature(input []byte) (MultiEd25519Signature, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeMultiEd25519Signature(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
 }
 
 type RawTransaction struct {
@@ -462,6 +754,12 @@ func (obj *RawTransaction) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *RawTransaction) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeRawTransaction(deserializer serde.Deserializer) (RawTransaction, error) {
 	var obj RawTransaction
 	if val, err := DeserializeAccountAddress(deserializer); err == nil { obj.Sender = val } else { return obj, err }
@@ -473,6 +771,15 @@ func DeserializeRawTransaction(deserializer serde.Deserializer) (RawTransaction,
 	if val, err := deserializer.DeserializeU64(); err == nil { obj.ExpirationTimestampSecs = val } else { return obj, err }
 	if val, err := DeserializeChainId(deserializer); err == nil { obj.ChainId = val } else { return obj, err }
 	return obj, nil
+}
+
+func LcsDeserializeRawTransaction(input []byte) (RawTransaction, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeRawTransaction(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
 }
 
 type Script struct {
@@ -488,12 +795,27 @@ func (obj *Script) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *Script) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeScript(deserializer serde.Deserializer) (Script, error) {
 	var obj Script
 	if val, err := deserializer.DeserializeBytes(); err == nil { obj.Code = val } else { return obj, err }
 	if val, err := deserialize_vector_TypeTag(deserializer); err == nil { obj.TyArgs = val } else { return obj, err }
 	if val, err := deserialize_vector_TransactionArgument(deserializer); err == nil { obj.Args = val } else { return obj, err }
 	return obj, nil
+}
+
+func LcsDeserializeScript(input []byte) (Script, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeScript(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
 }
 
 type SignedTransaction struct {
@@ -507,11 +829,26 @@ func (obj *SignedTransaction) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *SignedTransaction) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeSignedTransaction(deserializer serde.Deserializer) (SignedTransaction, error) {
 	var obj SignedTransaction
 	if val, err := DeserializeRawTransaction(deserializer); err == nil { obj.RawTxn = val } else { return obj, err }
 	if val, err := DeserializeTransactionAuthenticator(deserializer); err == nil { obj.Authenticator = val } else { return obj, err }
 	return obj, nil
+}
+
+func LcsDeserializeSignedTransaction(input []byte) (SignedTransaction, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeSignedTransaction(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
 }
 
 type StructTag struct {
@@ -529,6 +866,12 @@ func (obj *StructTag) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *StructTag) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeStructTag(deserializer serde.Deserializer) (StructTag, error) {
 	var obj StructTag
 	if val, err := DeserializeAccountAddress(deserializer); err == nil { obj.Address = val } else { return obj, err }
@@ -538,9 +881,19 @@ func DeserializeStructTag(deserializer serde.Deserializer) (StructTag, error) {
 	return obj, nil
 }
 
+func LcsDeserializeStructTag(input []byte) (StructTag, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeStructTag(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type Transaction interface {
 	isTransaction()
 	Serialize(serializer serde.Serializer) error
+	LcsSerialize() ([]byte, error)
 }
 
 func DeserializeTransaction(deserializer serde.Deserializer) (Transaction, error) {
@@ -574,6 +927,15 @@ func DeserializeTransaction(deserializer serde.Deserializer) (Transaction, error
 	}
 }
 
+func LcsDeserializeTransaction(input []byte) (Transaction, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeTransaction(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type Transaction__UserTransaction struct {
 	Value SignedTransaction
 }
@@ -584,6 +946,12 @@ func (obj *Transaction__UserTransaction) Serialize(serializer serde.Serializer) 
 	serializer.SerializeVariantIndex(0)
 	if err := obj.Value.Serialize(serializer); err != nil { return err }
 	return nil
+}
+
+func (obj *Transaction__UserTransaction) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_Transaction__UserTransaction(deserializer serde.Deserializer) (Transaction__UserTransaction, error) {
@@ -604,6 +972,12 @@ func (obj *Transaction__GenesisTransaction) Serialize(serializer serde.Serialize
 	return nil
 }
 
+func (obj *Transaction__GenesisTransaction) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func load_Transaction__GenesisTransaction(deserializer serde.Deserializer) (Transaction__GenesisTransaction, error) {
 	var obj Transaction__GenesisTransaction
 	if val, err := DeserializeWriteSetPayload(deserializer); err == nil { obj.Value = val } else { return obj, err }
@@ -622,6 +996,12 @@ func (obj *Transaction__BlockMetadata) Serialize(serializer serde.Serializer) er
 	return nil
 }
 
+func (obj *Transaction__BlockMetadata) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func load_Transaction__BlockMetadata(deserializer serde.Deserializer) (Transaction__BlockMetadata, error) {
 	var obj Transaction__BlockMetadata
 	if val, err := DeserializeBlockMetadata(deserializer); err == nil { obj.Value = val } else { return obj, err }
@@ -631,6 +1011,7 @@ func load_Transaction__BlockMetadata(deserializer serde.Deserializer) (Transacti
 type TransactionArgument interface {
 	isTransactionArgument()
 	Serialize(serializer serde.Serializer) error
+	LcsSerialize() ([]byte, error)
 }
 
 func DeserializeTransactionArgument(deserializer serde.Deserializer) (TransactionArgument, error) {
@@ -685,6 +1066,15 @@ func DeserializeTransactionArgument(deserializer serde.Deserializer) (Transactio
 	}
 }
 
+func LcsDeserializeTransactionArgument(input []byte) (TransactionArgument, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeTransactionArgument(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type TransactionArgument__U8 uint8
 
 func (*TransactionArgument__U8) isTransactionArgument() {}
@@ -693,6 +1083,12 @@ func (obj *TransactionArgument__U8) Serialize(serializer serde.Serializer) error
 	serializer.SerializeVariantIndex(0)
 	if err := serializer.SerializeU8(((uint8)(*obj))); err != nil { return err }
 	return nil
+}
+
+func (obj *TransactionArgument__U8) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_TransactionArgument__U8(deserializer serde.Deserializer) (TransactionArgument__U8, error) {
@@ -711,6 +1107,12 @@ func (obj *TransactionArgument__U64) Serialize(serializer serde.Serializer) erro
 	return nil
 }
 
+func (obj *TransactionArgument__U64) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func load_TransactionArgument__U64(deserializer serde.Deserializer) (TransactionArgument__U64, error) {
 	var obj uint64
 	if val, err := deserializer.DeserializeU64(); err == nil { obj = val } else { return ((TransactionArgument__U64)(obj)), err }
@@ -725,6 +1127,12 @@ func (obj *TransactionArgument__U128) Serialize(serializer serde.Serializer) err
 	serializer.SerializeVariantIndex(2)
 	if err := serializer.SerializeU128(((serde.Uint128)(*obj))); err != nil { return err }
 	return nil
+}
+
+func (obj *TransactionArgument__U128) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_TransactionArgument__U128(deserializer serde.Deserializer) (TransactionArgument__U128, error) {
@@ -745,6 +1153,12 @@ func (obj *TransactionArgument__Address) Serialize(serializer serde.Serializer) 
 	return nil
 }
 
+func (obj *TransactionArgument__Address) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func load_TransactionArgument__Address(deserializer serde.Deserializer) (TransactionArgument__Address, error) {
 	var obj TransactionArgument__Address
 	if val, err := DeserializeAccountAddress(deserializer); err == nil { obj.Value = val } else { return obj, err }
@@ -759,6 +1173,12 @@ func (obj *TransactionArgument__U8Vector) Serialize(serializer serde.Serializer)
 	serializer.SerializeVariantIndex(4)
 	if err := serializer.SerializeBytes((([]byte)(*obj))); err != nil { return err }
 	return nil
+}
+
+func (obj *TransactionArgument__U8Vector) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_TransactionArgument__U8Vector(deserializer serde.Deserializer) (TransactionArgument__U8Vector, error) {
@@ -777,6 +1197,12 @@ func (obj *TransactionArgument__Bool) Serialize(serializer serde.Serializer) err
 	return nil
 }
 
+func (obj *TransactionArgument__Bool) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func load_TransactionArgument__Bool(deserializer serde.Deserializer) (TransactionArgument__Bool, error) {
 	var obj bool
 	if val, err := deserializer.DeserializeBool(); err == nil { obj = val } else { return ((TransactionArgument__Bool)(obj)), err }
@@ -786,6 +1212,7 @@ func load_TransactionArgument__Bool(deserializer serde.Deserializer) (Transactio
 type TransactionAuthenticator interface {
 	isTransactionAuthenticator()
 	Serialize(serializer serde.Serializer) error
+	LcsSerialize() ([]byte, error)
 }
 
 func DeserializeTransactionAuthenticator(deserializer serde.Deserializer) (TransactionAuthenticator, error) {
@@ -812,6 +1239,15 @@ func DeserializeTransactionAuthenticator(deserializer serde.Deserializer) (Trans
 	}
 }
 
+func LcsDeserializeTransactionAuthenticator(input []byte) (TransactionAuthenticator, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeTransactionAuthenticator(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type TransactionAuthenticator__Ed25519 struct {
 	PublicKey Ed25519PublicKey
 	Signature Ed25519Signature
@@ -824,6 +1260,12 @@ func (obj *TransactionAuthenticator__Ed25519) Serialize(serializer serde.Seriali
 	if err := obj.PublicKey.Serialize(serializer); err != nil { return err }
 	if err := obj.Signature.Serialize(serializer); err != nil { return err }
 	return nil
+}
+
+func (obj *TransactionAuthenticator__Ed25519) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_TransactionAuthenticator__Ed25519(deserializer serde.Deserializer) (TransactionAuthenticator__Ed25519, error) {
@@ -847,6 +1289,12 @@ func (obj *TransactionAuthenticator__MultiEd25519) Serialize(serializer serde.Se
 	return nil
 }
 
+func (obj *TransactionAuthenticator__MultiEd25519) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func load_TransactionAuthenticator__MultiEd25519(deserializer serde.Deserializer) (TransactionAuthenticator__MultiEd25519, error) {
 	var obj TransactionAuthenticator__MultiEd25519
 	if val, err := DeserializeMultiEd25519PublicKey(deserializer); err == nil { obj.PublicKey = val } else { return obj, err }
@@ -857,6 +1305,7 @@ func load_TransactionAuthenticator__MultiEd25519(deserializer serde.Deserializer
 type TransactionPayload interface {
 	isTransactionPayload()
 	Serialize(serializer serde.Serializer) error
+	LcsSerialize() ([]byte, error)
 }
 
 func DeserializeTransactionPayload(deserializer serde.Deserializer) (TransactionPayload, error) {
@@ -890,6 +1339,15 @@ func DeserializeTransactionPayload(deserializer serde.Deserializer) (Transaction
 	}
 }
 
+func LcsDeserializeTransactionPayload(input []byte) (TransactionPayload, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeTransactionPayload(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type TransactionPayload__WriteSet struct {
 	Value WriteSetPayload
 }
@@ -900,6 +1358,12 @@ func (obj *TransactionPayload__WriteSet) Serialize(serializer serde.Serializer) 
 	serializer.SerializeVariantIndex(0)
 	if err := obj.Value.Serialize(serializer); err != nil { return err }
 	return nil
+}
+
+func (obj *TransactionPayload__WriteSet) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_TransactionPayload__WriteSet(deserializer serde.Deserializer) (TransactionPayload__WriteSet, error) {
@@ -920,6 +1384,12 @@ func (obj *TransactionPayload__Script) Serialize(serializer serde.Serializer) er
 	return nil
 }
 
+func (obj *TransactionPayload__Script) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func load_TransactionPayload__Script(deserializer serde.Deserializer) (TransactionPayload__Script, error) {
 	var obj TransactionPayload__Script
 	if val, err := DeserializeScript(deserializer); err == nil { obj.Value = val } else { return obj, err }
@@ -938,6 +1408,12 @@ func (obj *TransactionPayload__Module) Serialize(serializer serde.Serializer) er
 	return nil
 }
 
+func (obj *TransactionPayload__Module) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func load_TransactionPayload__Module(deserializer serde.Deserializer) (TransactionPayload__Module, error) {
 	var obj TransactionPayload__Module
 	if val, err := DeserializeModule(deserializer); err == nil { obj.Value = val } else { return obj, err }
@@ -947,6 +1423,7 @@ func load_TransactionPayload__Module(deserializer serde.Deserializer) (Transacti
 type TravelRuleMetadata interface {
 	isTravelRuleMetadata()
 	Serialize(serializer serde.Serializer) error
+	LcsSerialize() ([]byte, error)
 }
 
 func DeserializeTravelRuleMetadata(deserializer serde.Deserializer) (TravelRuleMetadata, error) {
@@ -966,6 +1443,15 @@ func DeserializeTravelRuleMetadata(deserializer serde.Deserializer) (TravelRuleM
 	}
 }
 
+func LcsDeserializeTravelRuleMetadata(input []byte) (TravelRuleMetadata, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeTravelRuleMetadata(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type TravelRuleMetadata__TravelRuleMetadataVersion0 struct {
 	Value TravelRuleMetadataV0
 }
@@ -976,6 +1462,12 @@ func (obj *TravelRuleMetadata__TravelRuleMetadataVersion0) Serialize(serializer 
 	serializer.SerializeVariantIndex(0)
 	if err := obj.Value.Serialize(serializer); err != nil { return err }
 	return nil
+}
+
+func (obj *TravelRuleMetadata__TravelRuleMetadataVersion0) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_TravelRuleMetadata__TravelRuleMetadataVersion0(deserializer serde.Deserializer) (TravelRuleMetadata__TravelRuleMetadataVersion0, error) {
@@ -993,15 +1485,31 @@ func (obj *TravelRuleMetadataV0) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *TravelRuleMetadataV0) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeTravelRuleMetadataV0(deserializer serde.Deserializer) (TravelRuleMetadataV0, error) {
 	var obj TravelRuleMetadataV0
 	if val, err := deserialize_option_str(deserializer); err == nil { obj.OffChainReferenceId = val } else { return obj, err }
 	return obj, nil
 }
 
+func LcsDeserializeTravelRuleMetadataV0(input []byte) (TravelRuleMetadataV0, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeTravelRuleMetadataV0(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type TypeTag interface {
 	isTypeTag()
 	Serialize(serializer serde.Serializer) error
+	LcsSerialize() ([]byte, error)
 }
 
 func DeserializeTypeTag(deserializer serde.Deserializer) (TypeTag, error) {
@@ -1070,6 +1578,15 @@ func DeserializeTypeTag(deserializer serde.Deserializer) (TypeTag, error) {
 	}
 }
 
+func LcsDeserializeTypeTag(input []byte) (TypeTag, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeTypeTag(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type TypeTag__Bool struct {
 }
 
@@ -1078,6 +1595,12 @@ func (*TypeTag__Bool) isTypeTag() {}
 func (obj *TypeTag__Bool) Serialize(serializer serde.Serializer) error {
 	serializer.SerializeVariantIndex(0)
 	return nil
+}
+
+func (obj *TypeTag__Bool) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_TypeTag__Bool(deserializer serde.Deserializer) (TypeTag__Bool, error) {
@@ -1095,6 +1618,12 @@ func (obj *TypeTag__U8) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *TypeTag__U8) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func load_TypeTag__U8(deserializer serde.Deserializer) (TypeTag__U8, error) {
 	var obj TypeTag__U8
 	return obj, nil
@@ -1108,6 +1637,12 @@ func (*TypeTag__U64) isTypeTag() {}
 func (obj *TypeTag__U64) Serialize(serializer serde.Serializer) error {
 	serializer.SerializeVariantIndex(2)
 	return nil
+}
+
+func (obj *TypeTag__U64) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_TypeTag__U64(deserializer serde.Deserializer) (TypeTag__U64, error) {
@@ -1125,6 +1660,12 @@ func (obj *TypeTag__U128) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *TypeTag__U128) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func load_TypeTag__U128(deserializer serde.Deserializer) (TypeTag__U128, error) {
 	var obj TypeTag__U128
 	return obj, nil
@@ -1138,6 +1679,12 @@ func (*TypeTag__Address) isTypeTag() {}
 func (obj *TypeTag__Address) Serialize(serializer serde.Serializer) error {
 	serializer.SerializeVariantIndex(4)
 	return nil
+}
+
+func (obj *TypeTag__Address) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_TypeTag__Address(deserializer serde.Deserializer) (TypeTag__Address, error) {
@@ -1155,6 +1702,12 @@ func (obj *TypeTag__Signer) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *TypeTag__Signer) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func load_TypeTag__Signer(deserializer serde.Deserializer) (TypeTag__Signer, error) {
 	var obj TypeTag__Signer
 	return obj, nil
@@ -1170,6 +1723,12 @@ func (obj *TypeTag__Vector) Serialize(serializer serde.Serializer) error {
 	serializer.SerializeVariantIndex(6)
 	if err := obj.Value.Serialize(serializer); err != nil { return err }
 	return nil
+}
+
+func (obj *TypeTag__Vector) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_TypeTag__Vector(deserializer serde.Deserializer) (TypeTag__Vector, error) {
@@ -1190,6 +1749,12 @@ func (obj *TypeTag__Struct) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *TypeTag__Struct) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func load_TypeTag__Struct(deserializer serde.Deserializer) (TypeTag__Struct, error) {
 	var obj TypeTag__Struct
 	if val, err := DeserializeStructTag(deserializer); err == nil { obj.Value = val } else { return obj, err }
@@ -1205,15 +1770,31 @@ func (obj *UnstructuredBytesMetadata) Serialize(serializer serde.Serializer) err
 	return nil
 }
 
+func (obj *UnstructuredBytesMetadata) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeUnstructuredBytesMetadata(deserializer serde.Deserializer) (UnstructuredBytesMetadata, error) {
 	var obj UnstructuredBytesMetadata
 	if val, err := deserialize_option_bytes(deserializer); err == nil { obj.Metadata = val } else { return obj, err }
 	return obj, nil
 }
 
+func LcsDeserializeUnstructuredBytesMetadata(input []byte) (UnstructuredBytesMetadata, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeUnstructuredBytesMetadata(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type WriteOp interface {
 	isWriteOp()
 	Serialize(serializer serde.Serializer) error
+	LcsSerialize() ([]byte, error)
 }
 
 func DeserializeWriteOp(deserializer serde.Deserializer) (WriteOp, error) {
@@ -1240,6 +1821,15 @@ func DeserializeWriteOp(deserializer serde.Deserializer) (WriteOp, error) {
 	}
 }
 
+func LcsDeserializeWriteOp(input []byte) (WriteOp, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeWriteOp(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type WriteOp__Deletion struct {
 }
 
@@ -1248,6 +1838,12 @@ func (*WriteOp__Deletion) isWriteOp() {}
 func (obj *WriteOp__Deletion) Serialize(serializer serde.Serializer) error {
 	serializer.SerializeVariantIndex(0)
 	return nil
+}
+
+func (obj *WriteOp__Deletion) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_WriteOp__Deletion(deserializer serde.Deserializer) (WriteOp__Deletion, error) {
@@ -1265,6 +1861,12 @@ func (obj *WriteOp__Value) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *WriteOp__Value) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func load_WriteOp__Value(deserializer serde.Deserializer) (WriteOp__Value, error) {
 	var obj []byte
 	if val, err := deserializer.DeserializeBytes(); err == nil { obj = val } else { return ((WriteOp__Value)(obj)), err }
@@ -1280,10 +1882,25 @@ func (obj *WriteSet) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *WriteSet) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeWriteSet(deserializer serde.Deserializer) (WriteSet, error) {
 	var obj WriteSet
 	if val, err := DeserializeWriteSetMut(deserializer); err == nil { obj.Value = val } else { return obj, err }
 	return obj, nil
+}
+
+func LcsDeserializeWriteSet(input []byte) (WriteSet, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeWriteSet(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
 }
 
 type WriteSetMut struct {
@@ -1295,15 +1912,31 @@ func (obj *WriteSetMut) Serialize(serializer serde.Serializer) error {
 	return nil
 }
 
+func (obj *WriteSetMut) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
 func DeserializeWriteSetMut(deserializer serde.Deserializer) (WriteSetMut, error) {
 	var obj WriteSetMut
 	if val, err := deserialize_vector_tuple2_AccessPath_WriteOp(deserializer); err == nil { obj.WriteSet = val } else { return obj, err }
 	return obj, nil
 }
 
+func LcsDeserializeWriteSetMut(input []byte) (WriteSetMut, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeWriteSetMut(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type WriteSetPayload interface {
 	isWriteSetPayload()
 	Serialize(serializer serde.Serializer) error
+	LcsSerialize() ([]byte, error)
 }
 
 func DeserializeWriteSetPayload(deserializer serde.Deserializer) (WriteSetPayload, error) {
@@ -1330,6 +1963,15 @@ func DeserializeWriteSetPayload(deserializer serde.Deserializer) (WriteSetPayloa
 	}
 }
 
+func LcsDeserializeWriteSetPayload(input []byte) (WriteSetPayload, error) {
+	deserializer := lcs.NewDeserializer(input);
+	obj, err := DeserializeWriteSetPayload(deserializer)
+	if deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type WriteSetPayload__Direct struct {
 	Value ChangeSet
 }
@@ -1340,6 +1982,12 @@ func (obj *WriteSetPayload__Direct) Serialize(serializer serde.Serializer) error
 	serializer.SerializeVariantIndex(0)
 	if err := obj.Value.Serialize(serializer); err != nil { return err }
 	return nil
+}
+
+func (obj *WriteSetPayload__Direct) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_WriteSetPayload__Direct(deserializer serde.Deserializer) (WriteSetPayload__Direct, error) {
@@ -1360,6 +2008,12 @@ func (obj *WriteSetPayload__Script) Serialize(serializer serde.Serializer) error
 	if err := obj.ExecuteAs.Serialize(serializer); err != nil { return err }
 	if err := obj.Script.Serialize(serializer); err != nil { return err }
 	return nil
+}
+
+func (obj *WriteSetPayload__Script) LcsSerialize() ([]byte, error) {
+	serializer := lcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
 }
 
 func load_WriteSetPayload__Script(deserializer serde.Deserializer) (WriteSetPayload__Script, error) {

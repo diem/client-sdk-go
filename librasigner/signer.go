@@ -47,7 +47,7 @@ func NewRawTransactionAndSigningMsg(
 		ChainId:                 libratypes.ChainId(chainID),
 	}
 
-	signingMsg := append(libratypes.HashPrefix("RawTransaction"), rawTxn.ToLCS()...)
+	signingMsg := append(libratypes.HashPrefix("RawTransaction"), libratypes.ToLCS(&rawTxn)...)
 	return &rawTxn, signingMsg
 }
 

@@ -1,4 +1,5 @@
 test:
+	go clean -cache -testcache
 	go list ./... | grep examples | grep -v transaction-builder | xargs go build
 	go list ./... | grep -v /examples/ | xargs go test
 

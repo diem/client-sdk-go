@@ -5,34 +5,26 @@ package libratypes
 
 import (
 	"encoding/hex"
-
-	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/lcs"
-	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/serde"
+	"fmt"
 )
 
 // LCSable interface for `ToLCS`
 type LCSable interface {
-	Serialize(serializer serde.Serializer) error
+	LcsSerialize() ([]byte, error)
 }
 
-// ToLCS serialize given `LCSable` into LCS bytes
+// ToLCS serialize given `LCSable` into LCS bytes.
+// It panics if lcs serialization failed.
 func ToLCS(t LCSable) []byte {
-	s := lcs.NewSerializer()
-	t.Serialize(s)
-	return s.GetBytes()
+	ret, err := t.LcsSerialize()
+	if err != nil {
+		panic(fmt.Sprintf("lcs serialize failed: %v", err.Error()))
+	}
+	return ret
 }
 
-// ToLCS convert `RawTransaction` into LCS bytes
-func (t *RawTransaction) ToLCS() []byte {
-	return ToLCS(t)
-}
-
-// ToLCS convert `SignedTransaction` into LCS bytes
-func (t *SignedTransaction) ToLCS() []byte {
-	return ToLCS(t)
-}
-
-// ToHex convert `SignedTransaction` into hex-encoded LCS bytes
-func (t *SignedTransaction) ToHex() string {
+// ToHex serialize given `LCSable` into LCS bytes and then return hex-encoded string
+// It panics if lcs serialization failed.
+func ToHex(t LCSable) string {
 	return hex.EncodeToString(ToLCS(t))
 }

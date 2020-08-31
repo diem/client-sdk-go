@@ -256,7 +256,7 @@ func (c *client) Submit(data string) error {
 }
 
 func (c *client) SubmitTransaction(txn *libratypes.SignedTransaction) error {
-	return c.Submit(txn.ToHex())
+	return c.Submit(libratypes.ToHex(txn))
 }
 
 func (c *client) call(method jsonrpc.Method, ret interface{}, params ...jsonrpc.Param) (bool, error) {

@@ -214,11 +214,11 @@ func TestClient(t *testing.T) {
 					uint64(time.Now().Add(time.Second*30).Unix()),
 					testnet.ChainID,
 				)
-				err := client.Submit(txn.ToHex())
+				err := client.Submit(libratypes.ToHex(txn))
 				require.NoError(t, err)
 
 				ret, err := client.WaitForTransaction3(
-					txn.ToHex(), time.Second*5)
+					libratypes.ToHex(txn), time.Second*5)
 				require.NoError(t, err)
 				assert.NotNil(t, ret)
 			},

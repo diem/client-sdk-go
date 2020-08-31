@@ -6,8 +6,8 @@ package libratypes
 import (
 	"encoding/hex"
 
-	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/lcs"
-	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/serde"
+	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/lcs"
+	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/serde"
 )
 
 // LCSable interface for `ToLCS`
@@ -17,7 +17,7 @@ type LCSable interface {
 
 // ToLCS serialize given `LCSable` into LCS bytes
 func ToLCS(t LCSable) []byte {
-	s := new(lcs.Serializer)
+	s := lcs.NewSerializer()
 	t.Serialize(s)
 	return s.GetBytes()
 }

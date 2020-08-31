@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/lcs"
 	"github.com/libra/libra-client-sdk-go/jsonrpc"
 	"github.com/libra/libra-client-sdk-go/libratypes"
 )
@@ -120,8 +119,7 @@ func (c *client) WaitForTransaction3(signedTxnHex string, timeout time.Duration)
 	if err != nil {
 		return nil, err
 	}
-	ds := lcs.NewDeserializer(bytes)
-	txn, err := libratypes.DeserializeSignedTransaction(ds)
+	txn, err := libratypes.LcsDeserializeSignedTransaction(bytes)
 	if err != nil {
 		return nil, fmt.Errorf("Deserialize given hex string as SignedTransaction LCS failed: %v", err.Error())
 	}

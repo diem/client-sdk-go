@@ -8,8 +8,8 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/lcs"
 	"github.com/libra/libra-client-sdk-go/librakeys"
+	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/lcs"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -128,7 +128,7 @@ func TestNewMultiEd25519PublicKeyErrors(t *testing.T) {
 }
 
 func lcsBytes(bytes []byte) string {
-	s := new(lcs.Serializer)
+	s := lcs.NewSerializer()
 	s.SerializeBytes(bytes)
 	return hex.EncodeToString(s.GetBytes())
 }

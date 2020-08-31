@@ -8,9 +8,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/serde-reflection/serde-generate/runtime/golang/lcs"
 	"github.com/libra/libra-client-sdk-go/libraclient"
 	"github.com/libra/libra-client-sdk-go/libratypes"
+	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/lcs"
 )
 
 // NewTravelRuleMetadata creates metadata and signature message for given
@@ -30,7 +30,7 @@ func NewTravelRuleMetadata(
 	}
 
 	// receiver_lcs_data = lcs(metadata, sender_address, amount, "@@$$LIBRA_ATTEST$$@@" /*ASCII-encoded string*/);
-	s := new(lcs.Serializer)
+	s := lcs.NewSerializer()
 	metadata.Serialize(s)
 	senderAccountAddress.Serialize(s)
 	s.SerializeU64(amount)

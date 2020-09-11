@@ -22,6 +22,8 @@
 - [x] https
 - [x] Handle stale responses:
   - [x] client tracks latest server response block version and timestamp, raise error when received server response contains stale version / timestamp.
+    - [ ] last known blockchain version >= response version + 30: when connecting to a cluster of fullnodes, it is possible some fullnodes are behind the head couple versions.
+    - [ ] last known blockchain timestamp >= response timestamp + 30 seconds.
   - [x] parse and use libra_chain_id, libra_ledger_version and libra_ledger_tiemstamp in the JSONRPC response.
 - [x] language specific standard release publish: e.g. java maven central repo, python pip
 - [x] Multi-network: initialize Client with chain id, JSON-RPC server URL
@@ -30,6 +32,7 @@
 - [x] [Multi-signatures support](https://github.com/libra/libra/blob/master/specifications/crypto/spec.md#multi-signatures)
 - [x] Transaction hash: for a given signed transaction, produce hash of the transaction executed.
   - hex-encode(sha3-256([]byte("Transaction")) + []byte {0} + signed transaction bytes)
+- [ ] Send request with "client sdk name / version" as HTTP User-Agent: this is for server to recognize client sdk version, server can block the specific client version if we found the SDK has unacceptable bugs.
 
 # [LIP-4][7] support
 

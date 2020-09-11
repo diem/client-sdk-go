@@ -54,6 +54,8 @@
 - [x] Get account transactions
 - [x] Handle error response
 - [x] Serialize result JSON to typed data structure
+- [ ] Forward compatible: ignore unknown fields for
+- [ ] Backward compatible: new fields are optional
 
 # Submit Transaction
 

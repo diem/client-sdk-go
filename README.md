@@ -18,9 +18,9 @@ libra-client-sdk-go is the official Libra Client SDK for the Go programming lang
 - [examples](../../tree/master/examples): examples of how to use this SDK.
   - [submit transaction and wait](../master/examples/exampleutils/submit_and_wait.go): this example shows how to submit transaction and wait for it's result; it also shows how to handle stale response error in various cases.
   - [create child VASP account](../master/examples/create-child-vasp-account/main.go): this example shows how to create child VASP account for a parent VASP account.
-  - [p2p transfer](../master/examples/p2p-transfer/main.go): this example shows 4 different types p2p transfer between custodial accounts and non-custodial accounts.
+  - [p2p transfer](../master/examples/p2p-transfers/main.go): this example shows 4 different types p2p transfer between custodial accounts and non-custodial accounts.
   - [refund](../master/examples/refund/main.go): this example shows peer to peer transfer from custodial account to non-custodial account, and then refund the amount.
-  - [intent identifier](../master/examples/p2p-transfer/main.go): this example shows how to use libraid for encoding and decoding intent identifier / url.
+  - [intent identifier](../master/examples/intent-identifier/main.go): this example shows how to use libraid for encoding and decoding intent identifier / url.
 
 ## Installing
 

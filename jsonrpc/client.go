@@ -21,18 +21,28 @@ type Client interface {
 }
 
 // NewClient creates a new JSON-RPC Client.
-// Creates http.Transport with 3 max idel connections and 30 seconds idle timeout.
+// Creates http.Transport with 3 max idle connections and 30 seconds idle timeout, and 30 seconds connection timeout
+// NewClientWithHTTPClient can be used to override the connection timeout
+// NewClientWithTransport can be used to override the underlying transport
 func NewClient(url string) Client {
-	return NewClientWithTransport(url, &http.Transport{
-		MaxIdleConns:    3,
-		IdleConnTimeout: 30 * time.Second,
+	return NewClientWithHTTPClient(url, &http.Client{
+		Transport: &http.Transport{
+			MaxIdleConns:    3,
+			IdleConnTimeout: 30 * time.Second,
+		},
+		Timeout: 30 * time.Second,
 	})
 }
 
 // NewClientWithTransport creates a new JSON-RPC Client with given URL and
 // `*http.Transport`
 func NewClientWithTransport(url string, t *http.Transport) Client {
-	return &client{url: url, http: &http.Client{Transport: t}}
+	return NewClientWithHTTPClient(url, &http.Client{Transport: t})
+}
+
+// NewClientWithHTTPClient creates a new JSON-RPC Client with given URL and `*http.Client`
+func NewClientWithHTTPClient(url string, httpClient *http.Client) Client {
+	return &client{url: url, http: httpClient}
 }
 
 type client struct {

@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	URL                  = "https://testnet.libra.org/v1"
-	FaucetURL            = "https://testnet.libra.org/mint"
-	ChainID         byte = 2
-	DDAcountAddress      = "000000000000000000000000000000DD"
+	URL                   = "https://testnet.libra.org/v1"
+	FaucetURL             = "https://testnet.libra.org/mint"
+	ChainID          byte = 2
+	DDAccountAddress      = "000000000000000000000000000000DD"
 )
 
 // Client is testnet client

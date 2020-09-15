@@ -51,7 +51,7 @@ make gen
 
 # API Documentation
 
-The Go Client SDK API documentation is currently available on [godoc.org](https://godoc.org/github.com/libra/libra-client-sdk-go)
+The Go Client SDK API documentation is currently available on [godoc.org](https://godoc.org/github.com/libra/libra-client-sdk-go).
 
 # License
 

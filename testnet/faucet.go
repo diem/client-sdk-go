@@ -67,7 +67,7 @@ func Mint(authKey string, amount uint64, currencyCode string) (int, error) {
 
 func waitAccountSequence(seq int) {
 	for i := 0; i < 100; i++ {
-		account, err := Client.GetAccount(DDAcountAddress)
+		account, err := Client.GetAccount(DDAccountAddress)
 		if _, ok := err.(*libraclient.StaleResponseError); ok {
 			continue
 		}

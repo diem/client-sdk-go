@@ -16,3 +16,6 @@ gen:
 		--with-libra-types "testsuite/generate-format/tests/staged/libra.yaml" \
 		--target-source-dir ".." \
 		"language/stdlib/compiled/transaction_scripts/abi"
+
+protoc:
+	protoc  --go_out=. --go_opt=paths=source_relative ./librajsonrpctypes/libra-jsonrpc-types.proto

@@ -88,7 +88,7 @@ func FindRefundReferenceEventFromTransaction(txn *libraclient.Transaction, recei
 	for i, event := range txn.Events {
 		if event.Data.Type == "receivedpayment" &&
 			event.Data.Receiver == address {
-			return &txn.Events[i]
+			return txn.Events[i]
 		}
 	}
 	return nil

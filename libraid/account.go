@@ -9,8 +9,8 @@ package libraid
 import (
 	"errors"
 
+	"github.com/libra/libra-client-sdk-go/libraid/bech32"
 	"github.com/libra/libra-client-sdk-go/libratypes"
-	"github.com/sipa/bech32/ref/go/src/bech32"
 )
 
 const (

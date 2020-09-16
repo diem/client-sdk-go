@@ -20,6 +20,9 @@ func (b EventBuilder) Build() *libraclient.Event {
 
 func (b EventBuilder) Type(t string) *EventBuilder {
 	return b.append(func(e *libraclient.Event) {
+		if e.Data == nil {
+			e.Data = new(libraclient.EventData)
+		}
 		e.Data.Type = t
 	})
 }
@@ -32,12 +35,18 @@ func (b EventBuilder) SequenceNumber(n uint64) *EventBuilder {
 
 func (b EventBuilder) Receiver(receiver string) *EventBuilder {
 	return b.append(func(e *libraclient.Event) {
+		if e.Data == nil {
+			e.Data = new(libraclient.EventData)
+		}
 		e.Data.Receiver = receiver
 	})
 }
 
 func (b EventBuilder) Metadata(metadata string) *EventBuilder {
 	return b.append(func(e *libraclient.Event) {
+		if e.Data == nil {
+			e.Data = new(libraclient.EventData)
+		}
 		e.Data.Metadata = metadata
 	})
 }

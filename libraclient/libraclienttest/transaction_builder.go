@@ -21,7 +21,7 @@ func (b *TransactionBuilder) Build() *libraclient.Transaction {
 func (b TransactionBuilder) Events(events ...*EventBuilder) *TransactionBuilder {
 	return b.append(func(t *libraclient.Transaction) {
 		for _, event := range events {
-			t.Events = append(t.Events, *event.Build())
+			t.Events = append(t.Events, event.Build())
 		}
 	})
 }

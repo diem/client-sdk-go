@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/libra/libra-client-sdk-go/libraid"
+	"github.com/libra/libra-client-sdk-go/libraid/bech32"
 	"github.com/libra/libra-client-sdk-go/libratypes"
-	"github.com/sipa/bech32/ref/go/src/bech32"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

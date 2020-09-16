@@ -153,7 +153,7 @@ func TestWaitForTransaction(t *testing.T) {
       "type": "user"
     },
     "version": 106548,
-    "vm_status": { "type": "move_abort", "abort_code": 5, "location":  "00000000000000000000000000000001::LibraAccount"}
+    "vm_status": { "type": "move_abort", "abort_code": 5, "location": "00000000000000000000000000000001::LibraAccount"}
 }`)),
 			},
 			call: func(t *testing.T, client libraclient.Client) {
@@ -165,7 +165,7 @@ func TestWaitForTransaction(t *testing.T) {
 					uint64(time.Now().Add(time.Second).Unix()),
 					time.Second*5,
 				)
-				assert.EqualError(t, err, "transaction execution failed: {move_abort 00000000000000000000000000000001::LibraAccount 5 0 0}")
+				assert.EqualError(t, err, "transaction execution failed: type:\"move_abort\" location:\"00000000000000000000000000000001::LibraAccount\" abort_code:5")
 				assert.Nil(t, ret)
 			},
 		},

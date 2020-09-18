@@ -11,9 +11,6 @@ import (
 	"github.com/libra/libra-client-sdk-go/libratypes"
 )
 
-// Address represents 16 bytes hex-encoded account address
-type Address = string
-
 // PublicKey is Libra account public key
 type PublicKey interface {
 	IsMulti() bool

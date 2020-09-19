@@ -24,8 +24,8 @@ github.com/google/go-cmp v0.3.1/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMyw
 github.com/google/go-cmp v0.4.0/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.5.0 h1:/QaMHBdZ26BB3SSst0Iwl10Epc+xhTquomWX0oZEB6w=
 github.com/google/go-cmp v0.5.0/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
-github.com/novifinancial/serde-reflection/serde-generate/runtime/golang v0.0.0-20200831185941-6959e5a84935 h1:ZCF4zW99f4A2zIDu0Kbex156MFXneQ/BoBBAI/SCo1w=
-github.com/novifinancial/serde-reflection/serde-generate/runtime/golang v0.0.0-20200831185941-6959e5a84935/go.mod h1:NrRYJCFtaewjIRr4B9V2AyWsAEMW0Zqdjs8Bm+bACbM=
+github.com/novifinancial/serde-reflection/serde-generate/runtime/golang v0.0.0-20200919020617-423e2fc9b69f h1:Wkb7PnZsKJFHlKkcJa0TmsgFL3ZPk3XuR4u7IGm3ISc=
+github.com/novifinancial/serde-reflection/serde-generate/runtime/golang v0.0.0-20200919020617-423e2fc9b69f/go.mod h1:NrRYJCFtaewjIRr4B9V2AyWsAEMW0Zqdjs8Bm+bACbM=
 github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce h1:RPclfga2SEJmgMmz2k+Mg7cowZ8yv4Trqw9UsJby758=
 github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce/go.mod h1:uFMI8w+ref4v2r9jz+c9i1IfIttS/OkmLfrk1jne5hs=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

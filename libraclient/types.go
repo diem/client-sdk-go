@@ -7,9 +7,6 @@ import (
 	"github.com/libra/libra-client-sdk-go/librajsonrpctypes"
 )
 
-// Address represents account address hex-encoded string
-type Address = string
-
 // Amount represents currency amount
 type Amount = librajsonrpctypes.Amount
 

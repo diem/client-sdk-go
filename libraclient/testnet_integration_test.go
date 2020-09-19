@@ -78,7 +78,8 @@ func TestClient(t *testing.T) {
 		{
 			name: "get account",
 			call: func(t *testing.T, client libraclient.Client) {
-				ret, err := client.GetAccount("0000000000000000000000000A550C18")
+				ret, err := client.GetAccount(
+					libratypes.MustMakeAccountAddress("0000000000000000000000000A550C18"))
 				require.Nil(t, err)
 				assert.NotNil(t, ret)
 			},
@@ -86,16 +87,9 @@ func TestClient(t *testing.T) {
 		{
 			name: "get account not found",
 			call: func(t *testing.T, client libraclient.Client) {
-				ret, err := client.GetAccount("10000000010000000000000010000C18")
+				ret, err := client.GetAccount(
+					libratypes.MustMakeAccountAddress("10000000010000000000000010000C18"))
 				require.Nil(t, err)
-				assert.Nil(t, ret)
-			},
-		},
-		{
-			name: "get account error",
-			call: func(t *testing.T, client libraclient.Client) {
-				ret, err := client.GetAccount("10000000010000000000000010000C1K")
-				require.Error(t, err)
 				assert.Nil(t, ret)
 			},
 		},
@@ -103,7 +97,8 @@ func TestClient(t *testing.T) {
 			name: "get account transaction",
 			call: func(t *testing.T, client libraclient.Client) {
 				ret, err := client.GetAccountTransaction(
-					"000000000000000000000000000000DD", 0, true)
+					libratypes.MustMakeAccountAddress("000000000000000000000000000000DD"),
+					0, true)
 				require.Nil(t, err)
 				assert.NotNil(t, ret)
 			},
@@ -112,17 +107,9 @@ func TestClient(t *testing.T) {
 			name: "get account transaction not found",
 			call: func(t *testing.T, client libraclient.Client) {
 				ret, err := client.GetAccountTransaction(
-					"10000000010000000000000010000C18", 10000000, true)
+					libratypes.MustMakeAccountAddress("10000000010000000000000010000C18"),
+					10000000, true)
 				require.Nil(t, err)
-				assert.Nil(t, ret)
-			},
-		},
-		{
-			name: "get account transaction error",
-			call: func(t *testing.T, client libraclient.Client) {
-				ret, err := client.GetAccountTransaction(
-					"10000000010000000000000010000C1K", 10000000, true)
-				require.Error(t, err)
 				assert.Nil(t, ret)
 			},
 		},
@@ -130,7 +117,8 @@ func TestClient(t *testing.T) {
 			name: "get account transactions",
 			call: func(t *testing.T, client libraclient.Client) {
 				ret, err := client.GetAccountTransactions(
-					"000000000000000000000000000000DD", 0, 10, true)
+					libratypes.MustMakeAccountAddress("000000000000000000000000000000DD"),
+					0, 10, true)
 				require.Nil(t, err)
 				assert.NotEmpty(t, ret)
 			},
@@ -139,7 +127,8 @@ func TestClient(t *testing.T) {
 			name: "get account transactions error",
 			call: func(t *testing.T, client libraclient.Client) {
 				ret, err := client.GetAccountTransactions(
-					"1668f6be25668c1a17cd8caf6b8d2f2K", 0, 10, true)
+					libratypes.MustMakeAccountAddress("1668f6be25668c1a17cd8caf6b8d2f2f"),
+					0, 10000000000, true)
 				require.Error(t, err)
 				assert.Empty(t, ret)
 			},
@@ -164,7 +153,8 @@ func TestClient(t *testing.T) {
 		{
 			name: "get events",
 			call: func(t *testing.T, client libraclient.Client) {
-				account, err := client.GetAccount("000000000000000000000000000000DD")
+				account, err := client.GetAccount(
+					libratypes.MustMakeAccountAddress("000000000000000000000000000000DD"))
 				require.NoError(t, err)
 
 				ret, err := client.GetEvents(account.SentEventsKey, 2, 5)

@@ -9,14 +9,17 @@ import (
 )
 
 const (
-	URL                   = "https://testnet.libra.org/v1"
-	FaucetURL             = "https://testnet.libra.org/mint"
-	ChainID          byte = 2
-	DDAccountAddress      = "000000000000000000000000000000DD"
+	URL            = "https://testnet.libra.org/v1"
+	FaucetURL      = "https://testnet.libra.org/mint"
+	ChainID   byte = 2
 )
 
-// Client is testnet client
-var Client = libraclient.New(ChainID, URL)
+var (
+	// DDAccountAddress is testnet default dd account address
+	DDAccountAddress = libratypes.MustMakeAccountAddress("000000000000000000000000000000DD")
+	// Client is testnet client
+	Client = libraclient.New(ChainID, URL)
+)
 
 // Currencies
 var (

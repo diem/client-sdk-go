@@ -44,7 +44,7 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					account.AccountAddress().Hex(),
+					account.AccountAddress(),
 					0,
 					"0fa27a781a9086e80a870851ea4f1b14090fb8b5bd9933e27447ab806443e08e",
 					uint64(time.Now().Add(2*time.Second).Unix()),
@@ -81,7 +81,7 @@ func TestWaitForTransaction(t *testing.T) {
 				})
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					account.AccountAddress().Hex(),
+					account.AccountAddress(),
 					0,
 					"0fa27a781a9086e80a870851ea4f1b14090fb8b5bd9933e27447ab806443e08e",
 					uint64(time.Now().Add(2*time.Second).Unix()),
@@ -97,7 +97,7 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					account.AccountAddress().Hex(),
+					account.AccountAddress(),
 					0,
 					"invalid-hash",
 					uint64(time.Now().Add(2*time.Second).Unix()),
@@ -128,13 +128,13 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					account.AccountAddress().Hex(),
+					account.AccountAddress(),
 					0,
 					"mismatched hash",
 					uint64(time.Now().Add(time.Second).Unix()),
 					time.Second*5,
 				)
-				assert.EqualError(t, err, "found transaction, but hash does not match, given \"mismatched hash\", but got \"0fa27a781a9086e80a870851ea4f1b14090fb8b5bd9933e27447ab806443e08e\"")
+				assert.EqualError(t, err, "transaction hash does not match, given \"mismatched hash\", but got \"0fa27a781a9086e80a870851ea4f1b14090fb8b5bd9933e27447ab806443e08e\"")
 				assert.Nil(t, ret)
 			},
 		},
@@ -159,7 +159,7 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					account.AccountAddress().Hex(),
+					account.AccountAddress(),
 					0,
 					"0fa27a781a9086e80a870851ea4f1b14090fb8b5bd9933e27447ab806443e08e",
 					uint64(time.Now().Add(time.Second).Unix()),
@@ -179,7 +179,7 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					account.AccountAddress().Hex(),
+					account.AccountAddress(),
 					0,
 					"0fa27a781a9086e80a870851ea4f1b14090fb8b5bd9933e27447ab806443e08e",
 					uint64(1597722856),
@@ -198,7 +198,7 @@ func TestWaitForTransaction(t *testing.T) {
 			call: func(t *testing.T, client libraclient.Client) {
 				account := librakeys.MustGenKeys()
 				ret, err := client.WaitForTransaction(
-					account.AccountAddress().Hex(),
+					account.AccountAddress(),
 					0,
 					"a181a036ba68fcd25a7ba9f3895caf720af7aee4bf86c4d798050a1101e75f71ccd891158c8fa0bf349bbb66fb0ba50b29b6fb29822dc04071aff831735e6402",
 					uint64(1597722856),

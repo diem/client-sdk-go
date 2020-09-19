@@ -20,7 +20,7 @@ func PrintAccountsBalances(title string, sender, receiver *librakeys.Keys) {
 // PrintAccountBalances prints given account balances
 func PrintAccountBalances(name string, account *librakeys.Keys) {
 RetryGetAccount:
-	ret, err := Client.GetAccount(account.AccountAddress().Hex())
+	ret, err := Client.GetAccount(account.AccountAddress())
 	if _, ok := err.(*libraclient.StaleResponseError); ok {
 		// retry to hit another server if got stale response
 		goto RetryGetAccount

@@ -33,6 +33,15 @@ func MakeAccountAddressFromBytes(bytes []byte) (AccountAddress, error) {
 	return ret, nil
 }
 
+// MustMakeAccountAddress panics if parse given string address failed
+func MustMakeAccountAddress(address string) AccountAddress {
+	ret, err := MakeAccountAddress(address)
+	if err != nil {
+		panic(err)
+	}
+	return ret
+}
+
 // Hex returns hex-encoded string of the address
 func (a AccountAddress) Hex() string {
 	return hex.EncodeToString(a[:])

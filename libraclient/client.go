@@ -40,21 +40,32 @@ func (e *StaleResponseError) Error() string {
 	return fmt.Sprintf("stale response error: expected server response ledger %v >= %v", e.Server, e.Client)
 }
 
+// InvalidTransactionError is error for get a transaction with unexpected details (e.g. vm status is failure)
+type InvalidTransactionError struct {
+	Transaction Transaction
+	Msg         string
+}
+
+// Error implements error interface
+func (e *InvalidTransactionError) Error() string {
+	return e.Msg
+}
+
 // Client is Libra client implements high level APIs
 type Client interface {
 	GetCurrencies() ([]*CurrencyInfo, error)
 	GetMetadata() (*Metadata, error)
 	GetMetadataByVersion(uint64) (*Metadata, error)
-	GetAccount(Address) (*Account, error)
-	GetAccountTransaction(Address, uint64, bool) (*Transaction, error)
-	GetAccountTransactions(Address, uint64, uint64, bool) ([]*Transaction, error)
+	GetAccount(libratypes.AccountAddress) (*Account, error)
+	GetAccountTransaction(libratypes.AccountAddress, uint64, bool) (*Transaction, error)
+	GetAccountTransactions(libratypes.AccountAddress, uint64, uint64, bool) ([]*Transaction, error)
 	GetTransactions(uint64, uint64, bool) ([]*Transaction, error)
 	GetEvents(string, uint64, uint64) ([]*Event, error)
 	Submit(signedTxnHex string) error
 	SubmitTransaction(txn *libratypes.SignedTransaction) error
 
 	WaitForTransaction(
-		address Address,
+		address libratypes.AccountAddress,
 		seq uint64,
 		hash string,
 		expirationTimeSec uint64,
@@ -129,7 +140,7 @@ func (c *client) WaitForTransaction3(signedTxnHex string, timeout time.Duration)
 // WaitForTransaction2 waits for given `SignedTransaction`
 func (c *client) WaitForTransaction2(txn *libratypes.SignedTransaction, timeout time.Duration) (*Transaction, error) {
 	return c.WaitForTransaction(
-		hex.EncodeToString(txn.RawTxn.Sender[:]),
+		txn.RawTxn.Sender,
 		txn.RawTxn.SequenceNumber,
 		txn.TransactionHash(),
 		txn.RawTxn.ExpirationTimestampSecs,
@@ -138,7 +149,7 @@ func (c *client) WaitForTransaction2(txn *libratypes.SignedTransaction, timeout 
 }
 
 // WaitForTransaction waits for given (address, sequence number, hash) transaction.
-func (c *client) WaitForTransaction(address Address, seq uint64, hash string, expirationTimeSec uint64, timeout time.Duration) (*Transaction, error) {
+func (c *client) WaitForTransaction(address libratypes.AccountAddress, seq uint64, hash string, expirationTimeSec uint64, timeout time.Duration) (*Transaction, error) {
 	step := time.Millisecond * 500
 	start := time.Now()
 	for {
@@ -154,10 +165,19 @@ func (c *client) WaitForTransaction(address Address, seq uint64, hash string, ex
 		}
 		if txn != nil {
 			if txn.Hash != hash {
-				return nil, fmt.Errorf("found transaction, but hash does not match, given %#v, but got %#v", hash, txn.Hash)
+				return nil, &InvalidTransactionError{
+					Transaction: *txn,
+					Msg: fmt.Sprintf(
+						"transaction hash does not match, given %#v, but got %#v",
+						hash, txn.Hash),
+				}
 			}
 			if txn.VmStatus.Type != VmStatusExecuted {
-				return nil, fmt.Errorf("transaction execution failed: %v", txn.VmStatus)
+				return nil, &InvalidTransactionError{
+					Transaction: *txn,
+					Msg: fmt.Sprintf(
+						"transaction execution failed: %v", txn.VmStatus),
+				}
 
 			}
 			return txn, nil
@@ -201,9 +221,9 @@ func (c *client) GetMetadataByVersion(version uint64) (*Metadata, error) {
 	return &ret, nil
 }
 
-func (c *client) GetAccount(address Address) (*Account, error) {
+func (c *client) GetAccount(address libratypes.AccountAddress) (*Account, error) {
 	var ret Account
-	ok, err := c.call(GetAccount, &ret, address)
+	ok, err := c.call(GetAccount, &ret, address.Hex())
 	if !ok {
 		return nil, err
 	}
@@ -211,18 +231,18 @@ func (c *client) GetAccount(address Address) (*Account, error) {
 	return &ret, nil
 }
 
-func (c *client) GetAccountTransaction(address Address, sequenceNum uint64, includeEvent bool) (*Transaction, error) {
+func (c *client) GetAccountTransaction(address libratypes.AccountAddress, sequenceNum uint64, includeEvent bool) (*Transaction, error) {
 	var ret Transaction
-	ok, err := c.call(GetAccountTransaction, &ret, address, sequenceNum, includeEvent)
+	ok, err := c.call(GetAccountTransaction, &ret, address.Hex(), sequenceNum, includeEvent)
 	if !ok {
 		return nil, err
 	}
 	return &ret, nil
 }
 
-func (c *client) GetAccountTransactions(address Address, start uint64, limit uint64, includeEvent bool) ([]*Transaction, error) {
+func (c *client) GetAccountTransactions(address libratypes.AccountAddress, start uint64, limit uint64, includeEvent bool) ([]*Transaction, error) {
 	var ret []*Transaction
-	_, err := c.call(GetAccountTransactions, &ret, address, start, limit, includeEvent)
+	_, err := c.call(GetAccountTransactions, &ret, address.Hex(), start, limit, includeEvent)
 	if err != nil {
 		return nil, err
 	}

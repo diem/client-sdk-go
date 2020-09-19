@@ -31,7 +31,7 @@ func SubmitAndWait(title string, sender *librakeys.Keys, script libratypes.Scrip
 	fmt.Println(title)
 	address := sender.AccountAddress()
 Retry:
-	account, err := Client.GetAccount(address.Hex())
+	account, err := Client.GetAccount(address)
 	if err != nil {
 		if _, ok := err.(*libraclient.StaleResponseError); ok {
 			// retry to hit another server if got stale response

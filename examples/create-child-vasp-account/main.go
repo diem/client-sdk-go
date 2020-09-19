@@ -16,7 +16,7 @@ import (
 func main() {
 	parentVASP := testnet.GenAccount()
 	parentVASPAddress := parentVASP.AccountAddress()
-	account, err := exampleutils.Client.GetAccount(parentVASPAddress.Hex())
+	account, err := exampleutils.Client.GetAccount(parentVASPAddress)
 	if err != nil {
 		panic(err)
 	}
@@ -38,7 +38,7 @@ func main() {
 		),
 	)
 
-	child, err := exampleutils.Client.GetAccount(childVASPAddress.Hex())
+	child, err := exampleutils.Client.GetAccount(childVASPAddress)
 	if err != nil {
 		panic(err)
 	}

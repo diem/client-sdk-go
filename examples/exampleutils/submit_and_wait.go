@@ -49,7 +49,7 @@ Retry:
 		address,
 		sequenceNum,
 		script,
-		1000, 0, "LBR",
+		1_000_000, 0, "LBR",
 		expiration,
 		testnet.ChainID,
 	)

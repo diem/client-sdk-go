@@ -1,6 +1,7 @@
 // Copyright (c) The Libra Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// Provides a simple json-rpc client stub for testing client without connecting to remote server.
 package jsonrpctest
 
 import (

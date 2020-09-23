@@ -8,6 +8,7 @@ import (
 	"fmt"
 )
 
+// AccountAddressLength account address bytes length
 const AccountAddressLength = 16
 
 // MakeAccountAddress creates account address from given hex string,

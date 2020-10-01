@@ -11,16 +11,16 @@ libra-client-sdk-go is the official Libra Client SDK for the Go programming lang
 - librakeys: keys utils, including generating public & private keys for testing, creating auth key and account address from public key.
 - librasigner: sign transaction logic
 - txnmetadata: utils for creating peer to peer transaction metadata. (LIP-4)
-- libraid: encoding & decodeing Libra Account Identifier and Intent URL. (LIP-5)
+- libraid: encoding & decoding Libra Account Identifier and Intent URL. (LIP-5)
 - testnet: testnet utils
 - stdlib: move stdlib script utils. This is generated code, for constructing transaction script playload.
-- libratypes: Libra onchain data structure types. Mostly generated code with small extension code for attaching handy functions to generated types.
+- libratypes: Libra on-chain data structure types. Mostly generated code with small extension code for attaching handy functions to generated types.
 - [examples](../../tree/master/examples): examples of how to use this SDK.
-  - [submit transaction and wait](../master/examples/exampleutils/submit_and_wait.go): this example shows how to submit transaction and wait for it's result; it also shows how to handle stale response error in various cases.
-  - [create child VASP account](../master/examples/create-child-vasp-account/main.go): this example shows how to create child VASP account for a parent VASP account.
-  - [p2p transfer](../master/examples/p2p-transfers/main.go): this example shows 4 different types p2p transfer between custodial accounts and non-custodial accounts.
-  - [refund](../master/examples/refund/main.go): this example shows peer to peer transfer from custodial account to non-custodial account, and then refund the amount.
-  - [intent identifier](../master/examples/intent-identifier/main.go): this example shows how to use libraid for encoding and decoding intent identifier / url.
+  - [submit transaction and wait](../master/examples/exampleutils/submit_and_wait.go): this example shows how to submit a transaction and wait for its result; it also shows how to handle a stale response error in various cases.
+  - [create child VASP account](../master/examples/create-child-vasp-account/main.go): this example shows how to create ChildVASP account for a ParentVASP account.
+  - [p2p transfer](../master/examples/p2p-transfers/main.go): this example shows 4 different types p2p transfers between custodial accounts and non-custodial accounts.
+  - [refund](../master/examples/refund/main.go): this example shows peer to peer transfers from custodial accounts to non-custodial accounts, and then refunds the amount.
+  - [intent identifier](../master/examples/intent-identifier/main.go): this example shows how to use libraid for encoding and decoding the intent identifier / url.
 
 ## Installing
 
@@ -51,7 +51,7 @@ make gen
 
 # API Documentation
 
-The Go Client SDK API documentation is currently available on [godoc.org](https://godoc.org/github.com/libra/libra-client-sdk-go).
+The Go Client SDK API documentation is currently available at [godoc.org](https://godoc.org/github.com/libra/libra-client-sdk-go).
 
 # License
 

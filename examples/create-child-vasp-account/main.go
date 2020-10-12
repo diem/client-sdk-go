@@ -30,7 +30,7 @@ func main() {
 		"create child vasp account transaction",
 		parentVASP,
 		stdlib.EncodeCreateChildVaspAccountScript(
-			testnet.LBR,
+			testnet.Coin1,
 			childVASPAddress,
 			childAuthKey.Prefix(),
 			false,

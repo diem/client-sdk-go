@@ -36,13 +36,13 @@ func TestEncodeDecodeIntent(t *testing.T) {
 		intent := libraid.Intent{
 			Account: *account,
 			Params: libraid.Params{
-				Currency: "LBR",
+				Currency: "Coin1",
 				Amount:   &amount,
 			},
 		}
 		intentEncode, err := intent.Encode()
 		require.NoError(t, err)
-		assert.Equal(t, fmt.Sprintf("libra://%s?am=123&c=LBR", accountEncode), intentEncode)
+		assert.Equal(t, fmt.Sprintf("libra://%s?am=123&c=Coin1", accountEncode), intentEncode)
 
 		ret, err := libraid.DecodeToIntent(libraid.MainnetPrefix, intentEncode)
 		require.NoError(t, err)

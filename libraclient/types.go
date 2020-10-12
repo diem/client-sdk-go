@@ -26,7 +26,7 @@ type EventData = librajsonrpctypes.EventData
 type Event = librajsonrpctypes.Event
 
 // Metadata is get_metadata method response
-type Metadata = librajsonrpctypes.BlockMetadata
+type Metadata = librajsonrpctypes.Metadata
 
 // Script represents decoded transaction script arguments
 type Script = librajsonrpctypes.Script

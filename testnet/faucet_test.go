@@ -14,12 +14,12 @@ import (
 
 func TestMint(t *testing.T) {
 	keys := librakeys.MustGenKeys()
-	testnet.MustMint(keys.AuthKey().Hex(), 1000, "LBR")
+	testnet.MustMint(keys.AuthKey().Hex(), 1000, "Coin1")
 	account, err := testnet.Client.GetAccount(keys.AccountAddress())
 	require.NoError(t, err)
 
 	assert.Len(t, account.Balances, 1)
-	assert.Equal(t, "LBR", account.Balances[0].Currency)
+	assert.Equal(t, "Coin1", account.Balances[0].Currency)
 	assert.Equal(t, uint64(1000), account.Balances[0].Amount)
 }
 

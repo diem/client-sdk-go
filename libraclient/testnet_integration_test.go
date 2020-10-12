@@ -185,7 +185,7 @@ func TestClient(t *testing.T) {
 		{
 			name: "submit: transaction hex-encoded bytes",
 			call: func(t *testing.T, client libraclient.Client) {
-				var currencyCode = "LBR"
+				var currencyCode = "Coin1"
 				var sequenceNum uint64 = 0
 				var amount uint64 = 10
 				account1 := testnet.GenAccount()
@@ -216,7 +216,7 @@ func TestClient(t *testing.T) {
 		{
 			name: "submit transaction: with multi-signatures",
 			call: func(t *testing.T, client libraclient.Client) {
-				var currencyCode = "LBR"
+				var currencyCode = "Coin1"
 				var sequenceNum uint64 = 0
 				var amount uint64 = 10
 				account1 := testnet.GenMultiSigAccount()

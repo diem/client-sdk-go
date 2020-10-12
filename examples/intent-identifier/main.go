@@ -15,7 +15,7 @@ import (
 func main() {
 	merchant := librakeys.MustGenKeys()
 	address := merchant.AccountAddress()
-	currency := "LBR"
+	currency := "Coin1"
 	amount := uint64(5000)
 	account := libraid.NewAccount(
 		libraid.TestnetPrefix, address, libratypes.EmptySubAddress)

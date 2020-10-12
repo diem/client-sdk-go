@@ -84,7 +84,7 @@ func TestParseServerResponseJson(t *testing.T) {
 		{
 			name: "get-latest-metadata.json",
 			unmarshal: func(t *testing.T, resp *jsonrpc.Response) interface{} {
-				var result librajsonrpctypes.BlockMetadata
+				var result librajsonrpctypes.Metadata
 				ok, err := resp.UnmarshalResult(&result)
 				assert.True(t, ok)
 				require.NoError(t, err)
@@ -121,14 +121,20 @@ func TestParseServerResponseJson(t *testing.T) {
 				return &result
 			},
 		},
+		{
+			name: "get-account-transaction-with-events.json",
+			unmarshal: func(t *testing.T, resp *jsonrpc.Response) interface{} {
+				var result librajsonrpctypes.Transaction
+				ok, err := resp.UnmarshalResult(&result)
+				assert.True(t, ok)
+				require.NoError(t, err)
+				return &result
+			},
+		},
 	}
 	wd, _ := os.Getwd()
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			defer func() {
-				r := recover()
-				assert.Nil(t, r)
-			}()
 			bytes, err := ioutil.ReadFile(wd + "/testdata/" + tc.name)
 			var data Data
 			err = json.Unmarshal(bytes, &data)

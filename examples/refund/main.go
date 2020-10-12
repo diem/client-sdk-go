@@ -12,7 +12,7 @@ import (
 	"github.com/libra/libra-client-sdk-go/txnmetadata"
 )
 
-const currency = "LBR"
+const currency = "Coin1"
 
 func main() {
 	sender, senderUserSubAddress := createCustodialAccount()
@@ -98,7 +98,7 @@ func createCustodialAccount() (*librakeys.Keys, libratypes.SubAddress) {
 	parentVASP := testnet.GenAccount()
 	childVASPAccount := librakeys.MustGenKeys()
 	script := stdlib.EncodeCreateChildVaspAccountScript(
-		testnet.LBR,
+		testnet.Coin1,
 		childVASPAccount.AccountAddress(),
 		childVASPAccount.AuthKey().Prefix(),
 		false,

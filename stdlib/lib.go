@@ -117,10 +117,12 @@ func (*ScriptCall__AddRecoveryRotationCapability) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category             | Error Reason                                                           | Description                                                                                |
 // | ----------------           | --------------                                                         | -------------                                                                              |
-// | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ELIBRA_ROOT`                                           | The sending account is not the Libra Root account.                                         |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`                                         | A `SlidingNonce` resource is not published under `lr_account`.                             |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`                                         | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`                                         | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED`                                | The `sliding_nonce` has been previously recorded.                                          |
+// | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ELIBRA_ROOT`                                           | The sending account is not the Libra Root account.                                         |
+// | `Errors::REQUIRES_ROLE`    | `Roles::ELIBRA_ROOT`                                                   | The sending account is not the Libra Root account.                                         |
 // | `Errors::INVALID_ARGUMENT` | `LibraTransactionPublishingOption::EINVALID_SCRIPT_HASH`               | The script `hash` is an invalid length.                                                    |
 // | `Errors::INVALID_ARGUMENT` | `LibraTransactionPublishingOption::EALLOWLIST_ALREADY_CONTAINS_SCRIPT` | The on-chain allowlist already contains the script `hash`.                                 |
 type ScriptCall__AddToScriptAllowList struct {
@@ -156,11 +158,13 @@ func (*ScriptCall__AddToScriptAllowList) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category             | Error Reason                                  | Description                                                                                                                               |
 // | ----------------           | --------------                                | -------------                                                                                                                             |
-// | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ELIBRA_ROOT`                  | The sending account is not the Libra Root account.                                                                                        |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`                | A `SlidingNonce` resource is not published under `lr_account`.                                                                            |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`                | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not.                                                |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`                | The `sliding_nonce` is too far in the future.                                                                                             |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED`       | The `sliding_nonce` has been previously recorded.                                                                                         |
-// | EMPTY                      | 0                                             | The provided `validator_name` does not match the already-recorded human name for the validator.                                           |
+// | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ELIBRA_ROOT`                  | The sending account is not the Libra Root account.                                                                                        |
+// | `Errors::REQUIRES_ROLE`    | `Roles::ELIBRA_ROOT`                          | The sending account is not the Libra Root account.                                                                                        |
+// | 0                          | 0                                             | The provided `validator_name` does not match the already-recorded human name for the validator.                                           |
 // | `Errors::INVALID_ARGUMENT` | `LibraSystem::EINVALID_PROSPECTIVE_VALIDATOR` | The validator to be added does not have a `ValidatorConfig::ValidatorConfig` resource published under it, or its `config` field is empty. |
 // | `Errors::INVALID_ARGUMENT` | `LibraSystem::EALREADY_A_VALIDATOR`           | The `validator_address` account is already a registered validator.                                                                        |
 //
@@ -217,6 +221,7 @@ func (*ScriptCall__AddValidatorAndReconfigure) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category                | Error Reason                            | Description                                                                                           |
 // | ----------------              | --------------                          | -------------                                                                                         |
+// | `Errors::NOT_PUBLISHED`       | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `account`.                                           |
 // | `Errors::INVALID_ARGUMENT`    | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not.            |
 // | `Errors::INVALID_ARGUMENT`    | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                                         |
 // | `Errors::INVALID_ARGUMENT`    | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                                     |
@@ -317,6 +322,8 @@ func (*ScriptCall__BurnTxnFees) isScriptCall() {}
 // | `Errors::NOT_PUBLISHED`       | `Libra::ECURRENCY_INFO`                          | The specified `Token` is not a registered currency on-chain.                                          |
 // | `Errors::INVALID_ARGUMENT`    | `LibraAccount::ECOIN_DEPOSIT_IS_ZERO`            | The value held in the preburn resource was zero.                                                      |
 // | `Errors::INVALID_ARGUMENT`    | `LibraAccount::EPAYEE_CANT_ACCEPT_CURRENCY_TYPE` | The account at `preburn_address` doesn't have a balance resource for `Token`.                         |
+// | `Errors::LIMIT_EXCEEDED`      | `LibraAccount::EDEPOSIT_EXCEEDS_LIMITS`          | The depositing of the funds held in the prebun area would exceed the `account`'s account limits.      |
+// | `Errors::INVALID_STATE`       | `DualAttestation::EPAYEE_COMPLIANCE_KEY_NOT_SET` | The `account` does not have a compliance key set on it but dual attestion checking was performed.     |
 //
 // # Related Scripts
 // * `Script::burn_txn_fees`
@@ -367,6 +374,7 @@ func (*ScriptCall__CancelBurn) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category              | Error Reason                                             | Description                                                                              |
 // | ----------------            | --------------                                           | -------------                                                                            |
+// | `Errors::INVALID_ARGUMENT`  | `LibraAccount::EMALFORMED_AUTHENTICATION_KEY`            | The `auth_key_prefix` was not of length 32.                                              |
 // | `Errors::REQUIRES_ROLE`     | `Roles::EPARENT_VASP`                                    | The sending account wasn't a Parent VASP account.                                        |
 // | `Errors::ALREADY_PUBLISHED` | `Roles::EROLE_ID`                                        | The `child_address` address is already taken.                                            |
 // | `Errors::LIMIT_EXCEEDED`    | `VASP::ETOO_MANY_CHILDREN`                               | The sending account has reached the maximum number of allowed child accounts.            |
@@ -374,10 +382,11 @@ func (*ScriptCall__CancelBurn) isScriptCall() {}
 // | `Errors::INVALID_STATE`     | `LibraAccount::EWITHDRAWAL_CAPABILITY_ALREADY_EXTRACTED` | The withdrawal capability for the sending account has already been extracted.            |
 // | `Errors::NOT_PUBLISHED`     | `LibraAccount::EPAYER_DOESNT_HOLD_CURRENCY`              | The sending account doesn't have a balance in `CoinType`.                                |
 // | `Errors::LIMIT_EXCEEDED`    | `LibraAccount::EINSUFFICIENT_BALANCE`                    | The sending account doesn't have at least `child_initial_balance` of `CoinType` balance. |
+// | `Errors::INVALID_ARGUMENT`  | `LibraAccount::ECANNOT_CREATE_AT_VM_RESERVED`            | The `child_address` is the reserved address 0x0.                                         |
 //
 // # Related Scripts
 // * `Script::create_parent_vasp_account`
-// * `Script::add_currency`
+// * `Script::add_currency_to_account`
 // * `Script::rotate_authentication_key`
 // * `Script::add_recovery_rotation_capability`
 // * `Script::create_recovery_address`
@@ -420,10 +429,12 @@ func (*ScriptCall__CreateChildVaspAccount) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category              | Error Reason                            | Description                                                                                |
 // | ----------------            | --------------                          | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`     | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `tc_account`.                             |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                          |
 // | `Errors::REQUIRES_ADDRESS`  | `CoreAddresses::ETREASURY_COMPLIANCE`   | The sending account is not the Treasury Compliance account.                                |
+// | `Errors::REQUIRES_ROLE`     | `Roles::ETREASURY_COMPLIANCE`           | The sending account is not the Treasury Compliance account.                                |
 // | `Errors::NOT_PUBLISHED`     | `Libra::ECURRENCY_INFO`                 | The `Currency` is not a registered currency on-chain.                                      |
 // | `Errors::ALREADY_PUBLISHED` | `Roles::EROLE_ID`                       | The `addr` address is already taken.                                                       |
 //
@@ -466,16 +477,18 @@ func (*ScriptCall__CreateDesignatedDealer) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category              | Error Reason                            | Description                                                                                |
 // | ----------------            | --------------                          | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`     | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `tc_account`.                             |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                          |
-// | `Errors::REQUIRES_ADDRESS`  | `CoreAddresses::ETREASURY_COMPLIANCE`   | The sending account is the Treasury Compliance account.                                    |
+// | `Errors::REQUIRES_ADDRESS`  | `CoreAddresses::ETREASURY_COMPLIANCE`   | The sending account is not the Treasury Compliance account.                                |
+// | `Errors::REQUIRES_ROLE`     | `Roles::ETREASURY_COMPLIANCE`           | The sending account is not the Treasury Compliance account.                                |
 // | `Errors::NOT_PUBLISHED`     | `Libra::ECURRENCY_INFO`                 | The `CoinType` is not a registered currency on-chain.                                      |
 // | `Errors::ALREADY_PUBLISHED` | `Roles::EROLE_ID`                       | The `new_account_address` address is already taken.                                        |
 //
 // # Related Scripts
 // * `Script::create_child_vasp_account`
-// * `Script::add_currency`
+// * `Script::add_currency_to_account`
 // * `Script::rotate_authentication_key`
 // * `Script::add_recovery_rotation_capability`
 // * `Script::create_recovery_address`
@@ -550,10 +563,12 @@ func (*ScriptCall__CreateRecoveryAddress) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category              | Error Reason                            | Description                                                                                |
 // | ----------------            | --------------                          | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`     | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `lr_account`.                             |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                          |
 // | `Errors::REQUIRES_ADDRESS`  | `CoreAddresses::ELIBRA_ROOT`            | The sending account is not the Libra Root account.                                         |
+// | `Errors::REQUIRES_ROLE`     | `Roles::ELIBRA_ROOT`                    | The sending account is not the Libra Root account.                                         |
 // | `Errors::ALREADY_PUBLISHED` | `Roles::EROLE_ID`                       | The `new_account_address` address is already taken.                                        |
 //
 // # Related Scripts
@@ -593,12 +608,14 @@ func (*ScriptCall__CreateValidatorAccount) isScriptCall() {}
 // | `human_name`          | `vector<u8>` | ASCII-encoded human name for the validator.                                                     |
 //
 // # Common Abort Conditions
-// | Error Category | Error Reason | Description |
-// |----------------|--------------|-------------|
+// | Error Category              | Error Reason                            | Description                                                                                |
+// | ----------------            | --------------                          | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`     | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `lr_account`.                             |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                          |
 // | `Errors::REQUIRES_ADDRESS`  | `CoreAddresses::ELIBRA_ROOT`            | The sending account is not the Libra Root account.                                         |
+// | `Errors::REQUIRES_ROLE`     | `Roles::ELIBRA_ROOT`                    | The sending account is not the Libra Root account.                                         |
 // | `Errors::ALREADY_PUBLISHED` | `Roles::EROLE_ID`                       | The `new_account_address` address is already taken.                                        |
 //
 // # Related Scripts
@@ -650,10 +667,12 @@ func (*ScriptCall__CreateValidatorOperatorAccount) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category             | Error Reason                                 | Description                                                                                |
 // | ----------------           | --------------                               | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`               | A `SlidingNonce` resource is not published under `tc_account`.                             |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`               | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`               | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED`      | The `sliding_nonce` has been previously recorded.                                          |
 // | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ETREASURY_COMPLIANCE`        | The sending account is not the Treasury Compliance account.                                |
+// | `Errors::REQUIRES_ROLE`    | `Roles::ETREASURY_COMPLIANCE`                | The sending account is not the Treasury Compliance account.                                |
 // | `Errors::INVALID_ARGUMENT` | `AccountFreezing::ECANNOT_FREEZE_TC`         | `to_freeze_account` was the Treasury Compliance account (`0xB1E55ED`).                     |
 // | `Errors::INVALID_ARGUMENT` | `AccountFreezing::ECANNOT_FREEZE_LIBRA_ROOT` | `to_freeze_account` was the Libra Root account (`0xA550C18`).                              |
 //
@@ -665,51 +684,6 @@ type ScriptCall__FreezeAccount struct {
 }
 
 func (*ScriptCall__FreezeAccount) isScriptCall() {}
-
-// # Summary
-// Mints LBR from the sending account's constituent coins by depositing in the
-// on-chain LBR reserve. Deposits the newly-minted LBR into the sending
-// account. Can be sent by any account that can hold balances for the constituent
-// currencies for LBR and LBR.
-//
-// # Technical Description
-// Mints `amount_lbr` LBR from the sending account's constituent coins and deposits the
-// resulting LBR into the sending account.
-//
-// ## Events
-// Successful execution of this script emits three events:
-// * A `LibraAccount::SentPaymentEvent` with the Coin1 currency code, and a
-// `LibraAccount::SentPaymentEvent` with the Coin2 currency code on `account`'s
-// `LibraAccount::LibraAccount` `sent_events` handle with the `amounts` for each event being the
-// components amounts of `amount_lbr` LBR; and
-// * A `LibraAccount::ReceivedPaymentEvent` on `account`'s `LibraAccount::LibraAccount`
-// `received_events` handle with the LBR currency code and amount field equal to `amount_lbr`.
-//
-// # Parameters
-// | Name         | Type      | Description                                      |
-// | ------       | ------    | -------------                                    |
-// | `account`    | `&signer` | The signer reference of the sending account.     |
-// | `amount_lbr` | `u64`     | The amount of LBR (in microlibra) to be created. |
-//
-// # Common Abort Conditions
-// | Error Category             | Error Reason                                     | Description                                                                      |
-// | ----------------           | --------------                                   | -------------                                                                    |
-// | `Errors::NOT_PUBLISHED`    | `LibraAccount::EPAYER_DOESNT_HOLD_CURRENCY`      | `account` doesn't hold a balance in one of the backing currencies of LBR.        |
-// | `Errors::INVALID_ARGUMENT` | `LBR::EZERO_LBR_MINT_NOT_ALLOWED`                | `amount_lbr` passed in was zero.                                                 |
-// | `Errors::LIMIT_EXCEEDED`   | `LBR::ECOIN1`                                    | The amount of `Coin1` needed for the specified LBR would exceed `LBR::MAX_U64`.  |
-// | `Errors::LIMIT_EXCEEDED`   | `LBR::ECOIN2`                                    | The amount of `Coin2` needed for the specified LBR would exceed `LBR::MAX_U64`.  |
-// | `Errors::INVALID_STATE`    | `Libra::EMINTING_NOT_ALLOWED`                    | Minting of LBR is not allowed currently.                                         |
-// | `Errors::INVALID_ARGUMENT` | `LibraAccount::EPAYEE_CANT_ACCEPT_CURRENCY_TYPE` | `account` doesn't hold a balance in LBR.                                         |
-// | `Errors::LIMIT_EXCEEDED`   | `LibraAccount::EWITHDRAWAL_EXCEEDS_LIMITS`       | `account` has exceeded its daily withdrawal limits for the backing coins of LBR. |
-// | `Errors::LIMIT_EXCEEDED`   | `LibraAccount::EDEPOSIT_EXCEEDS_LIMITS`          | `account` has exceeded its daily deposit limits for LBR.                         |
-//
-// # Related Scripts
-// * `Script::unmint_lbr`
-type ScriptCall__MintLbr struct {
-	AmountLbr uint64
-}
-
-func (*ScriptCall__MintLbr) isScriptCall() {}
 
 // # Summary
 // Transfers a given number of coins in a specified currency from one account to another.
@@ -920,12 +894,15 @@ func (*ScriptCall__RegisterValidatorConfig) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category             | Error Reason                            | Description                                                                                     |
 // | ----------------           | --------------                          | -------------                                                                                   |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `lr_account`.                                  |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not.      |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                                   |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                               |
-// | EMPTY                      | 0                                       | The provided `validator_name` does not match the already-recorded human name for the validator. |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`          | The sending account is not the Libra Root account or Treasury Compliance account                |
+// | 0                          | 0                                       | The provided `validator_name` does not match the already-recorded human name for the validator. |
 // | `Errors::INVALID_ARGUMENT` | `LibraSystem::ENOT_AN_ACTIVE_VALIDATOR` | The validator to be removed is not in the validator set.                                        |
 // | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ELIBRA_ROOT`            | The sending account is not the Libra Root account.                                              |
+// | `Errors::REQUIRES_ROLE`    | `Roles::ELIBRA_ROOT`                    | The sending account is not the Libra Root account.                                              |
 //
 // # Related Scripts
 // * `Script::create_validator_account`
@@ -994,6 +971,7 @@ func (*ScriptCall__RotateAuthenticationKey) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category             | Error Reason                                               | Description                                                                                |
 // | ----------------           | --------------                                             | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`                             | A `SlidingNonce` resource is not published under `account`.                                |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`                             | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`                             | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED`                    | The `sliding_nonce` has been previously recorded.                                          |
@@ -1031,6 +1009,7 @@ func (*ScriptCall__RotateAuthenticationKeyWithNonce) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category             | Error Reason                                               | Description                                                                                                |
 // | ----------------           | --------------                                             | -------------                                                                                              |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`                             | A `SlidingNonce` resource is not published under `lr_account`.                                             |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`                             | The `sliding_nonce` in `lr_account` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`                             | The `sliding_nonce` in `lr_account` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED`                    | The `sliding_nonce` in` lr_account` has been previously recorded.                                          |
@@ -1186,6 +1165,7 @@ func (*ScriptCall__RotateSharedEd25519PublicKey) isScriptCall() {}
 // | Error Category             | Error Reason                                   | Description                                                                                           |
 // | ----------------           | --------------                                 | -------------                                                                                         |
 // | `Errors::NOT_PUBLISHED`    | `ValidatorConfig::EVALIDATOR_CONFIG`           | `validator_address` does not have a `ValidatorConfig::ValidatorConfig` resource published under it.   |
+// | `Errors::REQUIRES_ROLE     | `Roles::EVALIDATOR_OPERATOR`                   | `validator_operator_account` does not have a Validator Operator role.                                 |
 // | `Errors::INVALID_ARGUMENT` | `ValidatorConfig::EINVALID_TRANSACTION_SENDER` | `validator_operator_account` is not the registered operator for the validator at `validator_address`. |
 // | `Errors::INVALID_ARGUMENT` | `ValidatorConfig::EINVALID_CONSENSUS_KEY`      | `consensus_pubkey` is not a valid ed25519 public key.                                                 |
 //
@@ -1231,7 +1211,7 @@ func (*ScriptCall__SetValidatorConfigAndReconfigure) isScriptCall() {}
 // | Error Category             | Error Reason                                          | Description                                                                                                                                                  |
 // | ----------------           | --------------                                        | -------------                                                                                                                                                |
 // | `Errors::NOT_PUBLISHED`    | `ValidatorOperatorConfig::EVALIDATOR_OPERATOR_CONFIG` | The `ValidatorOperatorConfig::ValidatorOperatorConfig` resource is not published under `operator_account`.                                                   |
-// | EMPTY                      | 0                                                     | The `human_name` field of the `ValidatorOperatorConfig::ValidatorOperatorConfig` resource under `operator_account` does not match the provided `human_name`. |
+// | 0                          | 0                                                     | The `human_name` field of the `ValidatorOperatorConfig::ValidatorOperatorConfig` resource under `operator_account` does not match the provided `human_name`. |
 // | `Errors::REQUIRES_ROLE`    | `Roles::EVALIDATOR`                                   | `account` does not have a Validator account role.                                                                                                            |
 // | `Errors::INVALID_ARGUMENT` | `ValidatorConfig::ENOT_A_VALIDATOR_OPERATOR`          | The account at `operator_account` does not have a `ValidatorOperatorConfig::ValidatorOperatorConfig` resource.                                               |
 // | `Errors::NOT_PUBLISHED`    | `ValidatorConfig::EVALIDATOR_CONFIG`                  | A `ValidatorConfig::ValidatorConfig` is not published under `account`.                                                                                       |
@@ -1277,11 +1257,13 @@ func (*ScriptCall__SetValidatorOperator) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category             | Error Reason                                          | Description                                                                                                                                                  |
 // | ----------------           | --------------                                        | -------------                                                                                                                                                |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`                        | A `SlidingNonce` resource is not published under `lr_account`.                                                                                               |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`                        | The `sliding_nonce` in `lr_account` is too old and it's impossible to determine if it's duplicated or not.                                                   |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`                        | The `sliding_nonce` in `lr_account` is too far in the future.                                                                                                |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED`               | The `sliding_nonce` in` lr_account` has been previously recorded.                                                                                            |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`                        | The sending account is not the Libra Root account or Treasury Compliance account                                                                             |
 // | `Errors::NOT_PUBLISHED`    | `ValidatorOperatorConfig::EVALIDATOR_OPERATOR_CONFIG` | The `ValidatorOperatorConfig::ValidatorOperatorConfig` resource is not published under `operator_account`.                                                   |
-// | EMPTY                      | 0                                                     | The `human_name` field of the `ValidatorOperatorConfig::ValidatorOperatorConfig` resource under `operator_account` does not match the provided `human_name`. |
+// | 0                          | 0                                                     | The `human_name` field of the `ValidatorOperatorConfig::ValidatorOperatorConfig` resource under `operator_account` does not match the provided `human_name`. |
 // | `Errors::REQUIRES_ROLE`    | `Roles::EVALIDATOR`                                   | `account` does not have a Validator account role.                                                                                                            |
 // | `Errors::INVALID_ARGUMENT` | `ValidatorConfig::ENOT_A_VALIDATOR_OPERATOR`          | The account at `operator_account` does not have a `ValidatorOperatorConfig::ValidatorOperatorConfig` resource.                                               |
 // | `Errors::NOT_PUBLISHED`    | `ValidatorConfig::EVALIDATOR_CONFIG`                  | A `ValidatorConfig::ValidatorConfig` is not published under `account`.                                                                                       |
@@ -1338,16 +1320,19 @@ func (*ScriptCall__SetValidatorOperatorWithNonceAdmin) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category                | Error Reason                                 | Description                                                                                                                  |
 // | ----------------              | --------------                               | -------------                                                                                                                |
+// | `Errors::NOT_PUBLISHED`       | `SlidingNonce::ESLIDING_NONCE`               | A `SlidingNonce` resource is not published under `tc_account`.                                                               |
 // | `Errors::INVALID_ARGUMENT`    | `SlidingNonce::ENONCE_TOO_OLD`               | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not.                                   |
 // | `Errors::INVALID_ARGUMENT`    | `SlidingNonce::ENONCE_TOO_NEW`               | The `sliding_nonce` is too far in the future.                                                                                |
 // | `Errors::INVALID_ARGUMENT`    | `SlidingNonce::ENONCE_ALREADY_RECORDED`      | The `sliding_nonce` has been previously recorded.                                                                            |
 // | `Errors::REQUIRES_ADDRESS`    | `CoreAddresses::ETREASURY_COMPLIANCE`        | `tc_account` is not the Treasury Compliance account.                                                                         |
+// | `Errors::REQUIRES_ROLE`       | `Roles::ETREASURY_COMPLIANCE`                | `tc_account` is not the Treasury Compliance account.                                                                         |
 // | `Errors::INVALID_ARGUMENT`    | `DesignatedDealer::EINVALID_MINT_AMOUNT`     | `mint_amount` is zero.                                                                                                       |
 // | `Errors::NOT_PUBLISHED`       | `DesignatedDealer::EDEALER`                  | `DesignatedDealer::Dealer` or `DesignatedDealer::TierInfo<CoinType>` resource does not exist at `designated_dealer_address`. |
 // | `Errors::INVALID_ARGUMENT`    | `DesignatedDealer::EINVALID_TIER_INDEX`      | The `tier_index` is out of bounds.                                                                                           |
 // | `Errors::INVALID_ARGUMENT`    | `DesignatedDealer::EINVALID_AMOUNT_FOR_TIER` | `mint_amount` exceeds the maximum allowed amount for `tier_index`.                                                           |
 // | `Errors::REQUIRES_CAPABILITY` | `Libra::EMINT_CAPABILITY`                    | `tc_account` does not have a `Libra::MintCapability<CoinType>` resource published under it.                                  |
 // | `Errors::INVALID_STATE`       | `Libra::EMINTING_NOT_ALLOWED`                | Minting is not currently allowed for `CoinType` coins.                                                                       |
+// | `Errors::LIMIT_EXCEEDED`      | `LibraAccount::EDEPOSIT_EXCEEDS_LIMITS`      | The depositing of the funds would exceed the `account`'s account limits.                                                     |
 //
 // # Related Scripts
 // * `Script::create_designated_dealer`
@@ -1388,6 +1373,7 @@ func (*ScriptCall__TieredMint) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category             | Error Reason                            | Description                                                                                |
 // | ----------------           | --------------                          | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `account`.                                |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                          |
@@ -1401,48 +1387,6 @@ type ScriptCall__UnfreezeAccount struct {
 }
 
 func (*ScriptCall__UnfreezeAccount) isScriptCall() {}
-
-// # Summary
-// Withdraws a specified amount of LBR from the transaction sender's account, and unstaples the
-// withdrawn LBR into its constituent coins. Deposits each of the constituent coins to the
-// transaction sender's balances. Any account that can hold balances that has the correct balances
-// may send this transaction.
-//
-// # Technical Description
-// Withdraws `amount_lbr` LBR coins from the `LibraAccount::Balance<LBR::LBR>` balance held under
-// `account`. Withdraws the backing coins for the LBR coins from the on-chain reserve in the
-// `LBR::Reserve` resource published under `0xA550C18`. It then deposits each of the backing coins
-// into balance resources published under `account`.
-//
-// ## Events
-// Successful execution of this transaction will emit two `LibraAccount::SentPaymentEvent`s. One
-// for each constituent currency that is unstapled and returned to the sending `account`'s
-// balances.
-//
-// # Parameters
-// | Name         | Type      | Description                                                     |
-// | ------       | ------    | -------------                                                   |
-// | `account`    | `&signer` | The signer reference of the sending account of the transaction. |
-// | `amount_lbr` | `u64`     | The amount of microlibra to unstaple.                           |
-//
-// # Common Abort Conditions
-// | Error Category             | Error Reason                                             | Description                                                                               |
-// | ----------------           | --------------                                           | -------------                                                                             |
-// | `Errors::INVALID_STATE`    | `LibraAccount::EWITHDRAWAL_CAPABILITY_ALREADY_EXTRACTED` | The `LibraAccount::WithdrawCapability` for `account` has previously been extracted.       |
-// | `Errors::NOT_PUBLISHED`    | `LibraAccount::EPAYER_DOESNT_HOLD_CURRENCY`              | `account` doesn't have a balance in LBR.                                                  |
-// | `Errors::LIMIT_EXCEEDED`   | `LibraAccount::EINSUFFICIENT_BALANCE`                    | `amount_lbr` is greater than the balance of LBR in `account`.                             |
-// | `Errors::INVALID_ARGUMENT` | `Libra::ECOIN`                                           | `amount_lbr` is zero.                                                                     |
-// | `Errors::LIMIT_EXCEEDED`   | `LibraAccount::EWITHDRAWAL_EXCEEDS_LIMITS`               | `account` has exceeded its daily withdrawal limits for LBR.                               |
-// | `Errors::LIMIT_EXCEEDED`   | `LibraAccount::EDEPOSIT_EXCEEDS_LIMITS`                  | `account` has exceeded its daily deposit limits for one of the backing currencies of LBR. |
-// | `Errors::INVALID_ARGUMENT` | `LibraAccount::EPAYEE_CANT_ACCEPT_CURRENCY_TYPE`         | `account` doesn't hold a balance in one or both of the backing currencies of LBR.         |
-//
-// # Related Scripts
-// * `Script::mint_lbr`
-type ScriptCall__UnmintLbr struct {
-	AmountLbr uint64
-}
-
-func (*ScriptCall__UnmintLbr) isScriptCall() {}
 
 // # Summary
 // Update the dual attestation limit on-chain. Defined in terms of micro-LBR.  The transaction can
@@ -1463,6 +1407,7 @@ func (*ScriptCall__UnmintLbr) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category             | Error Reason                            | Description                                                                                |
 // | ----------------           | --------------                          | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `tc_account`.                             |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                          |
@@ -1500,10 +1445,12 @@ func (*ScriptCall__UpdateDualAttestationLimit) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category             | Error Reason                            | Description                                                                                |
 // | ----------------           | --------------                          | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `tc_account`.                             |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                          |
 // | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ETREASURY_COMPLIANCE`   | `tc_account` is not the Treasury Compliance account.                                       |
+// | `Errors::REQUIRES_ROLE`    | `Roles::ETREASURY_COMPLIANCE`           | `tc_account` is not the Treasury Compliance account.                                       |
 // | `Errors::INVALID_ARGUMENT` | `FixedPoint32::EDENOMINATOR`            | `new_exchange_rate_denominator` is zero.                                                   |
 // | `Errors::INVALID_ARGUMENT` | `FixedPoint32::ERATIO_OUT_OF_RANGE`     | The quotient is unrepresentable as a `FixedPoint32`.                                       |
 // | `Errors::LIMIT_EXCEEDED`   | `FixedPoint32::ERATIO_OUT_OF_RANGE`     | The quotient is unrepresentable as a `FixedPoint32`.                                       |
@@ -1540,6 +1487,7 @@ func (*ScriptCall__UpdateExchangeRate) isScriptCall() {}
 // # Common Abort Conditions
 // | Error Category             | Error Reason                                  | Description                                                                                |
 // | ----------------           | --------------                                | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`                | A `SlidingNonce` resource is not published under `account`.                                |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`                | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`                | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED`       | The `sliding_nonce` has been previously recorded.                                          |
@@ -1617,8 +1565,6 @@ func EncodeScript(call ScriptCall) libratypes.Script {
 		return EncodeCreateValidatorOperatorAccountScript(call.SlidingNonce, call.NewAccountAddress, call.AuthKeyPrefix, call.HumanName)
 	case *ScriptCall__FreezeAccount:
 		return EncodeFreezeAccountScript(call.SlidingNonce, call.ToFreezeAccount)
-	case *ScriptCall__MintLbr:
-		return EncodeMintLbrScript(call.AmountLbr)
 	case *ScriptCall__PeerToPeerWithMetadata:
 		return EncodePeerToPeerWithMetadataScript(call.Currency, call.Payee, call.Amount, call.Metadata, call.MetadataSignature)
 	case *ScriptCall__Preburn:
@@ -1651,8 +1597,6 @@ func EncodeScript(call ScriptCall) libratypes.Script {
 		return EncodeTieredMintScript(call.CoinType, call.SlidingNonce, call.DesignatedDealerAddress, call.MintAmount, call.TierIndex)
 	case *ScriptCall__UnfreezeAccount:
 		return EncodeUnfreezeAccountScript(call.SlidingNonce, call.ToUnfreezeAccount)
-	case *ScriptCall__UnmintLbr:
-		return EncodeUnmintLbrScript(call.AmountLbr)
 	case *ScriptCall__UpdateDualAttestationLimit:
 		return EncodeUpdateDualAttestationLimitScript(call.SlidingNonce, call.NewMicroLbrLimit)
 	case *ScriptCall__UpdateExchangeRate:
@@ -1784,10 +1728,12 @@ func EncodeAddRecoveryRotationCapabilityScript(recovery_address libratypes.Accou
 // # Common Abort Conditions
 // | Error Category             | Error Reason                                                           | Description                                                                                |
 // | ----------------           | --------------                                                         | -------------                                                                              |
-// | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ELIBRA_ROOT`                                           | The sending account is not the Libra Root account.                                         |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`                                         | A `SlidingNonce` resource is not published under `lr_account`.                             |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`                                         | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`                                         | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED`                                | The `sliding_nonce` has been previously recorded.                                          |
+// | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ELIBRA_ROOT`                                           | The sending account is not the Libra Root account.                                         |
+// | `Errors::REQUIRES_ROLE`    | `Roles::ELIBRA_ROOT`                                                   | The sending account is not the Libra Root account.                                         |
 // | `Errors::INVALID_ARGUMENT` | `LibraTransactionPublishingOption::EINVALID_SCRIPT_HASH`               | The script `hash` is an invalid length.                                                    |
 // | `Errors::INVALID_ARGUMENT` | `LibraTransactionPublishingOption::EALLOWLIST_ALREADY_CONTAINS_SCRIPT` | The on-chain allowlist already contains the script `hash`.                                 |
 func EncodeAddToScriptAllowListScript(hash []byte, sliding_nonce uint64) libratypes.Script {
@@ -1824,11 +1770,13 @@ func EncodeAddToScriptAllowListScript(hash []byte, sliding_nonce uint64) libraty
 // # Common Abort Conditions
 // | Error Category             | Error Reason                                  | Description                                                                                                                               |
 // | ----------------           | --------------                                | -------------                                                                                                                             |
-// | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ELIBRA_ROOT`                  | The sending account is not the Libra Root account.                                                                                        |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`                | A `SlidingNonce` resource is not published under `lr_account`.                                                                            |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`                | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not.                                                |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`                | The `sliding_nonce` is too far in the future.                                                                                             |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED`       | The `sliding_nonce` has been previously recorded.                                                                                         |
-// | EMPTY                      | 0                                             | The provided `validator_name` does not match the already-recorded human name for the validator.                                           |
+// | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ELIBRA_ROOT`                  | The sending account is not the Libra Root account.                                                                                        |
+// | `Errors::REQUIRES_ROLE`    | `Roles::ELIBRA_ROOT`                          | The sending account is not the Libra Root account.                                                                                        |
+// | 0                          | 0                                             | The provided `validator_name` does not match the already-recorded human name for the validator.                                           |
 // | `Errors::INVALID_ARGUMENT` | `LibraSystem::EINVALID_PROSPECTIVE_VALIDATOR` | The validator to be added does not have a `ValidatorConfig::ValidatorConfig` resource published under it, or its `config` field is empty. |
 // | `Errors::INVALID_ARGUMENT` | `LibraSystem::EALREADY_A_VALIDATOR`           | The `validator_address` account is already a registered validator.                                                                        |
 //
@@ -1885,6 +1833,7 @@ func EncodeAddValidatorAndReconfigureScript(sliding_nonce uint64, validator_name
 // # Common Abort Conditions
 // | Error Category                | Error Reason                            | Description                                                                                           |
 // | ----------------              | --------------                          | -------------                                                                                         |
+// | `Errors::NOT_PUBLISHED`       | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `account`.                                           |
 // | `Errors::INVALID_ARGUMENT`    | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not.            |
 // | `Errors::INVALID_ARGUMENT`    | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                                         |
 // | `Errors::INVALID_ARGUMENT`    | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                                     |
@@ -1987,6 +1936,8 @@ func EncodeBurnTxnFeesScript(coin_type libratypes.TypeTag) libratypes.Script {
 // | `Errors::NOT_PUBLISHED`       | `Libra::ECURRENCY_INFO`                          | The specified `Token` is not a registered currency on-chain.                                          |
 // | `Errors::INVALID_ARGUMENT`    | `LibraAccount::ECOIN_DEPOSIT_IS_ZERO`            | The value held in the preburn resource was zero.                                                      |
 // | `Errors::INVALID_ARGUMENT`    | `LibraAccount::EPAYEE_CANT_ACCEPT_CURRENCY_TYPE` | The account at `preburn_address` doesn't have a balance resource for `Token`.                         |
+// | `Errors::LIMIT_EXCEEDED`      | `LibraAccount::EDEPOSIT_EXCEEDS_LIMITS`          | The depositing of the funds held in the prebun area would exceed the `account`'s account limits.      |
+// | `Errors::INVALID_STATE`       | `DualAttestation::EPAYEE_COMPLIANCE_KEY_NOT_SET` | The `account` does not have a compliance key set on it but dual attestion checking was performed.     |
 //
 // # Related Scripts
 // * `Script::burn_txn_fees`
@@ -2038,6 +1989,7 @@ func EncodeCancelBurnScript(token libratypes.TypeTag, preburn_address libratypes
 // # Common Abort Conditions
 // | Error Category              | Error Reason                                             | Description                                                                              |
 // | ----------------            | --------------                                           | -------------                                                                            |
+// | `Errors::INVALID_ARGUMENT`  | `LibraAccount::EMALFORMED_AUTHENTICATION_KEY`            | The `auth_key_prefix` was not of length 32.                                              |
 // | `Errors::REQUIRES_ROLE`     | `Roles::EPARENT_VASP`                                    | The sending account wasn't a Parent VASP account.                                        |
 // | `Errors::ALREADY_PUBLISHED` | `Roles::EROLE_ID`                                        | The `child_address` address is already taken.                                            |
 // | `Errors::LIMIT_EXCEEDED`    | `VASP::ETOO_MANY_CHILDREN`                               | The sending account has reached the maximum number of allowed child accounts.            |
@@ -2045,10 +1997,11 @@ func EncodeCancelBurnScript(token libratypes.TypeTag, preburn_address libratypes
 // | `Errors::INVALID_STATE`     | `LibraAccount::EWITHDRAWAL_CAPABILITY_ALREADY_EXTRACTED` | The withdrawal capability for the sending account has already been extracted.            |
 // | `Errors::NOT_PUBLISHED`     | `LibraAccount::EPAYER_DOESNT_HOLD_CURRENCY`              | The sending account doesn't have a balance in `CoinType`.                                |
 // | `Errors::LIMIT_EXCEEDED`    | `LibraAccount::EINSUFFICIENT_BALANCE`                    | The sending account doesn't have at least `child_initial_balance` of `CoinType` balance. |
+// | `Errors::INVALID_ARGUMENT`  | `LibraAccount::ECANNOT_CREATE_AT_VM_RESERVED`            | The `child_address` is the reserved address 0x0.                                         |
 //
 // # Related Scripts
 // * `Script::create_parent_vasp_account`
-// * `Script::add_currency`
+// * `Script::add_currency_to_account`
 // * `Script::rotate_authentication_key`
 // * `Script::add_recovery_rotation_capability`
 // * `Script::create_recovery_address`
@@ -2089,10 +2042,12 @@ func EncodeCreateChildVaspAccountScript(coin_type libratypes.TypeTag, child_addr
 // # Common Abort Conditions
 // | Error Category              | Error Reason                            | Description                                                                                |
 // | ----------------            | --------------                          | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`     | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `tc_account`.                             |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                          |
 // | `Errors::REQUIRES_ADDRESS`  | `CoreAddresses::ETREASURY_COMPLIANCE`   | The sending account is not the Treasury Compliance account.                                |
+// | `Errors::REQUIRES_ROLE`     | `Roles::ETREASURY_COMPLIANCE`           | The sending account is not the Treasury Compliance account.                                |
 // | `Errors::NOT_PUBLISHED`     | `Libra::ECURRENCY_INFO`                 | The `Currency` is not a registered currency on-chain.                                      |
 // | `Errors::ALREADY_PUBLISHED` | `Roles::EROLE_ID`                       | The `addr` address is already taken.                                                       |
 //
@@ -2132,16 +2087,18 @@ func EncodeCreateDesignatedDealerScript(currency libratypes.TypeTag, sliding_non
 // # Common Abort Conditions
 // | Error Category              | Error Reason                            | Description                                                                                |
 // | ----------------            | --------------                          | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`     | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `tc_account`.                             |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                          |
-// | `Errors::REQUIRES_ADDRESS`  | `CoreAddresses::ETREASURY_COMPLIANCE`   | The sending account is the Treasury Compliance account.                                    |
+// | `Errors::REQUIRES_ADDRESS`  | `CoreAddresses::ETREASURY_COMPLIANCE`   | The sending account is not the Treasury Compliance account.                                |
+// | `Errors::REQUIRES_ROLE`     | `Roles::ETREASURY_COMPLIANCE`           | The sending account is not the Treasury Compliance account.                                |
 // | `Errors::NOT_PUBLISHED`     | `Libra::ECURRENCY_INFO`                 | The `CoinType` is not a registered currency on-chain.                                      |
 // | `Errors::ALREADY_PUBLISHED` | `Roles::EROLE_ID`                       | The `new_account_address` address is already taken.                                        |
 //
 // # Related Scripts
 // * `Script::create_child_vasp_account`
-// * `Script::add_currency`
+// * `Script::add_currency_to_account`
 // * `Script::rotate_authentication_key`
 // * `Script::add_recovery_rotation_capability`
 // * `Script::create_recovery_address`
@@ -2216,10 +2173,12 @@ func EncodeCreateRecoveryAddressScript() libratypes.Script {
 // # Common Abort Conditions
 // | Error Category              | Error Reason                            | Description                                                                                |
 // | ----------------            | --------------                          | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`     | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `lr_account`.                             |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                          |
 // | `Errors::REQUIRES_ADDRESS`  | `CoreAddresses::ELIBRA_ROOT`            | The sending account is not the Libra Root account.                                         |
+// | `Errors::REQUIRES_ROLE`     | `Roles::ELIBRA_ROOT`                    | The sending account is not the Libra Root account.                                         |
 // | `Errors::ALREADY_PUBLISHED` | `Roles::EROLE_ID`                       | The `new_account_address` address is already taken.                                        |
 //
 // # Related Scripts
@@ -2258,12 +2217,14 @@ func EncodeCreateValidatorAccountScript(sliding_nonce uint64, new_account_addres
 // | `human_name`          | `vector<u8>` | ASCII-encoded human name for the validator.                                                     |
 //
 // # Common Abort Conditions
-// | Error Category | Error Reason | Description |
-// |----------------|--------------|-------------|
+// | Error Category              | Error Reason                            | Description                                                                                |
+// | ----------------            | --------------                          | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`     | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `lr_account`.                             |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT`  | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                          |
 // | `Errors::REQUIRES_ADDRESS`  | `CoreAddresses::ELIBRA_ROOT`            | The sending account is not the Libra Root account.                                         |
+// | `Errors::REQUIRES_ROLE`     | `Roles::ELIBRA_ROOT`                    | The sending account is not the Libra Root account.                                         |
 // | `Errors::ALREADY_PUBLISHED` | `Roles::EROLE_ID`                       | The `new_account_address` address is already taken.                                        |
 //
 // # Related Scripts
@@ -2314,10 +2275,12 @@ func EncodeCreateValidatorOperatorAccountScript(sliding_nonce uint64, new_accoun
 // # Common Abort Conditions
 // | Error Category             | Error Reason                                 | Description                                                                                |
 // | ----------------           | --------------                               | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`               | A `SlidingNonce` resource is not published under `tc_account`.                             |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`               | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`               | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED`      | The `sliding_nonce` has been previously recorded.                                          |
 // | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ETREASURY_COMPLIANCE`        | The sending account is not the Treasury Compliance account.                                |
+// | `Errors::REQUIRES_ROLE`    | `Roles::ETREASURY_COMPLIANCE`                | The sending account is not the Treasury Compliance account.                                |
 // | `Errors::INVALID_ARGUMENT` | `AccountFreezing::ECANNOT_FREEZE_TC`         | `to_freeze_account` was the Treasury Compliance account (`0xB1E55ED`).                     |
 // | `Errors::INVALID_ARGUMENT` | `AccountFreezing::ECANNOT_FREEZE_LIBRA_ROOT` | `to_freeze_account` was the Libra Root account (`0xA550C18`).                              |
 //
@@ -2328,53 +2291,6 @@ func EncodeFreezeAccountScript(sliding_nonce uint64, to_freeze_account libratype
 		Code: append([]byte(nil), freeze_account_code...),
 		TyArgs: []libratypes.TypeTag{},
 		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), &libratypes.TransactionArgument__Address{to_freeze_account}},
-	}
-}
-
-// # Summary
-// Mints LBR from the sending account's constituent coins by depositing in the
-// on-chain LBR reserve. Deposits the newly-minted LBR into the sending
-// account. Can be sent by any account that can hold balances for the constituent
-// currencies for LBR and LBR.
-//
-// # Technical Description
-// Mints `amount_lbr` LBR from the sending account's constituent coins and deposits the
-// resulting LBR into the sending account.
-//
-// ## Events
-// Successful execution of this script emits three events:
-// * A `LibraAccount::SentPaymentEvent` with the Coin1 currency code, and a
-// `LibraAccount::SentPaymentEvent` with the Coin2 currency code on `account`'s
-// `LibraAccount::LibraAccount` `sent_events` handle with the `amounts` for each event being the
-// components amounts of `amount_lbr` LBR; and
-// * A `LibraAccount::ReceivedPaymentEvent` on `account`'s `LibraAccount::LibraAccount`
-// `received_events` handle with the LBR currency code and amount field equal to `amount_lbr`.
-//
-// # Parameters
-// | Name         | Type      | Description                                      |
-// | ------       | ------    | -------------                                    |
-// | `account`    | `&signer` | The signer reference of the sending account.     |
-// | `amount_lbr` | `u64`     | The amount of LBR (in microlibra) to be created. |
-//
-// # Common Abort Conditions
-// | Error Category             | Error Reason                                     | Description                                                                      |
-// | ----------------           | --------------                                   | -------------                                                                    |
-// | `Errors::NOT_PUBLISHED`    | `LibraAccount::EPAYER_DOESNT_HOLD_CURRENCY`      | `account` doesn't hold a balance in one of the backing currencies of LBR.        |
-// | `Errors::INVALID_ARGUMENT` | `LBR::EZERO_LBR_MINT_NOT_ALLOWED`                | `amount_lbr` passed in was zero.                                                 |
-// | `Errors::LIMIT_EXCEEDED`   | `LBR::ECOIN1`                                    | The amount of `Coin1` needed for the specified LBR would exceed `LBR::MAX_U64`.  |
-// | `Errors::LIMIT_EXCEEDED`   | `LBR::ECOIN2`                                    | The amount of `Coin2` needed for the specified LBR would exceed `LBR::MAX_U64`.  |
-// | `Errors::INVALID_STATE`    | `Libra::EMINTING_NOT_ALLOWED`                    | Minting of LBR is not allowed currently.                                         |
-// | `Errors::INVALID_ARGUMENT` | `LibraAccount::EPAYEE_CANT_ACCEPT_CURRENCY_TYPE` | `account` doesn't hold a balance in LBR.                                         |
-// | `Errors::LIMIT_EXCEEDED`   | `LibraAccount::EWITHDRAWAL_EXCEEDS_LIMITS`       | `account` has exceeded its daily withdrawal limits for the backing coins of LBR. |
-// | `Errors::LIMIT_EXCEEDED`   | `LibraAccount::EDEPOSIT_EXCEEDS_LIMITS`          | `account` has exceeded its daily deposit limits for LBR.                         |
-//
-// # Related Scripts
-// * `Script::unmint_lbr`
-func EncodeMintLbrScript(amount_lbr uint64) libratypes.Script {
-	return libratypes.Script {
-		Code: append([]byte(nil), mint_lbr_code...),
-		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&amount_lbr)},
 	}
 }
 
@@ -2587,12 +2503,15 @@ func EncodeRegisterValidatorConfigScript(validator_account libratypes.AccountAdd
 // # Common Abort Conditions
 // | Error Category             | Error Reason                            | Description                                                                                     |
 // | ----------------           | --------------                          | -------------                                                                                   |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `lr_account`.                                  |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not.      |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                                   |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                               |
-// | EMPTY                      | 0                                       | The provided `validator_name` does not match the already-recorded human name for the validator. |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`          | The sending account is not the Libra Root account or Treasury Compliance account                |
+// | 0                          | 0                                       | The provided `validator_name` does not match the already-recorded human name for the validator. |
 // | `Errors::INVALID_ARGUMENT` | `LibraSystem::ENOT_AN_ACTIVE_VALIDATOR` | The validator to be removed is not in the validator set.                                        |
 // | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ELIBRA_ROOT`            | The sending account is not the Libra Root account.                                              |
+// | `Errors::REQUIRES_ROLE`    | `Roles::ELIBRA_ROOT`                    | The sending account is not the Libra Root account.                                              |
 //
 // # Related Scripts
 // * `Script::create_validator_account`
@@ -2663,6 +2582,7 @@ func EncodeRotateAuthenticationKeyScript(new_key []byte) libratypes.Script {
 // # Common Abort Conditions
 // | Error Category             | Error Reason                                               | Description                                                                                |
 // | ----------------           | --------------                                             | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`                             | A `SlidingNonce` resource is not published under `account`.                                |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`                             | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`                             | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED`                    | The `sliding_nonce` has been previously recorded.                                          |
@@ -2701,6 +2621,7 @@ func EncodeRotateAuthenticationKeyWithNonceScript(sliding_nonce uint64, new_key 
 // # Common Abort Conditions
 // | Error Category             | Error Reason                                               | Description                                                                                                |
 // | ----------------           | --------------                                             | -------------                                                                                              |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`                             | A `SlidingNonce` resource is not published under `lr_account`.                                             |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`                             | The `sliding_nonce` in `lr_account` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`                             | The `sliding_nonce` in `lr_account` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED`                    | The `sliding_nonce` in` lr_account` has been previously recorded.                                          |
@@ -2860,6 +2781,7 @@ func EncodeRotateSharedEd25519PublicKeyScript(public_key []byte) libratypes.Scri
 // | Error Category             | Error Reason                                   | Description                                                                                           |
 // | ----------------           | --------------                                 | -------------                                                                                         |
 // | `Errors::NOT_PUBLISHED`    | `ValidatorConfig::EVALIDATOR_CONFIG`           | `validator_address` does not have a `ValidatorConfig::ValidatorConfig` resource published under it.   |
+// | `Errors::REQUIRES_ROLE     | `Roles::EVALIDATOR_OPERATOR`                   | `validator_operator_account` does not have a Validator Operator role.                                 |
 // | `Errors::INVALID_ARGUMENT` | `ValidatorConfig::EINVALID_TRANSACTION_SENDER` | `validator_operator_account` is not the registered operator for the validator at `validator_address`. |
 // | `Errors::INVALID_ARGUMENT` | `ValidatorConfig::EINVALID_CONSENSUS_KEY`      | `consensus_pubkey` is not a valid ed25519 public key.                                                 |
 //
@@ -2904,7 +2826,7 @@ func EncodeSetValidatorConfigAndReconfigureScript(validator_account libratypes.A
 // | Error Category             | Error Reason                                          | Description                                                                                                                                                  |
 // | ----------------           | --------------                                        | -------------                                                                                                                                                |
 // | `Errors::NOT_PUBLISHED`    | `ValidatorOperatorConfig::EVALIDATOR_OPERATOR_CONFIG` | The `ValidatorOperatorConfig::ValidatorOperatorConfig` resource is not published under `operator_account`.                                                   |
-// | EMPTY                      | 0                                                     | The `human_name` field of the `ValidatorOperatorConfig::ValidatorOperatorConfig` resource under `operator_account` does not match the provided `human_name`. |
+// | 0                          | 0                                                     | The `human_name` field of the `ValidatorOperatorConfig::ValidatorOperatorConfig` resource under `operator_account` does not match the provided `human_name`. |
 // | `Errors::REQUIRES_ROLE`    | `Roles::EVALIDATOR`                                   | `account` does not have a Validator account role.                                                                                                            |
 // | `Errors::INVALID_ARGUMENT` | `ValidatorConfig::ENOT_A_VALIDATOR_OPERATOR`          | The account at `operator_account` does not have a `ValidatorOperatorConfig::ValidatorOperatorConfig` resource.                                               |
 // | `Errors::NOT_PUBLISHED`    | `ValidatorConfig::EVALIDATOR_CONFIG`                  | A `ValidatorConfig::ValidatorConfig` is not published under `account`.                                                                                       |
@@ -2951,11 +2873,13 @@ func EncodeSetValidatorOperatorScript(operator_name []byte, operator_account lib
 // # Common Abort Conditions
 // | Error Category             | Error Reason                                          | Description                                                                                                                                                  |
 // | ----------------           | --------------                                        | -------------                                                                                                                                                |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`                        | A `SlidingNonce` resource is not published under `lr_account`.                                                                                               |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`                        | The `sliding_nonce` in `lr_account` is too old and it's impossible to determine if it's duplicated or not.                                                   |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`                        | The `sliding_nonce` in `lr_account` is too far in the future.                                                                                                |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED`               | The `sliding_nonce` in` lr_account` has been previously recorded.                                                                                            |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`                        | The sending account is not the Libra Root account or Treasury Compliance account                                                                             |
 // | `Errors::NOT_PUBLISHED`    | `ValidatorOperatorConfig::EVALIDATOR_OPERATOR_CONFIG` | The `ValidatorOperatorConfig::ValidatorOperatorConfig` resource is not published under `operator_account`.                                                   |
-// | EMPTY                      | 0                                                     | The `human_name` field of the `ValidatorOperatorConfig::ValidatorOperatorConfig` resource under `operator_account` does not match the provided `human_name`. |
+// | 0                          | 0                                                     | The `human_name` field of the `ValidatorOperatorConfig::ValidatorOperatorConfig` resource under `operator_account` does not match the provided `human_name`. |
 // | `Errors::REQUIRES_ROLE`    | `Roles::EVALIDATOR`                                   | `account` does not have a Validator account role.                                                                                                            |
 // | `Errors::INVALID_ARGUMENT` | `ValidatorConfig::ENOT_A_VALIDATOR_OPERATOR`          | The account at `operator_account` does not have a `ValidatorOperatorConfig::ValidatorOperatorConfig` resource.                                               |
 // | `Errors::NOT_PUBLISHED`    | `ValidatorConfig::EVALIDATOR_CONFIG`                  | A `ValidatorConfig::ValidatorConfig` is not published under `account`.                                                                                       |
@@ -3012,16 +2936,19 @@ func EncodeSetValidatorOperatorWithNonceAdminScript(sliding_nonce uint64, operat
 // # Common Abort Conditions
 // | Error Category                | Error Reason                                 | Description                                                                                                                  |
 // | ----------------              | --------------                               | -------------                                                                                                                |
+// | `Errors::NOT_PUBLISHED`       | `SlidingNonce::ESLIDING_NONCE`               | A `SlidingNonce` resource is not published under `tc_account`.                                                               |
 // | `Errors::INVALID_ARGUMENT`    | `SlidingNonce::ENONCE_TOO_OLD`               | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not.                                   |
 // | `Errors::INVALID_ARGUMENT`    | `SlidingNonce::ENONCE_TOO_NEW`               | The `sliding_nonce` is too far in the future.                                                                                |
 // | `Errors::INVALID_ARGUMENT`    | `SlidingNonce::ENONCE_ALREADY_RECORDED`      | The `sliding_nonce` has been previously recorded.                                                                            |
 // | `Errors::REQUIRES_ADDRESS`    | `CoreAddresses::ETREASURY_COMPLIANCE`        | `tc_account` is not the Treasury Compliance account.                                                                         |
+// | `Errors::REQUIRES_ROLE`       | `Roles::ETREASURY_COMPLIANCE`                | `tc_account` is not the Treasury Compliance account.                                                                         |
 // | `Errors::INVALID_ARGUMENT`    | `DesignatedDealer::EINVALID_MINT_AMOUNT`     | `mint_amount` is zero.                                                                                                       |
 // | `Errors::NOT_PUBLISHED`       | `DesignatedDealer::EDEALER`                  | `DesignatedDealer::Dealer` or `DesignatedDealer::TierInfo<CoinType>` resource does not exist at `designated_dealer_address`. |
 // | `Errors::INVALID_ARGUMENT`    | `DesignatedDealer::EINVALID_TIER_INDEX`      | The `tier_index` is out of bounds.                                                                                           |
 // | `Errors::INVALID_ARGUMENT`    | `DesignatedDealer::EINVALID_AMOUNT_FOR_TIER` | `mint_amount` exceeds the maximum allowed amount for `tier_index`.                                                           |
 // | `Errors::REQUIRES_CAPABILITY` | `Libra::EMINT_CAPABILITY`                    | `tc_account` does not have a `Libra::MintCapability<CoinType>` resource published under it.                                  |
 // | `Errors::INVALID_STATE`       | `Libra::EMINTING_NOT_ALLOWED`                | Minting is not currently allowed for `CoinType` coins.                                                                       |
+// | `Errors::LIMIT_EXCEEDED`      | `LibraAccount::EDEPOSIT_EXCEEDS_LIMITS`      | The depositing of the funds would exceed the `account`'s account limits.                                                     |
 //
 // # Related Scripts
 // * `Script::create_designated_dealer`
@@ -3060,6 +2987,7 @@ func EncodeTieredMintScript(coin_type libratypes.TypeTag, sliding_nonce uint64, 
 // # Common Abort Conditions
 // | Error Category             | Error Reason                            | Description                                                                                |
 // | ----------------           | --------------                          | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `account`.                                |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                          |
@@ -3072,50 +3000,6 @@ func EncodeUnfreezeAccountScript(sliding_nonce uint64, to_unfreeze_account libra
 		Code: append([]byte(nil), unfreeze_account_code...),
 		TyArgs: []libratypes.TypeTag{},
 		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&sliding_nonce), &libratypes.TransactionArgument__Address{to_unfreeze_account}},
-	}
-}
-
-// # Summary
-// Withdraws a specified amount of LBR from the transaction sender's account, and unstaples the
-// withdrawn LBR into its constituent coins. Deposits each of the constituent coins to the
-// transaction sender's balances. Any account that can hold balances that has the correct balances
-// may send this transaction.
-//
-// # Technical Description
-// Withdraws `amount_lbr` LBR coins from the `LibraAccount::Balance<LBR::LBR>` balance held under
-// `account`. Withdraws the backing coins for the LBR coins from the on-chain reserve in the
-// `LBR::Reserve` resource published under `0xA550C18`. It then deposits each of the backing coins
-// into balance resources published under `account`.
-//
-// ## Events
-// Successful execution of this transaction will emit two `LibraAccount::SentPaymentEvent`s. One
-// for each constituent currency that is unstapled and returned to the sending `account`'s
-// balances.
-//
-// # Parameters
-// | Name         | Type      | Description                                                     |
-// | ------       | ------    | -------------                                                   |
-// | `account`    | `&signer` | The signer reference of the sending account of the transaction. |
-// | `amount_lbr` | `u64`     | The amount of microlibra to unstaple.                           |
-//
-// # Common Abort Conditions
-// | Error Category             | Error Reason                                             | Description                                                                               |
-// | ----------------           | --------------                                           | -------------                                                                             |
-// | `Errors::INVALID_STATE`    | `LibraAccount::EWITHDRAWAL_CAPABILITY_ALREADY_EXTRACTED` | The `LibraAccount::WithdrawCapability` for `account` has previously been extracted.       |
-// | `Errors::NOT_PUBLISHED`    | `LibraAccount::EPAYER_DOESNT_HOLD_CURRENCY`              | `account` doesn't have a balance in LBR.                                                  |
-// | `Errors::LIMIT_EXCEEDED`   | `LibraAccount::EINSUFFICIENT_BALANCE`                    | `amount_lbr` is greater than the balance of LBR in `account`.                             |
-// | `Errors::INVALID_ARGUMENT` | `Libra::ECOIN`                                           | `amount_lbr` is zero.                                                                     |
-// | `Errors::LIMIT_EXCEEDED`   | `LibraAccount::EWITHDRAWAL_EXCEEDS_LIMITS`               | `account` has exceeded its daily withdrawal limits for LBR.                               |
-// | `Errors::LIMIT_EXCEEDED`   | `LibraAccount::EDEPOSIT_EXCEEDS_LIMITS`                  | `account` has exceeded its daily deposit limits for one of the backing currencies of LBR. |
-// | `Errors::INVALID_ARGUMENT` | `LibraAccount::EPAYEE_CANT_ACCEPT_CURRENCY_TYPE`         | `account` doesn't hold a balance in one or both of the backing currencies of LBR.         |
-//
-// # Related Scripts
-// * `Script::mint_lbr`
-func EncodeUnmintLbrScript(amount_lbr uint64) libratypes.Script {
-	return libratypes.Script {
-		Code: append([]byte(nil), unmint_lbr_code...),
-		TyArgs: []libratypes.TypeTag{},
-		Args: []libratypes.TransactionArgument{(*libratypes.TransactionArgument__U64)(&amount_lbr)},
 	}
 }
 
@@ -3138,6 +3022,7 @@ func EncodeUnmintLbrScript(amount_lbr uint64) libratypes.Script {
 // # Common Abort Conditions
 // | Error Category             | Error Reason                            | Description                                                                                |
 // | ----------------           | --------------                          | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `tc_account`.                             |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                          |
@@ -3176,10 +3061,12 @@ func EncodeUpdateDualAttestationLimitScript(sliding_nonce uint64, new_micro_lbr_
 // # Common Abort Conditions
 // | Error Category             | Error Reason                            | Description                                                                                |
 // | ----------------           | --------------                          | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`          | A `SlidingNonce` resource is not published under `tc_account`.                             |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`          | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`          | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED` | The `sliding_nonce` has been previously recorded.                                          |
 // | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ETREASURY_COMPLIANCE`   | `tc_account` is not the Treasury Compliance account.                                       |
+// | `Errors::REQUIRES_ROLE`    | `Roles::ETREASURY_COMPLIANCE`           | `tc_account` is not the Treasury Compliance account.                                       |
 // | `Errors::INVALID_ARGUMENT` | `FixedPoint32::EDENOMINATOR`            | `new_exchange_rate_denominator` is zero.                                                   |
 // | `Errors::INVALID_ARGUMENT` | `FixedPoint32::ERATIO_OUT_OF_RANGE`     | The quotient is unrepresentable as a `FixedPoint32`.                                       |
 // | `Errors::LIMIT_EXCEEDED`   | `FixedPoint32::ERATIO_OUT_OF_RANGE`     | The quotient is unrepresentable as a `FixedPoint32`.                                       |
@@ -3215,6 +3102,7 @@ func EncodeUpdateExchangeRateScript(currency libratypes.TypeTag, sliding_nonce u
 // # Common Abort Conditions
 // | Error Category             | Error Reason                                  | Description                                                                                |
 // | ----------------           | --------------                                | -------------                                                                              |
+// | `Errors::NOT_PUBLISHED`    | `SlidingNonce::ESLIDING_NONCE`                | A `SlidingNonce` resource is not published under `account`.                                |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_OLD`                | The `sliding_nonce` is too old and it's impossible to determine if it's duplicated or not. |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_TOO_NEW`                | The `sliding_nonce` is too far in the future.                                              |
 // | `Errors::INVALID_ARGUMENT` | `SlidingNonce::ENONCE_ALREADY_RECORDED`       | The `sliding_nonce` has been previously recorded.                                          |
@@ -3559,19 +3447,6 @@ func decode_freeze_account_script(script *libratypes.Script) (ScriptCall, error)
 
 	if val, err := decode_address_argument(script.Args[1]); err == nil {
 		call.ToFreezeAccount = val
-	} else {
-		return nil, err
-	}
-
-	return &call, nil
-}
-
-func decode_mint_lbr_script(script *libratypes.Script) (ScriptCall, error) {
-	if len(script.TyArgs) < 0 { return nil, fmt.Errorf("Was expecting 0 type arguments") }
-	if len(script.Args) < 1 { return nil, fmt.Errorf("Was expecting 1 regular arguments") }
-	var call ScriptCall__MintLbr
-	if val, err := decode_u64_argument(script.Args[0]); err == nil {
-		call.AmountLbr = val
 	} else {
 		return nil, err
 	}
@@ -3928,19 +3803,6 @@ func decode_unfreeze_account_script(script *libratypes.Script) (ScriptCall, erro
 	return &call, nil
 }
 
-func decode_unmint_lbr_script(script *libratypes.Script) (ScriptCall, error) {
-	if len(script.TyArgs) < 0 { return nil, fmt.Errorf("Was expecting 0 type arguments") }
-	if len(script.Args) < 1 { return nil, fmt.Errorf("Was expecting 1 regular arguments") }
-	var call ScriptCall__UnmintLbr
-	if val, err := decode_u64_argument(script.Args[0]); err == nil {
-		call.AmountLbr = val
-	} else {
-		return nil, err
-	}
-
-	return &call, nil
-}
-
 func decode_update_dual_attestation_limit_script(script *libratypes.Script) (ScriptCall, error) {
 	if len(script.TyArgs) < 0 { return nil, fmt.Errorf("Was expecting 0 type arguments") }
 	if len(script.Args) < 2 { return nil, fmt.Errorf("Was expecting 2 regular arguments") }
@@ -4047,8 +3909,6 @@ var create_validator_operator_account_code = []byte {161, 28, 235, 11, 1, 0, 0, 
 
 var freeze_account_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 5, 1, 0, 4, 3, 4, 10, 5, 14, 14, 7, 28, 66, 8, 94, 16, 0, 0, 0, 1, 0, 2, 0, 1, 0, 1, 3, 2, 1, 0, 2, 6, 12, 5, 0, 2, 6, 12, 3, 3, 6, 12, 3, 5, 15, 65, 99, 99, 111, 117, 110, 116, 70, 114, 101, 101, 122, 105, 110, 103, 12, 83, 108, 105, 100, 105, 110, 103, 78, 111, 110, 99, 101, 14, 102, 114, 101, 101, 122, 101, 95, 97, 99, 99, 111, 117, 110, 116, 21, 114, 101, 99, 111, 114, 100, 95, 110, 111, 110, 99, 101, 95, 111, 114, 95, 97, 98, 111, 114, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 3, 1, 7, 10, 0, 10, 1, 17, 1, 11, 0, 10, 2, 17, 0, 2};
 
-var mint_lbr_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 6, 1, 0, 2, 2, 2, 4, 3, 6, 15, 5, 21, 16, 7, 37, 99, 8, 136, 1, 16, 0, 0, 0, 1, 1, 0, 0, 2, 0, 1, 0, 0, 3, 1, 2, 0, 0, 4, 3, 2, 0, 1, 6, 12, 1, 8, 0, 0, 2, 6, 8, 0, 3, 2, 6, 12, 3, 12, 76, 105, 98, 114, 97, 65, 99, 99, 111, 117, 110, 116, 18, 87, 105, 116, 104, 100, 114, 97, 119, 67, 97, 112, 97, 98, 105, 108, 105, 116, 121, 27, 101, 120, 116, 114, 97, 99, 116, 95, 119, 105, 116, 104, 100, 114, 97, 119, 95, 99, 97, 112, 97, 98, 105, 108, 105, 116, 121, 27, 114, 101, 115, 116, 111, 114, 101, 95, 119, 105, 116, 104, 100, 114, 97, 119, 95, 99, 97, 112, 97, 98, 105, 108, 105, 116, 121, 10, 115, 116, 97, 112, 108, 101, 95, 108, 98, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 4, 1, 9, 11, 0, 17, 0, 12, 2, 14, 2, 10, 1, 17, 2, 11, 2, 17, 1, 2};
-
 var peer_to_peer_with_metadata_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 7, 1, 0, 2, 2, 2, 4, 3, 6, 16, 4, 22, 2, 5, 24, 29, 7, 53, 97, 8, 150, 1, 16, 0, 0, 0, 1, 1, 0, 0, 2, 0, 1, 0, 0, 3, 2, 3, 1, 1, 0, 4, 1, 3, 0, 1, 5, 1, 6, 12, 1, 8, 0, 5, 6, 8, 0, 5, 3, 10, 2, 10, 2, 0, 5, 6, 12, 5, 3, 10, 2, 10, 2, 1, 9, 0, 12, 76, 105, 98, 114, 97, 65, 99, 99, 111, 117, 110, 116, 18, 87, 105, 116, 104, 100, 114, 97, 119, 67, 97, 112, 97, 98, 105, 108, 105, 116, 121, 27, 101, 120, 116, 114, 97, 99, 116, 95, 119, 105, 116, 104, 100, 114, 97, 119, 95, 99, 97, 112, 97, 98, 105, 108, 105, 116, 121, 8, 112, 97, 121, 95, 102, 114, 111, 109, 27, 114, 101, 115, 116, 111, 114, 101, 95, 119, 105, 116, 104, 100, 114, 97, 119, 95, 99, 97, 112, 97, 98, 105, 108, 105, 116, 121, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 4, 1, 12, 11, 0, 17, 0, 12, 5, 14, 5, 10, 1, 10, 2, 11, 3, 11, 4, 56, 0, 11, 5, 17, 2, 2};
 
 var preburn_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 7, 1, 0, 2, 2, 2, 4, 3, 6, 16, 4, 22, 2, 5, 24, 21, 7, 45, 96, 8, 141, 1, 16, 0, 0, 0, 1, 1, 0, 0, 2, 0, 1, 0, 0, 3, 2, 3, 1, 1, 0, 4, 1, 3, 0, 1, 5, 1, 6, 12, 1, 8, 0, 3, 6, 12, 6, 8, 0, 3, 0, 2, 6, 12, 3, 1, 9, 0, 12, 76, 105, 98, 114, 97, 65, 99, 99, 111, 117, 110, 116, 18, 87, 105, 116, 104, 100, 114, 97, 119, 67, 97, 112, 97, 98, 105, 108, 105, 116, 121, 27, 101, 120, 116, 114, 97, 99, 116, 95, 119, 105, 116, 104, 100, 114, 97, 119, 95, 99, 97, 112, 97, 98, 105, 108, 105, 116, 121, 7, 112, 114, 101, 98, 117, 114, 110, 27, 114, 101, 115, 116, 111, 114, 101, 95, 119, 105, 116, 104, 100, 114, 97, 119, 95, 99, 97, 112, 97, 98, 105, 108, 105, 116, 121, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 4, 1, 10, 10, 0, 17, 0, 12, 2, 11, 0, 14, 2, 10, 1, 56, 0, 11, 2, 17, 2, 2};
@@ -4081,8 +3941,6 @@ var tiered_mint_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 6, 1, 0, 4, 3, 4, 1
 
 var unfreeze_account_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 5, 1, 0, 4, 3, 4, 10, 5, 14, 14, 7, 28, 68, 8, 96, 16, 0, 0, 0, 1, 0, 2, 0, 1, 0, 1, 3, 2, 1, 0, 2, 6, 12, 5, 0, 2, 6, 12, 3, 3, 6, 12, 3, 5, 15, 65, 99, 99, 111, 117, 110, 116, 70, 114, 101, 101, 122, 105, 110, 103, 12, 83, 108, 105, 100, 105, 110, 103, 78, 111, 110, 99, 101, 16, 117, 110, 102, 114, 101, 101, 122, 101, 95, 97, 99, 99, 111, 117, 110, 116, 21, 114, 101, 99, 111, 114, 100, 95, 110, 111, 110, 99, 101, 95, 111, 114, 95, 97, 98, 111, 114, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 3, 1, 7, 10, 0, 10, 1, 17, 1, 11, 0, 10, 2, 17, 0, 2};
 
-var unmint_lbr_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 6, 1, 0, 2, 2, 2, 4, 3, 6, 15, 5, 21, 16, 7, 37, 101, 8, 138, 1, 16, 0, 0, 0, 1, 1, 0, 0, 2, 0, 1, 0, 0, 3, 1, 2, 0, 0, 4, 3, 2, 0, 1, 6, 12, 1, 8, 0, 0, 2, 6, 8, 0, 3, 2, 6, 12, 3, 12, 76, 105, 98, 114, 97, 65, 99, 99, 111, 117, 110, 116, 18, 87, 105, 116, 104, 100, 114, 97, 119, 67, 97, 112, 97, 98, 105, 108, 105, 116, 121, 27, 101, 120, 116, 114, 97, 99, 116, 95, 119, 105, 116, 104, 100, 114, 97, 119, 95, 99, 97, 112, 97, 98, 105, 108, 105, 116, 121, 27, 114, 101, 115, 116, 111, 114, 101, 95, 119, 105, 116, 104, 100, 114, 97, 119, 95, 99, 97, 112, 97, 98, 105, 108, 105, 116, 121, 12, 117, 110, 115, 116, 97, 112, 108, 101, 95, 108, 98, 114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 4, 1, 9, 11, 0, 17, 0, 12, 2, 14, 2, 10, 1, 17, 2, 11, 2, 17, 1, 2};
-
 var update_dual_attestation_limit_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 5, 1, 0, 4, 3, 4, 10, 5, 14, 10, 7, 24, 72, 8, 96, 16, 0, 0, 0, 1, 0, 2, 0, 1, 0, 1, 3, 0, 1, 0, 2, 6, 12, 3, 0, 3, 6, 12, 3, 3, 15, 68, 117, 97, 108, 65, 116, 116, 101, 115, 116, 97, 116, 105, 111, 110, 12, 83, 108, 105, 100, 105, 110, 103, 78, 111, 110, 99, 101, 20, 115, 101, 116, 95, 109, 105, 99, 114, 111, 108, 105, 98, 114, 97, 95, 108, 105, 109, 105, 116, 21, 114, 101, 99, 111, 114, 100, 95, 110, 111, 110, 99, 101, 95, 111, 114, 95, 97, 98, 111, 114, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 1, 7, 10, 0, 10, 1, 17, 1, 11, 0, 10, 2, 17, 0, 2};
 
 var update_exchange_rate_code = []byte {161, 28, 235, 11, 1, 0, 0, 0, 7, 1, 0, 6, 2, 6, 4, 3, 10, 16, 4, 26, 2, 5, 28, 25, 7, 53, 100, 8, 153, 1, 16, 0, 0, 0, 1, 0, 2, 0, 0, 2, 0, 0, 3, 0, 1, 0, 2, 4, 2, 3, 0, 1, 5, 4, 3, 1, 1, 2, 6, 2, 3, 3, 1, 8, 0, 2, 6, 12, 3, 0, 2, 6, 12, 8, 0, 4, 6, 12, 3, 3, 3, 1, 9, 0, 12, 70, 105, 120, 101, 100, 80, 111, 105, 110, 116, 51, 50, 5, 76, 105, 98, 114, 97, 12, 83, 108, 105, 100, 105, 110, 103, 78, 111, 110, 99, 101, 20, 99, 114, 101, 97, 116, 101, 95, 102, 114, 111, 109, 95, 114, 97, 116, 105, 111, 110, 97, 108, 21, 114, 101, 99, 111, 114, 100, 95, 110, 111, 110, 99, 101, 95, 111, 114, 95, 97, 98, 111, 114, 116, 24, 117, 112, 100, 97, 116, 101, 95, 108, 98, 114, 95, 101, 120, 99, 104, 97, 110, 103, 101, 95, 114, 97, 116, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 5, 1, 11, 10, 0, 10, 1, 17, 1, 10, 2, 10, 3, 17, 0, 12, 4, 11, 0, 11, 4, 56, 0, 2};
@@ -4106,7 +3964,6 @@ var script_decoder_map = map[string]func(*libratypes.Script) (ScriptCall, error)
 	string(create_validator_account_code): decode_create_validator_account_script,
 	string(create_validator_operator_account_code): decode_create_validator_operator_account_script,
 	string(freeze_account_code): decode_freeze_account_script,
-	string(mint_lbr_code): decode_mint_lbr_script,
 	string(peer_to_peer_with_metadata_code): decode_peer_to_peer_with_metadata_script,
 	string(preburn_code): decode_preburn_script,
 	string(publish_shared_ed25519_public_key_code): decode_publish_shared_ed25519_public_key_script,
@@ -4123,7 +3980,6 @@ var script_decoder_map = map[string]func(*libratypes.Script) (ScriptCall, error)
 	string(set_validator_operator_with_nonce_admin_code): decode_set_validator_operator_with_nonce_admin_script,
 	string(tiered_mint_code): decode_tiered_mint_script,
 	string(unfreeze_account_code): decode_unfreeze_account_script,
-	string(unmint_lbr_code): decode_unmint_lbr_script,
 	string(update_dual_attestation_limit_code): decode_update_dual_attestation_limit_script,
 	string(update_exchange_rate_code): decode_update_exchange_rate_script,
 	string(update_libra_version_code): decode_update_libra_version_script,

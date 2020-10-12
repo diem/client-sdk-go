@@ -25,5 +25,4 @@ var (
 var (
 	LBR   = libratypes.Currency("LBR")
 	Coin1 = libratypes.Currency("Coin1")
-	Coin2 = libratypes.Currency("Coin2")
 )

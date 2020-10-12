@@ -24,7 +24,7 @@ var Client = libraclient.New(testnet.ChainID, testnet.URL)
 // Title is passed in for output with transaction version.
 // To keep logic simple:
 //   - this function simply panic when got unexpected error.
-//   - assume sender account has "LBR" currency and use it as gas currency
+//   - assume sender account has "Coin1" currency and use it as gas currency
 //   - always use 0 gasUnitPrice
 // This function returns back executed transaction version.
 func SubmitAndWait(title string, sender *librakeys.Keys, script libratypes.Script) uint64 {
@@ -49,7 +49,7 @@ Retry:
 		address,
 		sequenceNum,
 		script,
-		1_000_000, 0, "LBR",
+		1_000_000, 0, "Coin1",
 		expiration,
 		testnet.ChainID,
 	)

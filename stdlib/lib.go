@@ -167,6 +167,7 @@ func (*ScriptCall__AddToScriptAllowList) isScriptCall() {}
 // | 0                          | 0                                             | The provided `validator_name` does not match the already-recorded human name for the validator.                                           |
 // | `Errors::INVALID_ARGUMENT` | `LibraSystem::EINVALID_PROSPECTIVE_VALIDATOR` | The validator to be added does not have a `ValidatorConfig::ValidatorConfig` resource published under it, or its `config` field is empty. |
 // | `Errors::INVALID_ARGUMENT` | `LibraSystem::EALREADY_A_VALIDATOR`           | The `validator_address` account is already a registered validator.                                                                        |
+// | `Errors::INVALID_STATE`    | `LibraConfig::EINVALID_BLOCK_TIME`            | An invalid time value was encountered in reconfiguration. Unlikely to occur.                                                              |
 //
 // # Related Scripts
 // * `Script::create_validator_account`
@@ -903,6 +904,7 @@ func (*ScriptCall__RegisterValidatorConfig) isScriptCall() {}
 // | `Errors::INVALID_ARGUMENT` | `LibraSystem::ENOT_AN_ACTIVE_VALIDATOR` | The validator to be removed is not in the validator set.                                        |
 // | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ELIBRA_ROOT`            | The sending account is not the Libra Root account.                                              |
 // | `Errors::REQUIRES_ROLE`    | `Roles::ELIBRA_ROOT`                    | The sending account is not the Libra Root account.                                              |
+// | `Errors::INVALID_STATE`    | `LibraConfig::EINVALID_BLOCK_TIME`      | An invalid time value was encountered in reconfiguration. Unlikely to occur.                    |
 //
 // # Related Scripts
 // * `Script::create_validator_account`
@@ -1168,6 +1170,7 @@ func (*ScriptCall__RotateSharedEd25519PublicKey) isScriptCall() {}
 // | `Errors::REQUIRES_ROLE     | `Roles::EVALIDATOR_OPERATOR`                   | `validator_operator_account` does not have a Validator Operator role.                                 |
 // | `Errors::INVALID_ARGUMENT` | `ValidatorConfig::EINVALID_TRANSACTION_SENDER` | `validator_operator_account` is not the registered operator for the validator at `validator_address`. |
 // | `Errors::INVALID_ARGUMENT` | `ValidatorConfig::EINVALID_CONSENSUS_KEY`      | `consensus_pubkey` is not a valid ed25519 public key.                                                 |
+// | `Errors::INVALID_STATE`    | `LibraConfig::EINVALID_BLOCK_TIME`             | An invalid time value was encountered in reconfiguration. Unlikely to occur.                          |
 //
 // # Related Scripts
 // * `Script::create_validator_account`
@@ -1779,6 +1782,7 @@ func EncodeAddToScriptAllowListScript(hash []byte, sliding_nonce uint64) libraty
 // | 0                          | 0                                             | The provided `validator_name` does not match the already-recorded human name for the validator.                                           |
 // | `Errors::INVALID_ARGUMENT` | `LibraSystem::EINVALID_PROSPECTIVE_VALIDATOR` | The validator to be added does not have a `ValidatorConfig::ValidatorConfig` resource published under it, or its `config` field is empty. |
 // | `Errors::INVALID_ARGUMENT` | `LibraSystem::EALREADY_A_VALIDATOR`           | The `validator_address` account is already a registered validator.                                                                        |
+// | `Errors::INVALID_STATE`    | `LibraConfig::EINVALID_BLOCK_TIME`            | An invalid time value was encountered in reconfiguration. Unlikely to occur.                                                              |
 //
 // # Related Scripts
 // * `Script::create_validator_account`
@@ -2512,6 +2516,7 @@ func EncodeRegisterValidatorConfigScript(validator_account libratypes.AccountAdd
 // | `Errors::INVALID_ARGUMENT` | `LibraSystem::ENOT_AN_ACTIVE_VALIDATOR` | The validator to be removed is not in the validator set.                                        |
 // | `Errors::REQUIRES_ADDRESS` | `CoreAddresses::ELIBRA_ROOT`            | The sending account is not the Libra Root account.                                              |
 // | `Errors::REQUIRES_ROLE`    | `Roles::ELIBRA_ROOT`                    | The sending account is not the Libra Root account.                                              |
+// | `Errors::INVALID_STATE`    | `LibraConfig::EINVALID_BLOCK_TIME`      | An invalid time value was encountered in reconfiguration. Unlikely to occur.                    |
 //
 // # Related Scripts
 // * `Script::create_validator_account`
@@ -2784,6 +2789,7 @@ func EncodeRotateSharedEd25519PublicKeyScript(public_key []byte) libratypes.Scri
 // | `Errors::REQUIRES_ROLE     | `Roles::EVALIDATOR_OPERATOR`                   | `validator_operator_account` does not have a Validator Operator role.                                 |
 // | `Errors::INVALID_ARGUMENT` | `ValidatorConfig::EINVALID_TRANSACTION_SENDER` | `validator_operator_account` is not the registered operator for the validator at `validator_address`. |
 // | `Errors::INVALID_ARGUMENT` | `ValidatorConfig::EINVALID_CONSENSUS_KEY`      | `consensus_pubkey` is not a valid ed25519 public key.                                                 |
+// | `Errors::INVALID_STATE`    | `LibraConfig::EINVALID_BLOCK_TIME`             | An invalid time value was encountered in reconfiguration. Unlikely to occur.                          |
 //
 // # Related Scripts
 // * `Script::create_validator_account`

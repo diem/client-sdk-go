@@ -29,7 +29,7 @@ func TestClient(t *testing.T) {
 				ret, err := client.GetCurrencies()
 				require.Nil(t, err)
 				assert.NotEmpty(t, ret)
-				assert.Len(t, ret, 3)
+				assert.True(t, len(ret) > 0)
 			},
 		},
 		{

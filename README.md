@@ -1,8 +1,10 @@
-# libra-client-sdk-go
+> **Note to readers:** On December 1, 2020, the Libra Association was renamed to Diem Association. The project repos are in the process of being migrated. All projects will remain available for use here until the migration to a new GitHub Organization is complete.
+
+# client-sdk-go
 
 [![API Reference](https://img.shields.io/badge/api-reference-blue.svg)](https://github.com/libra/libra/blob/master/json-rpc/json-rpc-spec.md) [![Apache V2 License](https://img.shields.io/badge/license-Apache%20V2-blue.svg)](../master/LICENSE)
 
-libra-client-sdk-go is the official Libra Client SDK for the Go programming language.
+client-sdk-go is the official Libra Client SDK for the Go programming language.
 
 ## Overview of SDK's Packages
 
@@ -27,11 +29,11 @@ libra-client-sdk-go is the official Libra Client SDK for the Go programming lang
 Use `go get` to retrieve the SDK to add it to your `GOPATH` workspace, or
 project's Go module dependencies.
 
-	go get github.com/libra/libra-client-sdk-go
+	go get github.com/libra/client-sdk-go
 
 To update the SDK use `go get -u` to retrieve the latest version of the SDK.
 
-	go get -u github.com/libra/libra-client-sdk-go
+	go get -u github.com/libra/client-sdk-go
 
 
 ## Development
@@ -51,7 +53,7 @@ make gen
 
 # API Documentation
 
-The Go Client SDK API documentation is currently available at [godoc.org](https://godoc.org/github.com/libra/libra-client-sdk-go).
+The Go Client SDK API documentation is currently available at [godoc.org](https://godoc.org/github.com/libra/client-sdk-go).
 
 # License
 

@@ -1,4 +1,4 @@
-module github.com/libra/libra-client-sdk-go
+module github.com/diem/client-sdk-go
 
 go 1.14
 

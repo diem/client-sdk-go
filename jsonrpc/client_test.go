@@ -1,4 +1,4 @@
-// Copyright (c) The Libra Core Contributors
+// Copyright (c) The Diem Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package jsonrpc_test
@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/libra/libra-client-sdk-go/jsonrpc"
+	"github.com/diem/client-sdk-go/jsonrpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -59,34 +59,34 @@ func TestCall(t *testing.T) {
 			expect: response_result(),
 		},
 		{
-			name:   "success with result and libra extension fields",
+			name:   "success with result and diem extension fields",
 			method: "get_code",
 			params: []jsonrpc.Param{"hello", 1},
 			serve: `{
   "jsonrpc": "2.0",
   "result": {"code": 1, "msg": "hello"},
-  "libra_chain_id": 2,
-  "libra_ledger_timestampusec": 3,
-  "libra_ledger_version": 4,
+  "diem_chain_id": 2,
+  "diem_ledger_timestampusec": 3,
+  "diem_ledger_version": 4,
   "id": 1
 }`,
-			expect: list(response_result(), libra_extension()),
+			expect: list(response_result(), diem_extension()),
 		},
 		{
-			name:   "success with error and libra extension fields",
+			name:   "success with error and diem extension fields",
 			method: "get_code",
 			params: []jsonrpc.Param{"hello", 1},
 			serve: `{
   "jsonrpc": "2.0",
   "error": {"code": 32000, "message": "hello world", "data": {"foo": "bar"}},
-  "libra_chain_id": 2,
-  "libra_ledger_timestampusec": 3,
-  "libra_ledger_version": 4,
+  "diem_chain_id": 2,
+  "diem_ledger_timestampusec": 3,
+  "diem_ledger_version": 4,
   "id": 1
 }`,
 			expect: list(
 				response_error(32000, "hello world", map[string]interface{}{"foo": "bar"}),
-				libra_extension(),
+				diem_extension(),
 			),
 		},
 		{
@@ -358,12 +358,12 @@ func response_error(code int, msg string, data interface{}) expectation {
 	}
 }
 
-func libra_extension() expectation {
+func diem_extension() expectation {
 	return func(t *testing.T, resp *jsonrpc.Response, err *jsonrpc.Error) {
 		require.NotNil(t, resp)
-		assert.Equal(t, uint64(2), resp.LibraChainID)
-		assert.Equal(t, uint64(3), resp.LibraLedgerTimestampusec)
-		assert.Equal(t, uint64(4), resp.LibraLedgerVersion)
+		assert.Equal(t, uint64(2), resp.DiemChainID)
+		assert.Equal(t, uint64(3), resp.DiemLedgerTimestampusec)
+		assert.Equal(t, uint64(4), resp.DiemLedgerVersion)
 	}
 }
 

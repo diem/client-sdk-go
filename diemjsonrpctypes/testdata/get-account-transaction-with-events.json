@@ -1,0 +1,85 @@
+{
+  "name": "get-account-transaction-with-events",
+  "request": {
+    "id": 1,
+    "jsonrpc": "2.0",
+    "method": "get_account_transactions",
+    "params": [
+      "876ff1d441cb0b352f438fcfbce8608f",
+      1,
+      3,
+      true
+    ]
+  },
+  "response": {
+    "id": 1,
+    "jsonrpc": "2.0",
+    "diem_chain_id": 4,
+    "diem_ledger_timestampusec": 1600152974894366,
+    "diem_ledger_version": 45,
+    "result": {
+        "bytes": "00876ff1d441cb0b352f438fcfbce8608f010000000000000001e101a11ceb0b010000000701000202020403061004160205181d0735610896011000000001010000020001000003020301010004010300010501060c0108000506080005030a020a020005060c05030a020a020109000c4c696272614163636f756e741257697468647261774361706162696c6974791b657874726163745f77697468647261775f6361706162696c697479087061795f66726f6d1b726573746f72655f77697468647261775f6361706162696c69747900000000000000000000000000000001010104010c0b0011000c050e050a010a020b030b0438000b05110202010700000000000000000000000000000001034c4252034c4252000403762cbea8b99911d49707d2b901e1342501c0c62d00000000000400040040420f00000000000000000000000000034c4252a765605f00000000040020f4d854d7719c8ca6b454df278aa513c3e1f17ad6a38579ff0baa2bd50f5dd0e54079358f2a818adcbfb7e9db3e9a560007881acfe6b62c29f1eedcc76b534024a574fcb95bf4c438da33eba8052b565c8d7e3f507225d2998849d6613f64fa6005",
+        "events": [
+          {
+            "data": {
+              "amount": {
+                "amount": 3000000,
+                "currency": "LBR"
+              },
+              "metadata": "metadata",
+              "receiver": "762cbea8b99911d49707d2b901e13425",
+              "sender": "876ff1d441cb0b352f438fcfbce8608f",
+              "type": "sentpayment"
+            },
+            "key": "0300000000000000876ff1d441cb0b352f438fcfbce8608f",
+            "sequence_number": 1,
+            "transaction_version": 27
+          },
+          {
+            "data": {
+              "amount": {
+                "amount": 3000000,
+                "currency": "LBR"
+              },
+              "metadata": "metadata",
+              "receiver": "762cbea8b99911d49707d2b901e13425",
+              "sender": "876ff1d441cb0b352f438fcfbce8608f",
+              "type": "receivedpayment"
+            },
+            "key": "0000000000000000762cbea8b99911d49707d2b901e13425",
+            "sequence_number": 1,
+            "transaction_version": 27
+          }
+        ],
+        "gas_used": 476,
+        "hash": "0895ced78e9f10c1351f248b9bda40cc9c8e6d4dbba823e08fe1cfacd582f171",
+        "transaction": {
+          "chain_id": 4,
+          "expiration_timestamp_secs": 1600152999,
+          "gas_currency": "LBR",
+          "gas_unit_price": 10,
+          "max_gas_amount": 1000000,
+          "public_key": "f4d854d7719c8ca6b454df278aa513c3e1f17ad6a38579ff0baa2bd50f5dd0e5",
+          "script": {
+            "amount": 3000000,
+            "currency": "LBR",
+            "metadata": "metadata",
+            "metadata_signature": "metadata_signature",
+            "receiver": "762cbea8b99911d49707d2b901e13425",
+            "type": "peer_to_peer_transaction"
+          },
+          "script_bytes": "e101a11ceb0b010000000701000202020403061004160205181d0735610896011000000001010000020001000003020301010004010300010501060c0108000506080005030a020a020005060c05030a020a020109000c4c696272614163636f756e741257697468647261774361706162696c6974791b657874726163745f77697468647261775f6361706162696c697479087061795f66726f6d1b726573746f72655f77697468647261775f6361706162696c69747900000000000000000000000000000001010104010c0b0011000c050e050a010a020b030b0438000b05110202010700000000000000000000000000000001034c4252034c4252000403762cbea8b99911d49707d2b901e1342501c0c62d000000000004000400",
+          "script_hash": "61749d43d8f10940be6944df85ddf13f0f8fb830269c601f481cc5ee3de731c8",
+          "sender": "876ff1d441cb0b352f438fcfbce8608f",
+          "sequence_number": 1,
+          "signature": "79358f2a818adcbfb7e9db3e9a560007881acfe6b62c29f1eedcc76b534024a574fcb95bf4c438da33eba8052b565c8d7e3f507225d2998849d6613f64fa6005",
+          "signature_scheme": "Scheme::Ed25519",
+          "type": "user"
+        },
+        "version": 27,
+        "vm_status": {
+          "type": "executed"
+        }
+      }
+  }
+}

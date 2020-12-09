@@ -1,4 +1,4 @@
-// Copyright (c) The Libra Core Contributors
+// Copyright (c) The Diem Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package testnet_test
@@ -6,20 +6,20 @@ package testnet_test
 import (
 	"testing"
 
-	"github.com/libra/libra-client-sdk-go/librakeys"
-	"github.com/libra/libra-client-sdk-go/testnet"
+	"github.com/diem/client-sdk-go/diemkeys"
+	"github.com/diem/client-sdk-go/testnet"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestMint(t *testing.T) {
-	keys := librakeys.MustGenKeys()
-	testnet.MustMint(keys.AuthKey().Hex(), 1000, "Coin1")
+	keys := diemkeys.MustGenKeys()
+	testnet.MustMint(keys.AuthKey().Hex(), 1000, "XUS")
 	account, err := testnet.Client.GetAccount(keys.AccountAddress())
 	require.NoError(t, err)
 
 	assert.Len(t, account.Balances, 1)
-	assert.Equal(t, "Coin1", account.Balances[0].Currency)
+	assert.Equal(t, "XUS", account.Balances[0].Currency)
 	assert.Equal(t, uint64(1000), account.Balances[0].Amount)
 }
 

@@ -9,13 +9,14 @@ cover:
 	go tool cover -html=.tmp/count.out
 
 gen:
-	cd libra && cargo build -p transaction-builder-generator && target/debug/generate-transaction-builders \
+	cd diem && cargo build -p transaction-builder-generator && target/debug/generate-transaction-builders \
 		--language go \
 		--module-name stdlib \
-		--libra-package-name github.com/libra/libra-client-sdk-go \
-		--with-libra-types "testsuite/generate-format/tests/staged/libra.yaml" \
+		--diem-package-name github.com/diem/client-sdk-go \
+		--with-diem-types "testsuite/generate-format/tests/staged/diem.yaml" \
 		--target-source-dir ".." \
 		"language/stdlib/compiled/transaction_scripts/abi"
 
 protoc:
-	protoc  --go_out=. --go_opt=paths=source_relative ./librajsonrpctypes/libra-jsonrpc-types.proto
+	# protoc  --go_out=. --go_opt=paths=source_relative ./diemjsonrpctypes/jsonrpc.proto
+	protoc -Idiem/json-rpc/types/src/proto --go_out=./diemjsonrpctypes --go_opt=paths=source_relative jsonrpc.proto

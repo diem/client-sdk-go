@@ -1,5 +1,5 @@
-// Copyright (c) The Libra Core Contributors
+// Copyright (c) The Diem Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// Provides Libra move language stdlib script encoding and decoding utilities.
+// Provides Diem move language stdlib script encoding and decoding utilities.
 package stdlib

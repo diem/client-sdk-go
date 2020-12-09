@@ -1,0 +1,54 @@
+{
+  "name": "get-account-with-designated-dealer-role",
+  "request": {
+    "id": 1,
+    "jsonrpc": "2.0",
+    "method": "get_account",
+    "params": [
+      "000000000000000000000000000000dd"
+    ]
+  },
+  "response": {
+    "id": 1,
+    "jsonrpc": "2.0",
+    "diem_chain_id": 4,
+    "diem_ledger_timestampusec": 1600152974894366,
+    "diem_ledger_version": 45,
+    "result": {
+      "address": "000000000000000000000000000000dd",
+      "authentication_key": "536beec888b6a19d480c5f2375280432a7fd7dc99e4daed8699d1706de22eec4",
+      "balances": [
+        {
+          "amount": 4611686018427387903,
+          "currency": "XUS"
+        },
+        {
+          "amount": 9223372035854775807,
+          "currency": "XDX"
+        }
+      ],
+      "delegated_key_rotation_capability": true,
+      "delegated_withdrawal_capability": true,
+      "is_frozen": true,
+      "received_events_key": "0300000000000000000000000000000000000000000000dd",
+      "role": {
+        "base_url": "base url",
+        "base_url_rotation_events_key": "0200000000000000000000000000000000000000000000dd",
+        "compliance_key": "compliance key",
+        "compliance_key_rotation_events_key": "0100000000000000000000000000000000000000000000dd",
+        "expiration_time": 18446744073709551615,
+        "human_name": "moneybags",
+        "preburn_balances": [
+          {
+            "amount": 10,
+            "currency": "XUS"
+          }
+        ],
+        "received_mint_events_key": "0000000000000000000000000000000000000000000000dd",
+        "type": "designated_dealer"
+      },
+      "sent_events_key": "0400000000000000000000000000000000000000000000dd",
+      "sequence_number": 1
+    }
+  }
+}

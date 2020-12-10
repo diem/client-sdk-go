@@ -15,9 +15,11 @@ import (
 
 const (
 	// MainnetPrefix is mainnet account identifier prefix
-	MainnetPrefix NetworkPrefix = "lbr"
+	MainnetPrefix NetworkPrefix = "dm"
 	// TestnetPrefix is testnet account identifier prefix
-	TestnetPrefix NetworkPrefix = "tlb"
+	TestnetPrefix       NetworkPrefix = "tdm"
+	PreMainnetPrefix    NetworkPrefix = "pdm"
+	DryRunMainnetPrefix NetworkPrefix = "ddm"
 
 	// version 1
 	V1 byte = 1

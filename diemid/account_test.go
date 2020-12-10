@@ -19,7 +19,7 @@ func TestEncodeDecodeAccountIdentifier(t *testing.T) {
 
 	ret, err := diemid.EncodeAccount(diemid.MainnetPrefix, address, subAddress)
 	require.NoError(t, err)
-	assert.Equal(t, "lbr1p7ujcndcl7nudzwt8fglhx6wxn08kgs5tm6mz4usw5p72t", string(ret))
+	assert.Equal(t, "dm1p7ujcndcl7nudzwt8fglhx6wxn08kgs5tm6mz4us2vfufk", string(ret))
 
 	id, err := diemid.DecodeToAccount(diemid.MainnetPrefix, ret)
 	require.NoError(t, err)
@@ -34,7 +34,7 @@ func TestEncodeDecodeAccountIdentifierWithoutSubAddress(t *testing.T) {
 
 	ret, err := diemid.EncodeAccount(diemid.MainnetPrefix, address, diemtypes.EmptySubAddress)
 	require.NoError(t, err)
-	assert.Equal(t, "lbr1p7ujcndcl7nudzwt8fglhx6wxnvqqqqqqqqqqqqqflf8ma", string(ret))
+	assert.Equal(t, "dm1p7ujcndcl7nudzwt8fglhx6wxnvqqqqqqqqqqqqqd8p9cq", string(ret))
 
 	id, err := diemid.DecodeToAccount(diemid.MainnetPrefix, ret)
 	require.NoError(t, err)

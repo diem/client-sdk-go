@@ -1,4 +1,4 @@
-// Copyright (c) The Libra Core Contributors
+// Copyright (c) The Diem Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package main
@@ -6,15 +6,15 @@ package main
 import (
 	"crypto/ed25519"
 
-	"github.com/libra/libra-client-sdk-go/examples/exampleutils"
-	"github.com/libra/libra-client-sdk-go/librakeys"
-	"github.com/libra/libra-client-sdk-go/libratypes"
-	"github.com/libra/libra-client-sdk-go/stdlib"
-	"github.com/libra/libra-client-sdk-go/testnet"
-	"github.com/libra/libra-client-sdk-go/txnmetadata"
+	"github.com/diem/client-sdk-go/diemkeys"
+	"github.com/diem/client-sdk-go/diemtypes"
+	"github.com/diem/client-sdk-go/examples/exampleutils"
+	"github.com/diem/client-sdk-go/stdlib"
+	"github.com/diem/client-sdk-go/testnet"
+	"github.com/diem/client-sdk-go/txnmetadata"
 )
 
-const currency = "Coin1"
+const currency = "XUS"
 
 func main() {
 	nonCustodialAccount := testnet.GenAccount()
@@ -29,7 +29,7 @@ func main() {
 		"non custodial account to non custodial account transaction",
 		nonCustodialAccount,
 		stdlib.EncodePeerToPeerWithMetadataScript(
-			libratypes.Currency(currency),
+			diemtypes.Currency(currency),
 			nonCustodialAccount2.AccountAddress(),
 			amount,
 			nil,
@@ -45,7 +45,7 @@ func main() {
 		"non custodial account to custodial account transaction",
 		nonCustodialAccount,
 		stdlib.EncodePeerToPeerWithMetadataScript(
-			libratypes.Currency(currency),
+			diemtypes.Currency(currency),
 			custodialAccountChildVasp.AccountAddress(),
 			amount,
 			txnmetadata.NewGeneralMetadataToSubAddress(custodialAccountSubAddress),
@@ -61,7 +61,7 @@ func main() {
 		"custodial account to non custodial account transaction",
 		custodialAccountChildVasp,
 		stdlib.EncodePeerToPeerWithMetadataScript(
-			libratypes.Currency(currency),
+			diemtypes.Currency(currency),
 			nonCustodialAccount.AccountAddress(),
 			amount,
 			txnmetadata.NewGeneralMetadataFromSubAddress(custodialAccountSubAddress),
@@ -82,7 +82,7 @@ func main() {
 		"custodial account to custodial account transaction under travel rule threshold",
 		senderCustodialAccountChildVasp,
 		stdlib.EncodePeerToPeerWithMetadataScript(
-			libratypes.Currency(currency),
+			diemtypes.Currency(currency),
 			custodialAccountChildVasp.AccountAddress(),
 			amount,
 			txnmetadata.NewGeneralMetadataWithFromToSubAddresses(
@@ -119,7 +119,7 @@ func main() {
 	)
 
 	// receiver_signature is passed to the sender via the off-chain APIs as per
-	// https://github.com/libra/lip/blob/master/lips/lip-1.mdx#recipient-signature
+	// https://github.com/diem/lip/blob/master/lips/lip-1.mdx#recipient-signature
 	recipientSignature := ed25519.Sign(compliancePrivateKey, sigMsg)
 
 	exampleutils.PrintAccountsBalances("before transfer",
@@ -128,7 +128,7 @@ func main() {
 		"custodial account to custodial account transaction",
 		senderCustodialAccountChildVasp,
 		stdlib.EncodePeerToPeerWithMetadataScript(
-			libratypes.Currency(currency),
+			diemtypes.Currency(currency),
 			custodialAccountChildVasp.AccountAddress(), //receiverAccountAddress,
 			amount,
 			metadata,
@@ -139,20 +139,20 @@ func main() {
 		senderCustodialAccountChildVasp, custodialAccountChildVasp)
 }
 
-func createCustodialAccount() (*librakeys.Keys, *librakeys.Keys, libratypes.SubAddress) {
+func createCustodialAccount() (*diemkeys.Keys, *diemkeys.Keys, diemtypes.SubAddress) {
 	parentVASP := testnet.GenAccount()
-	childVASPAccount := librakeys.MustGenKeys()
+	childVASPAccount := diemkeys.MustGenKeys()
 	exampleutils.SubmitAndWait(
 		"create child vasp for custodial account",
 		parentVASP,
 		stdlib.EncodeCreateChildVaspAccountScript(
-			testnet.Coin1,
+			testnet.XUS,
 			childVASPAccount.AccountAddress(),
 			childVASPAccount.AuthKey().Prefix(),
 			false,
 			uint64(100000),
 		),
 	)
-	custodialAccountSubAddress := libratypes.MustGenSubAddress()
+	custodialAccountSubAddress := diemtypes.MustGenSubAddress()
 	return parentVASP, childVASPAccount, custodialAccountSubAddress
 }

@@ -1,4 +1,4 @@
-// Copyright (c) The Libra Core Contributors
+// Copyright (c) The Diem Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package main
@@ -6,10 +6,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/libra/libra-client-sdk-go/examples/exampleutils"
-	"github.com/libra/libra-client-sdk-go/librakeys"
-	"github.com/libra/libra-client-sdk-go/stdlib"
-	"github.com/libra/libra-client-sdk-go/testnet"
+	"github.com/diem/client-sdk-go/diemkeys"
+	"github.com/diem/client-sdk-go/examples/exampleutils"
+	"github.com/diem/client-sdk-go/stdlib"
+	"github.com/diem/client-sdk-go/testnet"
 	"gopkg.in/yaml.v3"
 )
 
@@ -22,7 +22,7 @@ func main() {
 	}
 	print("Parent VASP account", account)
 
-	childVASPAccount := librakeys.MustGenKeys()
+	childVASPAccount := diemkeys.MustGenKeys()
 	childVASPAddress := childVASPAccount.AccountAddress()
 	childAuthKey := childVASPAccount.AuthKey()
 
@@ -30,7 +30,7 @@ func main() {
 		"create child vasp account transaction",
 		parentVASP,
 		stdlib.EncodeCreateChildVaspAccountScript(
-			testnet.Coin1,
+			testnet.XUS,
 			childVASPAddress,
 			childAuthKey.Prefix(),
 			false,

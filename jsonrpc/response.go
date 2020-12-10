@@ -1,4 +1,4 @@
-// Copyright (c) The Libra Core Contributors
+// Copyright (c) The Diem Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package jsonrpc
@@ -22,13 +22,13 @@ func (e *ResponseError) Error() string {
 
 // Response is type of JSON-RPC response struct
 type Response struct {
-	JsonRpc                  string           `json:"jsonrpc"`
-	ID                       *RequestID       `json:"id"`
-	Result                   *json.RawMessage `json:"result"`
-	Error                    *ResponseError   `json:"error"`
-	LibraChainID             uint64           `json:"libra_chain_id"`
-	LibraLedgerTimestampusec uint64           `json:"libra_ledger_timestampusec"`
-	LibraLedgerVersion       uint64           `json:"libra_ledger_version"`
+	JsonRpc                 string           `json:"jsonrpc"`
+	ID                      *RequestID       `json:"id"`
+	Result                  *json.RawMessage `json:"result"`
+	Error                   *ResponseError   `json:"error"`
+	DiemChainID             uint64           `json:"diem_chain_id"`
+	DiemLedgerTimestampusec uint64           `json:"diem_ledger_timestampusec"`
+	DiemLedgerVersion       uint64           `json:"diem_ledger_version"`
 }
 
 // UnmarshalResult unmarshals result json into given struct.

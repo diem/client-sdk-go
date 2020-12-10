@@ -1,4 +1,4 @@
-// Copyright (c) The Libra Core Contributors
+// Copyright (c) The Diem Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package txnmetadata
@@ -8,8 +8,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/libra/libra-client-sdk-go/libraclient"
-	"github.com/libra/libra-client-sdk-go/libratypes"
+	"github.com/diem/client-sdk-go/diemclient"
+	"github.com/diem/client-sdk-go/diemtypes"
 	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/lcs"
 )
 
@@ -18,31 +18,31 @@ import (
 // This is used for peer to peer transfer between 2 custodial accounts.
 func NewTravelRuleMetadata(
 	offChainReferenceID string,
-	senderAccountAddress libratypes.AccountAddress,
+	senderAccountAddress diemtypes.AccountAddress,
 	amount uint64,
 ) ([]byte, []byte) {
-	metadata := libratypes.Metadata__TravelRuleMetadata{
-		Value: &libratypes.TravelRuleMetadata__TravelRuleMetadataVersion0{
-			Value: libratypes.TravelRuleMetadataV0{
+	metadata := diemtypes.Metadata__TravelRuleMetadata{
+		Value: &diemtypes.TravelRuleMetadata__TravelRuleMetadataVersion0{
+			Value: diemtypes.TravelRuleMetadataV0{
 				OffChainReferenceId: &offChainReferenceID,
 			},
 		},
 	}
 
-	// receiver_lcs_data = lcs(metadata, sender_address, amount, "@@$$LIBRA_ATTEST$$@@" /*ASCII-encoded string*/);
+	// receiver_lcs_data = lcs(metadata, sender_address, amount, "@@$$DIEM_ATTEST$$@@" /*ASCII-encoded string*/);
 	s := lcs.NewSerializer()
 	metadata.Serialize(s)
 	senderAccountAddress.Serialize(s)
 	s.SerializeU64(amount)
-	sigMsg := append(s.GetBytes(), []byte("@@$$LIBRA_ATTEST$$@@")...)
+	sigMsg := append(s.GetBytes(), []byte("@@$$DIEM_ATTEST$$@@")...)
 
-	return libratypes.ToLCS(&metadata), sigMsg
+	return diemtypes.ToLCS(&metadata), sigMsg
 }
 
 // NewGeneralMetadataToSubAddress creates metadata for creating peer to peer
 // transaction script with ToSubaddress
 // This is used for peer to peer transfer from non-custodial account to custodial account.
-func NewGeneralMetadataToSubAddress(toSubAddress libratypes.SubAddress) []byte {
+func NewGeneralMetadataToSubAddress(toSubAddress diemtypes.SubAddress) []byte {
 	to := toSubAddress[:]
 	return newGeneralMetadata(nil, &to)
 }
@@ -50,7 +50,7 @@ func NewGeneralMetadataToSubAddress(toSubAddress libratypes.SubAddress) []byte {
 // NewGeneralMetadataFromSubAddress creates metadata for creating peer to peer
 // transaction script with FromSubaddress
 // This is used for peer to peer transfer from custodial account to non-custodial account.
-func NewGeneralMetadataFromSubAddress(fromSubAddress libratypes.SubAddress) []byte {
+func NewGeneralMetadataFromSubAddress(fromSubAddress diemtypes.SubAddress) []byte {
 	from := fromSubAddress[:]
 	return newGeneralMetadata(&from, nil)
 }
@@ -59,7 +59,7 @@ func NewGeneralMetadataFromSubAddress(fromSubAddress libratypes.SubAddress) []by
 // transaction script with fromSubaddress and toSubaddress.
 // Use this function to create metadata with from and to subaddresses for peer to peer transfer
 // from custodial account to custodial account under travel rule threshold.
-func NewGeneralMetadataWithFromToSubAddresses(fromSubAddress libratypes.SubAddress, toSubAddress libratypes.SubAddress) []byte {
+func NewGeneralMetadataWithFromToSubAddresses(fromSubAddress diemtypes.SubAddress, toSubAddress diemtypes.SubAddress) []byte {
 	from := fromSubAddress[:]
 	to := toSubAddress[:]
 	return newGeneralMetadata(&from, &to)
@@ -67,20 +67,20 @@ func NewGeneralMetadataWithFromToSubAddresses(fromSubAddress libratypes.SubAddre
 
 // newGeneralMetadata is internal methods for constructing with *[]byte as from and to subaddress type
 func newGeneralMetadata(fromSubAddress *[]byte, toSubAddress *[]byte) []byte {
-	metadata := libratypes.Metadata__GeneralMetadata{
-		Value: &libratypes.GeneralMetadata__GeneralMetadataVersion0{
-			Value: libratypes.GeneralMetadataV0{
+	metadata := diemtypes.Metadata__GeneralMetadata{
+		Value: &diemtypes.GeneralMetadata__GeneralMetadataVersion0{
+			Value: diemtypes.GeneralMetadataV0{
 				FromSubaddress: fromSubAddress,
 				ToSubaddress:   toSubAddress,
 			},
 		},
 	}
-	return libratypes.ToLCS(&metadata)
+	return diemtypes.ToLCS(&metadata)
 }
 
 // FindRefundReferenceEventFromTransaction looks for receivedpayment type event in the
 // given transaction and event receiver is given receiver account address.
-func FindRefundReferenceEventFromTransaction(txn *libraclient.Transaction, receiver libratypes.AccountAddress) *libraclient.Event {
+func FindRefundReferenceEventFromTransaction(txn *diemclient.Transaction, receiver diemtypes.AccountAddress) *diemclient.Event {
 	if txn == nil {
 		return nil
 	}
@@ -98,7 +98,7 @@ func FindRefundReferenceEventFromTransaction(txn *libraclient.Transaction, recei
 // Returns error if given event is nil
 // Returns nil without error if given event has no metadata
 // Returns error if deserialization failed.
-func DeserializeMetadata(event *libraclient.Event) (libratypes.Metadata, error) {
+func DeserializeMetadata(event *diemclient.Event) (diemtypes.Metadata, error) {
 	if event == nil {
 		return nil, errors.New("must provide refund reference event")
 	}
@@ -109,7 +109,7 @@ func DeserializeMetadata(event *libraclient.Event) (libratypes.Metadata, error) 
 	if err != nil {
 		return nil, fmt.Errorf("decode event metadata failed: %v", err.Error())
 	}
-	metadata, err := libratypes.DeserializeMetadata(lcs.NewDeserializer(bytes))
+	metadata, err := diemtypes.DeserializeMetadata(lcs.NewDeserializer(bytes))
 	if err != nil {
 		return nil, fmt.Errorf("can't deserialize metadata: %v", err)
 	}
@@ -119,21 +119,21 @@ func DeserializeMetadata(event *libraclient.Event) (libratypes.Metadata, error) 
 // NewRefundMetadataFromEventMetadata creates GeneralMetadata for refunding a receivedpayment event.
 // Returns error if given `gm` is nil.
 // Returns InvalidGeneralMetadataError if given event metadata is not
-// `*libratypes.GeneralMetadata__GeneralMetadataVersion0`.
+// `*diemtypes.GeneralMetadata__GeneralMetadataVersion0`.
 //
 // Note: for a receivedpayment event with TravelRuleMetadata, refund transaction is same with transfer money
 // transaction, no need refund metadata constructed like this function does.
-func NewRefundMetadataFromEventMetadata(eventSequenceNumber uint64, gm *libratypes.Metadata__GeneralMetadata) ([]byte, error) {
+func NewRefundMetadataFromEventMetadata(eventSequenceNumber uint64, gm *diemtypes.Metadata__GeneralMetadata) ([]byte, error) {
 	if gm == nil {
 		return nil, errors.New("must provide refund event general metadata")
 	}
-	gmv0, ok := gm.Value.(*libratypes.GeneralMetadata__GeneralMetadataVersion0)
+	gmv0, ok := gm.Value.(*diemtypes.GeneralMetadata__GeneralMetadataVersion0)
 	if !ok {
 		return nil, fmt.Errorf("can't handle GeneralMetadata: %T", gm.Value)
 	}
-	return libratypes.ToLCS(&libratypes.Metadata__GeneralMetadata{
-		Value: &libratypes.GeneralMetadata__GeneralMetadataVersion0{
-			Value: libratypes.GeneralMetadataV0{
+	return diemtypes.ToLCS(&diemtypes.Metadata__GeneralMetadata{
+		Value: &diemtypes.GeneralMetadata__GeneralMetadataVersion0{
+			Value: diemtypes.GeneralMetadataV0{
 				FromSubaddress:  gmv0.Value.ToSubaddress,
 				ToSubaddress:    gmv0.Value.FromSubaddress,
 				ReferencedEvent: &eventSequenceNumber,

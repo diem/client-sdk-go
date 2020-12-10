@@ -1,0 +1,38 @@
+{
+  "name": "get-account-with-child-vasp-role",
+  "request": {
+    "id": 1,
+    "jsonrpc": "2.0",
+    "method": "get_account",
+    "params": [
+      "762cbea8b99911d49707d2b901e13425"
+    ]
+  },
+  "response": {
+    "id": 1,
+    "jsonrpc": "2.0",
+    "diem_chain_id": 4,
+    "diem_ledger_timestampusec": 1600152974894366,
+    "diem_ledger_version": 45,
+    "result": {
+      "address": "762cbea8b99911d49707d2b901e13425",
+      "authentication_key": "5d378ee8381f5b39f84d4c3cd1618b17762cbea8b99911d49707d2b901e13425",
+      "balances": [
+        {
+          "amount": 8000000,
+          "currency": "LBR"
+        }
+      ],
+      "delegated_key_rotation_capability": true,
+      "delegated_withdrawal_capability": true,
+      "is_frozen": true,
+      "received_events_key": "0000000000000000762cbea8b99911d49707d2b901e13425",
+      "role": {
+        "parent_vasp_address": "876ff1d441cb0b352f438fcfbce8608f",
+        "type": "child_vasp"
+      },
+      "sent_events_key": "0100000000000000762cbea8b99911d49707d2b901e13425",
+      "sequence_number": 1
+    }
+  }
+}

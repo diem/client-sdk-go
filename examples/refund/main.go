@@ -3,16 +3,16 @@ package main
 import (
 	"fmt"
 
-	"github.com/libra/libra-client-sdk-go/examples/exampleutils"
-	"github.com/libra/libra-client-sdk-go/libraclient"
-	"github.com/libra/libra-client-sdk-go/librakeys"
-	"github.com/libra/libra-client-sdk-go/libratypes"
-	"github.com/libra/libra-client-sdk-go/stdlib"
-	"github.com/libra/libra-client-sdk-go/testnet"
-	"github.com/libra/libra-client-sdk-go/txnmetadata"
+	"github.com/diem/client-sdk-go/diemclient"
+	"github.com/diem/client-sdk-go/diemkeys"
+	"github.com/diem/client-sdk-go/diemtypes"
+	"github.com/diem/client-sdk-go/examples/exampleutils"
+	"github.com/diem/client-sdk-go/stdlib"
+	"github.com/diem/client-sdk-go/testnet"
+	"github.com/diem/client-sdk-go/txnmetadata"
 )
 
-const currency = "Coin1"
+const currency = "XUS"
 
 func main() {
 	sender, senderUserSubAddress := createCustodialAccount()
@@ -24,7 +24,7 @@ func main() {
 		"p2p transfer",
 		sender,
 		stdlib.EncodePeerToPeerWithMetadataScript(
-			libratypes.Currency(currency),
+			diemtypes.Currency(currency),
 			receiver.AccountAddress(),
 			amount,
 			txnmetadata.NewGeneralMetadataFromSubAddress(senderUserSubAddress),
@@ -38,7 +38,7 @@ RetryGetTransactions:
 	// find transaction back with events info
 	txns, err := exampleutils.Client.GetTransactions(txnVersion, 1, true)
 	if err != nil {
-		if _, ok := err.(*libraclient.StaleResponseError); ok {
+		if _, ok := err.(*diemclient.StaleResponseError); ok {
 			// retry to hit another server if got stale response
 			goto RetryGetTransactions
 		}
@@ -58,17 +58,17 @@ RetryGetTransactions:
 	}
 	var refundMetadata []byte
 	switch v := metadata.(type) {
-	case *libratypes.Metadata__GeneralMetadata:
+	case *diemtypes.Metadata__GeneralMetadata:
 		refundMetadata, err = txnmetadata.NewRefundMetadataFromEventMetadata(event.SequenceNumber, v)
 		if err != nil {
 			panic(err)
 		}
-	case *libratypes.Metadata__TravelRuleMetadata:
+	case *diemtypes.Metadata__TravelRuleMetadata:
 		// If original peer to peer transaction script contains travel rule metadata,
 		// refund should be same process.
 		// It requires communication through off-chain API first and then create peer to
 		// peer transaction script with travel rule metadata and recipient signature.
-		// Please see https://github.com/libra/libra-client-sdk-go/blob/master/examples/p2p-transfers/main.go
+		// Please see https://github.com/diem/client-sdk-go/blob/master/examples/p2p-transfers/main.go
 		// for custodial account to custodial account over threshold example.
 		//
 		// Here as we expect GeneralMetadata, so we panic for simplicity.
@@ -84,7 +84,7 @@ RetryGetTransactions:
 		"refund transaction",
 		receiver,
 		stdlib.EncodePeerToPeerWithMetadataScript(
-			libratypes.Currency(event.Data.Amount.Currency),
+			diemtypes.Currency(event.Data.Amount.Currency),
 			sender.AccountAddress(),
 			event.Data.Amount.Amount,
 			refundMetadata,
@@ -94,11 +94,11 @@ RetryGetTransactions:
 	exampleutils.PrintAccountsBalances("after refund", sender, receiver)
 }
 
-func createCustodialAccount() (*librakeys.Keys, libratypes.SubAddress) {
+func createCustodialAccount() (*diemkeys.Keys, diemtypes.SubAddress) {
 	parentVASP := testnet.GenAccount()
-	childVASPAccount := librakeys.MustGenKeys()
+	childVASPAccount := diemkeys.MustGenKeys()
 	script := stdlib.EncodeCreateChildVaspAccountScript(
-		testnet.Coin1,
+		testnet.XUS,
 		childVASPAccount.AccountAddress(),
 		childVASPAccount.AuthKey().Prefix(),
 		false,
@@ -106,5 +106,5 @@ func createCustodialAccount() (*librakeys.Keys, libratypes.SubAddress) {
 	)
 	exampleutils.SubmitAndWait("create custodial child vasp account",
 		parentVASP, script)
-	return childVASPAccount, libratypes.MustGenSubAddress()
+	return childVASPAccount, diemtypes.MustGenSubAddress()
 }

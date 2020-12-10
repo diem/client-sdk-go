@@ -1,4 +1,4 @@
-// Copyright (c) The Libra Core Contributors
+// Copyright (c) The Diem Core Contributors
 // SPDX-License-Identifier: Apache-2.0
 
 package main
@@ -6,22 +6,22 @@ package main
 import (
 	"fmt"
 
-	"github.com/libra/libra-client-sdk-go/libraid"
-	"github.com/libra/libra-client-sdk-go/librakeys"
-	"github.com/libra/libra-client-sdk-go/libratypes"
+	"github.com/diem/client-sdk-go/diemid"
+	"github.com/diem/client-sdk-go/diemkeys"
+	"github.com/diem/client-sdk-go/diemtypes"
 	"gopkg.in/yaml.v3"
 )
 
 func main() {
-	merchant := librakeys.MustGenKeys()
+	merchant := diemkeys.MustGenKeys()
 	address := merchant.AccountAddress()
-	currency := "Coin1"
+	currency := "XUS"
 	amount := uint64(5000)
-	account := libraid.NewAccount(
-		libraid.TestnetPrefix, address, libratypes.EmptySubAddress)
-	intent := libraid.Intent{
+	account := diemid.NewAccount(
+		diemid.TestnetPrefix, address, diemtypes.EmptySubAddress)
+	intent := diemid.Intent{
 		Account: *account,
-		Params: libraid.Params{
+		Params: diemid.Params{
 			Currency: currency,
 			Amount:   &amount,
 		},
@@ -33,7 +33,7 @@ func main() {
 
 	fmt.Printf("==== encoded intent identifier ====\n%v\n", encodedIntent)
 
-	decodedIntent, err := libraid.DecodeToIntent(libraid.TestnetPrefix, encodedIntent)
+	decodedIntent, err := diemid.DecodeToIntent(diemid.TestnetPrefix, encodedIntent)
 	if err != nil {
 		panic(err)
 	}

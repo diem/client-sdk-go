@@ -22,7 +22,7 @@ func (s *Stub) Call(requests ...*jsonrpc.Request) (map[jsonrpc.RequestID]*jsonrp
 		resp.JsonRpc = req.JsonRpc
 		resp.ID = &req.ID
 		if resp.DiemChainID == 0 {
-			resp.DiemChainID = uint64(testnet.ChainID)
+			resp.DiemChainID = testnet.ChainID
 		}
 		if resp.DiemLedgerTimestampusec == 0 {
 			resp.DiemLedgerTimestampusec = uint64(time.Now().Unix() * 1000000)

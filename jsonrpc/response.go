@@ -26,7 +26,7 @@ type Response struct {
 	ID                      *RequestID       `json:"id"`
 	Result                  *json.RawMessage `json:"result"`
 	Error                   *ResponseError   `json:"error"`
-	DiemChainID             uint64           `json:"diem_chain_id"`
+	DiemChainID             byte             `json:"diem_chain_id"`
 	DiemLedgerTimestampusec uint64           `json:"diem_ledger_timestampusec"`
 	DiemLedgerVersion       uint64           `json:"diem_ledger_version"`
 }

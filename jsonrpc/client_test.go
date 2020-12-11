@@ -361,7 +361,7 @@ func response_error(code int, msg string, data interface{}) expectation {
 func diem_extension() expectation {
 	return func(t *testing.T, resp *jsonrpc.Response, err *jsonrpc.Error) {
 		require.NotNil(t, resp)
-		assert.Equal(t, uint64(2), resp.DiemChainID)
+		assert.Equal(t, byte(2), resp.DiemChainID)
 		assert.Equal(t, uint64(3), resp.DiemLedgerTimestampusec)
 		assert.Equal(t, uint64(4), resp.DiemLedgerVersion)
 	}

@@ -703,7 +703,7 @@ func (*ScriptCall__FreezeAccount) isScriptCall() {}
 // `DualAttestation::get_cur_microdiem_limit` XDX and `payer` and `payee` are distinct VASPs.
 // However, a transaction sender can opt in to dual attestation even when it is not required
 // (e.g., a DesignatedDealer -> VASP payment) by providing a non-empty `metadata_signature`.
-// Standardized `metadata` LCS format can be found in `diem_types::transaction::metadata::Metadata`.
+// Standardized `metadata` BCS format can be found in `diem_types::transaction::metadata::Metadata`.
 //
 // ## Events
 // Successful execution of this script emits two events:
@@ -2317,7 +2317,7 @@ func EncodeFreezeAccountScript(sliding_nonce uint64, to_freeze_account diemtypes
 // `DualAttestation::get_cur_microdiem_limit` XDX and `payer` and `payee` are distinct VASPs.
 // However, a transaction sender can opt in to dual attestation even when it is not required
 // (e.g., a DesignatedDealer -> VASP payment) by providing a non-empty `metadata_signature`.
-// Standardized `metadata` LCS format can be found in `diem_types::transaction::metadata::Metadata`.
+// Standardized `metadata` BCS format can be found in `diem_types::transaction::metadata::Metadata`.
 //
 // ## Events
 // Successful execution of this script emits two events:

@@ -47,7 +47,7 @@ func NewRawTransactionAndSigningMsg(
 		ChainId:                 diemtypes.ChainId(chainID),
 	}
 
-	signingMsg := append(diemtypes.HashPrefix("RawTransaction"), diemtypes.ToLCS(&rawTxn)...)
+	signingMsg := append(diemtypes.HashPrefix("RawTransaction"), diemtypes.ToBCS(&rawTxn)...)
 	return &rawTxn, signingMsg
 }
 

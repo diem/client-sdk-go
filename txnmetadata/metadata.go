@@ -10,7 +10,7 @@ import (
 
 	"github.com/diem/client-sdk-go/diemclient"
 	"github.com/diem/client-sdk-go/diemtypes"
-	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/lcs"
+	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/bcs"
 )
 
 // NewTravelRuleMetadata creates metadata and signature message for given
@@ -29,14 +29,13 @@ func NewTravelRuleMetadata(
 		},
 	}
 
-	// receiver_lcs_data = lcs(metadata, sender_address, amount, "@@$$DIEM_ATTEST$$@@" /*ASCII-encoded string*/);
-	s := lcs.NewSerializer()
+	s := bcs.NewSerializer()
 	metadata.Serialize(s)
 	senderAccountAddress.Serialize(s)
 	s.SerializeU64(amount)
 	sigMsg := append(s.GetBytes(), []byte("@@$$DIEM_ATTEST$$@@")...)
 
-	return diemtypes.ToLCS(&metadata), sigMsg
+	return diemtypes.ToBCS(&metadata), sigMsg
 }
 
 // NewGeneralMetadataToSubAddress creates metadata for creating peer to peer
@@ -75,7 +74,7 @@ func newGeneralMetadata(fromSubAddress *[]byte, toSubAddress *[]byte) []byte {
 			},
 		},
 	}
-	return diemtypes.ToLCS(&metadata)
+	return diemtypes.ToBCS(&metadata)
 }
 
 // FindRefundReferenceEventFromTransaction looks for receivedpayment type event in the
@@ -109,7 +108,7 @@ func DeserializeMetadata(event *diemclient.Event) (diemtypes.Metadata, error) {
 	if err != nil {
 		return nil, fmt.Errorf("decode event metadata failed: %v", err.Error())
 	}
-	metadata, err := diemtypes.DeserializeMetadata(lcs.NewDeserializer(bytes))
+	metadata, err := diemtypes.DeserializeMetadata(bcs.NewDeserializer(bytes))
 	if err != nil {
 		return nil, fmt.Errorf("can't deserialize metadata: %v", err)
 	}
@@ -131,7 +130,7 @@ func NewRefundMetadataFromEventMetadata(eventSequenceNumber uint64, gm *diemtype
 	if !ok {
 		return nil, fmt.Errorf("can't handle GeneralMetadata: %T", gm.Value)
 	}
-	return diemtypes.ToLCS(&diemtypes.Metadata__GeneralMetadata{
+	return diemtypes.ToBCS(&diemtypes.Metadata__GeneralMetadata{
 		Value: &diemtypes.GeneralMetadata__GeneralMetadataVersion0{
 			Value: diemtypes.GeneralMetadataV0{
 				FromSubaddress:  gmv0.Value.ToSubaddress,

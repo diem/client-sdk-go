@@ -8,23 +8,23 @@ import (
 	"fmt"
 )
 
-// LCSable interface for `ToLCS`
-type LCSable interface {
-	LcsSerialize() ([]byte, error)
+// BCSable interface for `ToBCS`
+type BCSable interface {
+	BcsSerialize() ([]byte, error)
 }
 
-// ToLCS serialize given `LCSable` into LCS bytes.
-// It panics if lcs serialization failed.
-func ToLCS(t LCSable) []byte {
-	ret, err := t.LcsSerialize()
+// ToBCS serialize given `BCSable` into BCS bytes.
+// It panics if bcs serialization failed.
+func ToBCS(t BCSable) []byte {
+	ret, err := t.BcsSerialize()
 	if err != nil {
-		panic(fmt.Sprintf("lcs serialize failed: %v", err.Error()))
+		panic(fmt.Sprintf("bcs serialize failed: %v", err.Error()))
 	}
 	return ret
 }
 
-// ToHex serialize given `LCSable` into LCS bytes and then return hex-encoded string
-// It panics if lcs serialization failed.
-func ToHex(t LCSable) string {
-	return hex.EncodeToString(ToLCS(t))
+// ToHex serialize given `BCSable` into BCS bytes and then return hex-encoded string
+// It panics if bcs serialization failed.
+func ToHex(t BCSable) string {
+	return hex.EncodeToString(ToBCS(t))
 }

@@ -156,7 +156,7 @@ func TestNewRefundMetadataFromEvent(t *testing.T) {
 			expectedErrorMsg: "decode event metadata failed: encoding/hex: invalid byte: U+006C 'l'",
 		},
 		{
-			name:             "event metadata is not valid LCS bytes",
+			name:             "event metadata is not valid BCS bytes",
 			event:            diemclienttest.EventBuilder{}.Metadata("1112233333"),
 			expectedErrorMsg: "can't deserialize metadata: Unknown variant index for Metadata: 17",
 		},
@@ -179,7 +179,7 @@ func TestNewRefundMetadataFromEvent(t *testing.T) {
 				assert.EqualError(t, err, tc.expectedErrorMsg)
 			} else if tc.expected != nil {
 				require.NoError(t, err)
-				ret, err := diemtypes.LcsDeserializeMetadata(ret)
+				ret, err := diemtypes.BcsDeserializeMetadata(ret)
 				require.NoError(t, err)
 				assert.EqualValues(t, tc.expected, ret)
 			} else {

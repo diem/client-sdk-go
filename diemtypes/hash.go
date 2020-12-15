@@ -27,6 +27,6 @@ func Hash(prefix []byte, bytes []byte) []byte {
 func (t *SignedTransaction) TransactionHash() string {
 	return hex.EncodeToString(Hash(
 		HashPrefix("Transaction"),
-		ToLCS(&Transaction__UserTransaction{*t}),
+		ToBCS(&Transaction__UserTransaction{*t}),
 	))
 }

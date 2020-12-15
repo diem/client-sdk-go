@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/diem/client-sdk-go/diemkeys"
-	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/lcs"
+	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/bcs"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -57,7 +57,7 @@ func TestMultiEd25519PrivateKey(t *testing.T) {
 		multiSig := pk.Sign([]byte("test"))
 
 		expectedSig := "8401951ea9303fe7c0245a2a4c159b3f641e4623e15091a6e0557eb26144cac9ebe3ab4338b9bc7f7d54e78e9c50f3de10bf43199956f5ed0fbcd3c54a081c43b407e86b66d43e1c70a69e819247c9df579dca7d6927569a89a1863f74af7d8ebe07947425ddf6d0155b8a193c8e859a8b3f7f85191b4c613718d40d0fd3e09ca400c0000000"
-		assert.Equal(t, expectedSig, lcsBytes(multiSig))
+		assert.Equal(t, expectedSig, bcsBytes(multiSig))
 	})
 }
 
@@ -127,8 +127,8 @@ func TestNewMultiEd25519PublicKeyErrors(t *testing.T) {
 	})
 }
 
-func lcsBytes(bytes []byte) string {
-	s := lcs.NewSerializer()
+func bcsBytes(bytes []byte) string {
+	s := bcs.NewSerializer()
 	s.SerializeBytes(bytes)
 	return hex.EncodeToString(s.GetBytes())
 }

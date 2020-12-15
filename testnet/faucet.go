@@ -13,7 +13,7 @@ import (
 
 	"github.com/diem/client-sdk-go/diemkeys"
 	"github.com/diem/client-sdk-go/diemtypes"
-	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/lcs"
+	"github.com/novifinancial/serde-reflection/serde-generate/runtime/golang/bcs"
 )
 
 // GenAccount generate account with single keys
@@ -81,7 +81,7 @@ func deserializeMintTransactions(body []byte) ([]diemtypes.SignedTransaction, er
 	if err != nil {
 		return nil, fmt.Errorf("decode mint transactions hex string failed: %v", err)
 	}
-	deserializer := lcs.NewDeserializer(bytes)
+	deserializer := bcs.NewDeserializer(bytes)
 	length, err := deserializer.DeserializeLen()
 	if err != nil {
 		return nil, fmt.Errorf("deserialize mint transactions length failed: %v", err)

@@ -11,23 +11,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestToLCS(t *testing.T) {
+func TestToBCS(t *testing.T) {
 	address, _ := diemtypes.MakeAccountAddress("f72589b71ff4f8d139674a3f7369c69b")
-	bytes := diemtypes.ToLCS(&address)
+	bytes := diemtypes.ToBCS(&address)
 	assert.NotEmpty(t, bytes)
 }
 
-func TestToLCSPanicsForSerializationError(t *testing.T) {
+func TestToBCSPanicsForSerializationError(t *testing.T) {
 	defer func() {
 		r := recover()
 		assert.NotNil(t, r)
 	}()
-	diemtypes.ToLCS(new(lcsError))
+	diemtypes.ToBCS(new(bcsError))
 }
 
-type lcsError struct {
+type bcsError struct {
 }
 
-func (l *lcsError) LcsSerialize() ([]byte, error) {
+func (l *bcsError) BcsSerialize() ([]byte, error) {
 	return nil, errors.New("unexpected")
 }

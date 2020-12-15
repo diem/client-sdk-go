@@ -219,14 +219,14 @@ func TestWaitForTransaction(t *testing.T) {
 			},
 		},
 		{
-			name:     "wait for transaction3: not a signed transaction lcs",
+			name:     "wait for transaction3: not a signed transaction bcs",
 			response: jsonrpc.Response{},
 			call: func(t *testing.T, client diemclient.Client) {
 				account := diemkeys.MustGenKeys()
 				ret, err := client.WaitForTransaction3(
 					account.AccountAddress().Hex(),
 					time.Second)
-				require.EqualError(t, err, "Deserialize given hex string as SignedTransaction LCS failed: EOF")
+				require.EqualError(t, err, "Deserialize given hex string as SignedTransaction BCS failed: EOF")
 				assert.Nil(t, ret)
 			},
 		},

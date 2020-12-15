@@ -784,7 +784,7 @@ type Transaction struct {
 	Version     uint64           `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
 	Transaction *TransactionData `protobuf:"bytes,2,opt,name=transaction,proto3" json:"transaction,omitempty"`
 	Hash        string           `protobuf:"bytes,3,opt,name=hash,proto3" json:"hash,omitempty"`
-	// hex-encoded lcs bytes
+	// hex-encoded bcs bytes
 	Bytes    string    `protobuf:"bytes,4,opt,name=bytes,proto3" json:"bytes,omitempty"`
 	Events   []*Event  `protobuf:"bytes,5,rep,name=events,proto3" json:"events,omitempty"`
 	VmStatus *VMStatus `protobuf:"bytes,6,opt,name=vm_status,proto3" json:"vm_status,omitempty"`
@@ -1233,7 +1233,7 @@ type Script struct {
 	// peer to peer transfer currency code.
 	Currency string `protobuf:"bytes,7,opt,name=currency,proto3" json:"currency,omitempty"`
 	//*
-	// Metadata of the transaction, LCS serialized hex-encoded string.
+	// Metadata of the transaction, BCS serialized hex-encoded string.
 	// See [LIP-4](https://dip.diem.com/dip-4/) for more details.
 	Metadata string `protobuf:"bytes,8,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	//*
@@ -1458,11 +1458,11 @@ type StateProof struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// hex-encoded lcs bytes
+	// hex-encoded bcs bytes
 	LedgerInfoWithSignatures string `protobuf:"bytes,1,opt,name=ledger_info_with_signatures,proto3" json:"ledger_info_with_signatures,omitempty"`
-	// hex-encoded lcs bytes
+	// hex-encoded bcs bytes
 	EpochChangeProof string `protobuf:"bytes,2,opt,name=epoch_change_proof,proto3" json:"epoch_change_proof,omitempty"`
-	// hex-encoded lcs bytes
+	// hex-encoded bcs bytes
 	LedgerConsistencyProof string `protobuf:"bytes,3,opt,name=ledger_consistency_proof,proto3" json:"ledger_consistency_proof,omitempty"`
 }
 
@@ -1525,9 +1525,9 @@ type AccountStateWithProof struct {
 	unknownFields protoimpl.UnknownFields
 
 	Version uint64 `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
-	// hex-encoded lcs bytes
+	// hex-encoded bcs bytes
 	Blob string `protobuf:"bytes,2,opt,name=blob,proto3" json:"blob,omitempty"`
-	// hex-encoded lcs bytes
+	// hex-encoded bcs bytes
 	Proof *AccountStateProof `protobuf:"bytes,3,opt,name=proof,proto3" json:"proof,omitempty"`
 }
 
@@ -1589,11 +1589,11 @@ type AccountStateProof struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// hex-encoded lcs bytes
+	// hex-encoded bcs bytes
 	LedgerInfoToTransactionInfoProof string `protobuf:"bytes,1,opt,name=ledger_info_to_transaction_info_proof,proto3" json:"ledger_info_to_transaction_info_proof,omitempty"`
-	// hex-encoded lcs bytes
+	// hex-encoded bcs bytes
 	TransactionInfo string `protobuf:"bytes,2,opt,name=transaction_info,proto3" json:"transaction_info,omitempty"`
-	// hex-encoded lcs bytes
+	// hex-encoded bcs bytes
 	TransactionInfoToAccountProof string `protobuf:"bytes,3,opt,name=transaction_info_to_account_proof,proto3" json:"transaction_info_to_account_proof,omitempty"`
 }
 

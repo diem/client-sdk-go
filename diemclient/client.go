@@ -130,9 +130,9 @@ func (c *client) WaitForTransaction3(signedTxnHex string, timeout time.Duration)
 	if err != nil {
 		return nil, err
 	}
-	txn, err := diemtypes.LcsDeserializeSignedTransaction(bytes)
+	txn, err := diemtypes.BcsDeserializeSignedTransaction(bytes)
 	if err != nil {
-		return nil, fmt.Errorf("Deserialize given hex string as SignedTransaction LCS failed: %v", err.Error())
+		return nil, fmt.Errorf("Deserialize given hex string as SignedTransaction BCS failed: %v", err.Error())
 	}
 	return c.WaitForTransaction2(&txn, timeout)
 }

@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	URL            = "http://dev.testnet.diem.com/v1"
-	FaucetURL      = "http://dev.testnet.diem.com/mint"
-	ChainID   byte = 3 // temp to 3 devnet before we upgrade testnet to new version
+	URL            = "http://testnet.diem.com/v1"
+	FaucetURL      = "http://testnet.diem.com/mint"
+	ChainID   byte = 2
 )
 
 var (

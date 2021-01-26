@@ -3,6 +3,7 @@ module github.com/diem/client-sdk-go
 go 1.14
 
 require (
+	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/golang/protobuf v1.4.2
 	github.com/novifinancial/serde-reflection/serde-generate/runtime/golang v0.0.0-20201214184956-1fd02a932898
 	github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce

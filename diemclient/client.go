@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/diem/client-sdk-go/diemtypes"
 	"github.com/diem/client-sdk-go/jsonrpc"
 )
@@ -82,6 +83,7 @@ type Client interface {
 
 	LastResponseLedgerState() LedgerState
 	UpdateLastResponseLedgerState(state LedgerState)
+	WithRetryOptions(opts ...retry.Option) Client
 }
 
 // New creates a `DiemClient` connect to given server URL.
@@ -94,7 +96,7 @@ func New(chainID byte, url string) Client {
 
 // NewWithJsonRpcClient creates a `DiemClient` with given `jsonrpc.Client`
 func NewWithJsonRpcClient(chainID byte, rpc jsonrpc.Client) Client {
-	return &client{chainID: chainID, rpc: rpc}
+	return &client{chainID: chainID, rpc: rpc, retryOpts: []retry.Option{retry.LastErrorOnly(true)}}
 }
 
 // LedgerState represents response DiemLedgerTimestampusec & DiemLedgerVersion
@@ -104,10 +106,17 @@ type LedgerState struct {
 }
 
 type client struct {
-	chainID byte
-	rpc     jsonrpc.Client
-	mux     sync.RWMutex
-	last    LedgerState
+	chainID   byte
+	rpc       jsonrpc.Client
+	mux       sync.RWMutex
+	last      LedgerState
+	retryOpts []retry.Option
+}
+
+// WithRetryOptions appends given retry options
+func (c *client) WithRetryOptions(opts ...retry.Option) Client {
+	c.retryOpts = append(c.retryOpts, opts...)
+	return c
 }
 
 // LastResponseLedgerState returns last recorded response ledger state
@@ -279,7 +288,18 @@ func (c *client) SubmitTransaction(txn *diemtypes.SignedTransaction) error {
 	return c.Submit(diemtypes.ToHex(txn))
 }
 
-func (c *client) call(method jsonrpc.Method, ret interface{}, params ...jsonrpc.Param) (bool, error) {
+func (c *client) call(method jsonrpc.Method, ret interface{}, params ...jsonrpc.Param) (ok bool, err error) {
+	err = retry.Do(
+		func() error {
+			ok, err = c.callWithoutRetry(method, ret, params...)
+			return err
+		},
+		c.retryOpts...,
+	)
+	return ok, err
+}
+
+func (c *client) callWithoutRetry(method jsonrpc.Method, ret interface{}, params ...jsonrpc.Param) (bool, error) {
 	req := jsonrpc.NewRequest(method, params...)
 	resps, err := c.rpc.Call(req)
 	if err != nil {

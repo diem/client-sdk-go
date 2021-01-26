@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/diem/client-sdk-go/diemclient"
 	"github.com/diem/client-sdk-go/diemkeys"
 	"github.com/diem/client-sdk-go/jsonrpc"
@@ -238,7 +239,7 @@ func TestWaitForTransaction(t *testing.T) {
 				Responses: map[jsonrpc.RequestID]jsonrpc.Response{
 					1: tc.response,
 				},
-			})
+			}).WithRetryOptions(retry.Attempts(1))
 			tc.call(t, client)
 		})
 	}
@@ -323,7 +324,7 @@ func TestHandleStaleResponse(t *testing.T) {
 				Responses: map[jsonrpc.RequestID]jsonrpc.Response{
 					1: tc.response,
 				},
-			})
+			}).WithRetryOptions(retry.Attempts(1))
 			tc.call(t, client)
 		})
 	}
@@ -359,7 +360,7 @@ func TestValidateChainID(t *testing.T) {
 				Responses: map[jsonrpc.RequestID]jsonrpc.Response{
 					1: tc.response,
 				},
-			})
+			}).WithRetryOptions(retry.Attempts(1))
 			tc.call(t, client)
 		})
 	}

@@ -83,6 +83,19 @@ func TestFindRefundReferenceEventFromTransaction(t *testing.T) {
 	})
 }
 
+func TestRefundMetadata(t *testing.T) {
+	txnVersion := 12343
+	reason := new(diemtypes.RefundReason__UserInitiatedFullRefund)
+	ret := txnmetadata.NewRefundMetadata(uint64(txnVersion), reason)
+	assert.Equal(t, hex.EncodeToString(ret), "0400373000000000000003")
+
+	metadata, err := diemtypes.BcsDeserializeMetadata(ret)
+	assert.NoError(t, err)
+	md := metadata.(*diemtypes.Metadata__RefundMetadata).Value.(*diemtypes.RefundMetadata__RefundMetadataV0).Value
+	assert.Equal(t, md.TransactionVersion, uint64(txnVersion))
+	assert.Equal(t, md.Reason, reason)
+}
+
 func TestNewRefundMetadataFromEvent(t *testing.T) {
 	referencedEventSeqNum := uint64(123)
 

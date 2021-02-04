@@ -77,6 +77,20 @@ func newGeneralMetadata(fromSubAddress *[]byte, toSubAddress *[]byte) []byte {
 	return diemtypes.ToBCS(&metadata)
 }
 
+// NewRefundMetadata creates metadata for creating refund p2p transaction script with original payment
+// transaction version and reason
+func NewRefundMetadata(originalTransactionVersion uint64, reason diemtypes.RefundReason) []byte {
+	metadata := diemtypes.Metadata__RefundMetadata{
+		Value: &diemtypes.RefundMetadata__RefundMetadataV0{
+			Value: diemtypes.RefundMetadataV0{
+				TransactionVersion: originalTransactionVersion,
+				Reason:             reason,
+			},
+		},
+	}
+	return diemtypes.ToBCS(&metadata)
+}
+
 // FindRefundReferenceEventFromTransaction looks for receivedpayment type event in the
 // given transaction and event receiver is given receiver account address.
 func FindRefundReferenceEventFromTransaction(txn *diemclient.Transaction, receiver diemtypes.AccountAddress) *diemclient.Event {

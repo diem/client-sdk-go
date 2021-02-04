@@ -692,6 +692,13 @@ func DeserializeMetadata(deserializer serde.Deserializer) (Metadata, error) {
 			return nil, err
 		}
 
+	case 4:
+		if val, err := load_Metadata__RefundMetadata(deserializer); err == nil {
+			return &val, nil
+		} else {
+			return nil, err
+		}
+
 	default:
 		return nil, fmt.Errorf("Unknown variant index for Metadata: %d", index)
 	}
@@ -827,6 +834,37 @@ func load_Metadata__UnstructuredBytesMetadata(deserializer serde.Deserializer) (
 	var obj Metadata__UnstructuredBytesMetadata
 	if err := deserializer.IncreaseContainerDepth(); err != nil { return obj, err }
 	if val, err := DeserializeUnstructuredBytesMetadata(deserializer); err == nil { obj.Value = val } else { return obj, err }
+	deserializer.DecreaseContainerDepth()
+	return obj, nil
+}
+
+type Metadata__RefundMetadata struct {
+	Value RefundMetadata
+}
+
+func (*Metadata__RefundMetadata) isMetadata() {}
+
+func (obj *Metadata__RefundMetadata) Serialize(serializer serde.Serializer) error {
+	if err := serializer.IncreaseContainerDepth(); err != nil { return err }
+	serializer.SerializeVariantIndex(4)
+	if err := obj.Value.Serialize(serializer); err != nil { return err }
+	serializer.DecreaseContainerDepth()
+	return nil
+}
+
+func (obj *Metadata__RefundMetadata) BcsSerialize() ([]byte, error) {
+	if obj == nil {
+		return nil, fmt.Errorf("Cannot serialize null object")
+	}
+	serializer := bcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
+func load_Metadata__RefundMetadata(deserializer serde.Deserializer) (Metadata__RefundMetadata, error) {
+	var obj Metadata__RefundMetadata
+	if err := deserializer.IncreaseContainerDepth(); err != nil { return obj, err }
+	if val, err := DeserializeRefundMetadata(deserializer); err == nil { obj.Value = val } else { return obj, err }
 	deserializer.DecreaseContainerDepth()
 	return obj, nil
 }
@@ -1010,6 +1048,286 @@ func BcsDeserializeRawTransaction(input []byte) (RawTransaction, error) {
 		return obj, fmt.Errorf("Some input bytes were not read")
 	}
 	return obj, err
+}
+
+type RefundMetadata interface {
+	isRefundMetadata()
+	Serialize(serializer serde.Serializer) error
+	BcsSerialize() ([]byte, error)
+}
+
+func DeserializeRefundMetadata(deserializer serde.Deserializer) (RefundMetadata, error) {
+	index, err := deserializer.DeserializeVariantIndex()
+	if err != nil { return nil, err }
+
+	switch index {
+	case 0:
+		if val, err := load_RefundMetadata__RefundMetadataV0(deserializer); err == nil {
+			return &val, nil
+		} else {
+			return nil, err
+		}
+
+	default:
+		return nil, fmt.Errorf("Unknown variant index for RefundMetadata: %d", index)
+	}
+}
+
+func BcsDeserializeRefundMetadata(input []byte) (RefundMetadata, error) {
+	if input == nil {
+		var obj RefundMetadata
+		return obj, fmt.Errorf("Cannot deserialize null array")
+	}
+	deserializer := bcs.NewDeserializer(input);
+	obj, err := DeserializeRefundMetadata(deserializer)
+	if err == nil && deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
+type RefundMetadata__RefundMetadataV0 struct {
+	Value RefundMetadataV0
+}
+
+func (*RefundMetadata__RefundMetadataV0) isRefundMetadata() {}
+
+func (obj *RefundMetadata__RefundMetadataV0) Serialize(serializer serde.Serializer) error {
+	if err := serializer.IncreaseContainerDepth(); err != nil { return err }
+	serializer.SerializeVariantIndex(0)
+	if err := obj.Value.Serialize(serializer); err != nil { return err }
+	serializer.DecreaseContainerDepth()
+	return nil
+}
+
+func (obj *RefundMetadata__RefundMetadataV0) BcsSerialize() ([]byte, error) {
+	if obj == nil {
+		return nil, fmt.Errorf("Cannot serialize null object")
+	}
+	serializer := bcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
+func load_RefundMetadata__RefundMetadataV0(deserializer serde.Deserializer) (RefundMetadata__RefundMetadataV0, error) {
+	var obj RefundMetadata__RefundMetadataV0
+	if err := deserializer.IncreaseContainerDepth(); err != nil { return obj, err }
+	if val, err := DeserializeRefundMetadataV0(deserializer); err == nil { obj.Value = val } else { return obj, err }
+	deserializer.DecreaseContainerDepth()
+	return obj, nil
+}
+
+type RefundMetadataV0 struct {
+	TransactionVersion uint64
+	Reason RefundReason
+}
+
+func (obj *RefundMetadataV0) Serialize(serializer serde.Serializer) error {
+	if err := serializer.IncreaseContainerDepth(); err != nil { return err }
+	if err := serializer.SerializeU64(obj.TransactionVersion); err != nil { return err }
+	if err := obj.Reason.Serialize(serializer); err != nil { return err }
+	serializer.DecreaseContainerDepth()
+	return nil
+}
+
+func (obj *RefundMetadataV0) BcsSerialize() ([]byte, error) {
+	if obj == nil {
+		return nil, fmt.Errorf("Cannot serialize null object")
+	}
+	serializer := bcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
+func DeserializeRefundMetadataV0(deserializer serde.Deserializer) (RefundMetadataV0, error) {
+	var obj RefundMetadataV0
+	if err := deserializer.IncreaseContainerDepth(); err != nil { return obj, err }
+	if val, err := deserializer.DeserializeU64(); err == nil { obj.TransactionVersion = val } else { return obj, err }
+	if val, err := DeserializeRefundReason(deserializer); err == nil { obj.Reason = val } else { return obj, err }
+	deserializer.DecreaseContainerDepth()
+	return obj, nil
+}
+
+func BcsDeserializeRefundMetadataV0(input []byte) (RefundMetadataV0, error) {
+	if input == nil {
+		var obj RefundMetadataV0
+		return obj, fmt.Errorf("Cannot deserialize null array")
+	}
+	deserializer := bcs.NewDeserializer(input);
+	obj, err := DeserializeRefundMetadataV0(deserializer)
+	if err == nil && deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
+type RefundReason interface {
+	isRefundReason()
+	Serialize(serializer serde.Serializer) error
+	BcsSerialize() ([]byte, error)
+}
+
+func DeserializeRefundReason(deserializer serde.Deserializer) (RefundReason, error) {
+	index, err := deserializer.DeserializeVariantIndex()
+	if err != nil { return nil, err }
+
+	switch index {
+	case 0:
+		if val, err := load_RefundReason__OtherReason(deserializer); err == nil {
+			return &val, nil
+		} else {
+			return nil, err
+		}
+
+	case 1:
+		if val, err := load_RefundReason__InvalidSubaddress(deserializer); err == nil {
+			return &val, nil
+		} else {
+			return nil, err
+		}
+
+	case 2:
+		if val, err := load_RefundReason__UserInitiatedPartialRefund(deserializer); err == nil {
+			return &val, nil
+		} else {
+			return nil, err
+		}
+
+	case 3:
+		if val, err := load_RefundReason__UserInitiatedFullRefund(deserializer); err == nil {
+			return &val, nil
+		} else {
+			return nil, err
+		}
+
+	default:
+		return nil, fmt.Errorf("Unknown variant index for RefundReason: %d", index)
+	}
+}
+
+func BcsDeserializeRefundReason(input []byte) (RefundReason, error) {
+	if input == nil {
+		var obj RefundReason
+		return obj, fmt.Errorf("Cannot deserialize null array")
+	}
+	deserializer := bcs.NewDeserializer(input);
+	obj, err := DeserializeRefundReason(deserializer)
+	if err == nil && deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
+type RefundReason__OtherReason struct {
+}
+
+func (*RefundReason__OtherReason) isRefundReason() {}
+
+func (obj *RefundReason__OtherReason) Serialize(serializer serde.Serializer) error {
+	if err := serializer.IncreaseContainerDepth(); err != nil { return err }
+	serializer.SerializeVariantIndex(0)
+	serializer.DecreaseContainerDepth()
+	return nil
+}
+
+func (obj *RefundReason__OtherReason) BcsSerialize() ([]byte, error) {
+	if obj == nil {
+		return nil, fmt.Errorf("Cannot serialize null object")
+	}
+	serializer := bcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
+func load_RefundReason__OtherReason(deserializer serde.Deserializer) (RefundReason__OtherReason, error) {
+	var obj RefundReason__OtherReason
+	if err := deserializer.IncreaseContainerDepth(); err != nil { return obj, err }
+	deserializer.DecreaseContainerDepth()
+	return obj, nil
+}
+
+type RefundReason__InvalidSubaddress struct {
+}
+
+func (*RefundReason__InvalidSubaddress) isRefundReason() {}
+
+func (obj *RefundReason__InvalidSubaddress) Serialize(serializer serde.Serializer) error {
+	if err := serializer.IncreaseContainerDepth(); err != nil { return err }
+	serializer.SerializeVariantIndex(1)
+	serializer.DecreaseContainerDepth()
+	return nil
+}
+
+func (obj *RefundReason__InvalidSubaddress) BcsSerialize() ([]byte, error) {
+	if obj == nil {
+		return nil, fmt.Errorf("Cannot serialize null object")
+	}
+	serializer := bcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
+func load_RefundReason__InvalidSubaddress(deserializer serde.Deserializer) (RefundReason__InvalidSubaddress, error) {
+	var obj RefundReason__InvalidSubaddress
+	if err := deserializer.IncreaseContainerDepth(); err != nil { return obj, err }
+	deserializer.DecreaseContainerDepth()
+	return obj, nil
+}
+
+type RefundReason__UserInitiatedPartialRefund struct {
+}
+
+func (*RefundReason__UserInitiatedPartialRefund) isRefundReason() {}
+
+func (obj *RefundReason__UserInitiatedPartialRefund) Serialize(serializer serde.Serializer) error {
+	if err := serializer.IncreaseContainerDepth(); err != nil { return err }
+	serializer.SerializeVariantIndex(2)
+	serializer.DecreaseContainerDepth()
+	return nil
+}
+
+func (obj *RefundReason__UserInitiatedPartialRefund) BcsSerialize() ([]byte, error) {
+	if obj == nil {
+		return nil, fmt.Errorf("Cannot serialize null object")
+	}
+	serializer := bcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
+func load_RefundReason__UserInitiatedPartialRefund(deserializer serde.Deserializer) (RefundReason__UserInitiatedPartialRefund, error) {
+	var obj RefundReason__UserInitiatedPartialRefund
+	if err := deserializer.IncreaseContainerDepth(); err != nil { return obj, err }
+	deserializer.DecreaseContainerDepth()
+	return obj, nil
+}
+
+type RefundReason__UserInitiatedFullRefund struct {
+}
+
+func (*RefundReason__UserInitiatedFullRefund) isRefundReason() {}
+
+func (obj *RefundReason__UserInitiatedFullRefund) Serialize(serializer serde.Serializer) error {
+	if err := serializer.IncreaseContainerDepth(); err != nil { return err }
+	serializer.SerializeVariantIndex(3)
+	serializer.DecreaseContainerDepth()
+	return nil
+}
+
+func (obj *RefundReason__UserInitiatedFullRefund) BcsSerialize() ([]byte, error) {
+	if obj == nil {
+		return nil, fmt.Errorf("Cannot serialize null object")
+	}
+	serializer := bcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
+func load_RefundReason__UserInitiatedFullRefund(deserializer serde.Deserializer) (RefundReason__UserInitiatedFullRefund, error) {
+	var obj RefundReason__UserInitiatedFullRefund
+	if err := deserializer.IncreaseContainerDepth(); err != nil { return obj, err }
+	deserializer.DecreaseContainerDepth()
+	return obj, nil
 }
 
 type Script struct {

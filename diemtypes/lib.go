@@ -227,6 +227,114 @@ func BcsDeserializeChangeSet(input []byte) (ChangeSet, error) {
 	return obj, err
 }
 
+type CoinTradeMetadata interface {
+	isCoinTradeMetadata()
+	Serialize(serializer serde.Serializer) error
+	BcsSerialize() ([]byte, error)
+}
+
+func DeserializeCoinTradeMetadata(deserializer serde.Deserializer) (CoinTradeMetadata, error) {
+	index, err := deserializer.DeserializeVariantIndex()
+	if err != nil { return nil, err }
+
+	switch index {
+	case 0:
+		if val, err := load_CoinTradeMetadata__CoinTradeMetadataV0(deserializer); err == nil {
+			return &val, nil
+		} else {
+			return nil, err
+		}
+
+	default:
+		return nil, fmt.Errorf("Unknown variant index for CoinTradeMetadata: %d", index)
+	}
+}
+
+func BcsDeserializeCoinTradeMetadata(input []byte) (CoinTradeMetadata, error) {
+	if input == nil {
+		var obj CoinTradeMetadata
+		return obj, fmt.Errorf("Cannot deserialize null array")
+	}
+	deserializer := bcs.NewDeserializer(input);
+	obj, err := DeserializeCoinTradeMetadata(deserializer)
+	if err == nil && deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
+type CoinTradeMetadata__CoinTradeMetadataV0 struct {
+	Value CoinTradeMetadataV0
+}
+
+func (*CoinTradeMetadata__CoinTradeMetadataV0) isCoinTradeMetadata() {}
+
+func (obj *CoinTradeMetadata__CoinTradeMetadataV0) Serialize(serializer serde.Serializer) error {
+	if err := serializer.IncreaseContainerDepth(); err != nil { return err }
+	serializer.SerializeVariantIndex(0)
+	if err := obj.Value.Serialize(serializer); err != nil { return err }
+	serializer.DecreaseContainerDepth()
+	return nil
+}
+
+func (obj *CoinTradeMetadata__CoinTradeMetadataV0) BcsSerialize() ([]byte, error) {
+	if obj == nil {
+		return nil, fmt.Errorf("Cannot serialize null object")
+	}
+	serializer := bcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
+func load_CoinTradeMetadata__CoinTradeMetadataV0(deserializer serde.Deserializer) (CoinTradeMetadata__CoinTradeMetadataV0, error) {
+	var obj CoinTradeMetadata__CoinTradeMetadataV0
+	if err := deserializer.IncreaseContainerDepth(); err != nil { return obj, err }
+	if val, err := DeserializeCoinTradeMetadataV0(deserializer); err == nil { obj.Value = val } else { return obj, err }
+	deserializer.DecreaseContainerDepth()
+	return obj, nil
+}
+
+type CoinTradeMetadataV0 struct {
+	TradeIds []string
+}
+
+func (obj *CoinTradeMetadataV0) Serialize(serializer serde.Serializer) error {
+	if err := serializer.IncreaseContainerDepth(); err != nil { return err }
+	if err := serialize_vector_str(obj.TradeIds, serializer); err != nil { return err }
+	serializer.DecreaseContainerDepth()
+	return nil
+}
+
+func (obj *CoinTradeMetadataV0) BcsSerialize() ([]byte, error) {
+	if obj == nil {
+		return nil, fmt.Errorf("Cannot serialize null object")
+	}
+	serializer := bcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
+func DeserializeCoinTradeMetadataV0(deserializer serde.Deserializer) (CoinTradeMetadataV0, error) {
+	var obj CoinTradeMetadataV0
+	if err := deserializer.IncreaseContainerDepth(); err != nil { return obj, err }
+	if val, err := deserialize_vector_str(deserializer); err == nil { obj.TradeIds = val } else { return obj, err }
+	deserializer.DecreaseContainerDepth()
+	return obj, nil
+}
+
+func BcsDeserializeCoinTradeMetadataV0(input []byte) (CoinTradeMetadataV0, error) {
+	if input == nil {
+		var obj CoinTradeMetadataV0
+		return obj, fmt.Errorf("Cannot deserialize null array")
+	}
+	deserializer := bcs.NewDeserializer(input);
+	obj, err := DeserializeCoinTradeMetadataV0(deserializer)
+	if err == nil && deserializer.GetBufferOffset() < uint64(len(input)) {
+		return obj, fmt.Errorf("Some input bytes were not read")
+	}
+	return obj, err
+}
+
 type ContractEvent interface {
 	isContractEvent()
 	Serialize(serializer serde.Serializer) error
@@ -699,6 +807,13 @@ func DeserializeMetadata(deserializer serde.Deserializer) (Metadata, error) {
 			return nil, err
 		}
 
+	case 5:
+		if val, err := load_Metadata__CoinTradeMetadata(deserializer); err == nil {
+			return &val, nil
+		} else {
+			return nil, err
+		}
+
 	default:
 		return nil, fmt.Errorf("Unknown variant index for Metadata: %d", index)
 	}
@@ -865,6 +980,37 @@ func load_Metadata__RefundMetadata(deserializer serde.Deserializer) (Metadata__R
 	var obj Metadata__RefundMetadata
 	if err := deserializer.IncreaseContainerDepth(); err != nil { return obj, err }
 	if val, err := DeserializeRefundMetadata(deserializer); err == nil { obj.Value = val } else { return obj, err }
+	deserializer.DecreaseContainerDepth()
+	return obj, nil
+}
+
+type Metadata__CoinTradeMetadata struct {
+	Value CoinTradeMetadata
+}
+
+func (*Metadata__CoinTradeMetadata) isMetadata() {}
+
+func (obj *Metadata__CoinTradeMetadata) Serialize(serializer serde.Serializer) error {
+	if err := serializer.IncreaseContainerDepth(); err != nil { return err }
+	serializer.SerializeVariantIndex(5)
+	if err := obj.Value.Serialize(serializer); err != nil { return err }
+	serializer.DecreaseContainerDepth()
+	return nil
+}
+
+func (obj *Metadata__CoinTradeMetadata) BcsSerialize() ([]byte, error) {
+	if obj == nil {
+		return nil, fmt.Errorf("Cannot serialize null object")
+	}
+	serializer := bcs.NewSerializer();
+	if err := obj.Serialize(serializer); err != nil { return nil, err }
+	return serializer.GetBytes(), nil
+}
+
+func load_Metadata__CoinTradeMetadata(deserializer serde.Deserializer) (Metadata__CoinTradeMetadata, error) {
+	var obj Metadata__CoinTradeMetadata
+	if err := deserializer.IncreaseContainerDepth(); err != nil { return obj, err }
+	if val, err := DeserializeCoinTradeMetadata(deserializer); err == nil { obj.Value = val } else { return obj, err }
 	deserializer.DecreaseContainerDepth()
 	return obj, nil
 }
@@ -3030,6 +3176,24 @@ func deserialize_vector_TypeTag(deserializer serde.Deserializer) ([]TypeTag, err
 	obj := make([]TypeTag, length)
 	for i := range(obj) {
 		if val, err := DeserializeTypeTag(deserializer); err == nil { obj[i] = val } else { return nil, err }
+	}
+	return obj, nil
+}
+
+func serialize_vector_str(value []string, serializer serde.Serializer) error {
+	if err := serializer.SerializeLen(uint64(len(value))); err != nil { return err }
+	for _, item := range(value) {
+		if err := serializer.SerializeStr(item); err != nil { return err }
+	}
+	return nil
+}
+
+func deserialize_vector_str(deserializer serde.Deserializer) ([]string, error) {
+	length, err := deserializer.DeserializeLen()
+	if err != nil { return nil, err }
+	obj := make([]string, length)
+	for i := range(obj) {
+		if val, err := deserializer.DeserializeStr(); err == nil { obj[i] = val } else { return nil, err }
 	}
 	return obj, nil
 }

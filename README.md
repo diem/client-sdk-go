@@ -51,7 +51,7 @@ git submodule update
 make gen
 ```
 
-* Upgrade diemtypes and move stdlib*
+*Upgrade diemtypes and move stdlib*
 ```
 git submodule update
 cd diem

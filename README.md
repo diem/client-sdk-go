@@ -51,6 +51,15 @@ git submodule update
 make gen
 ```
 
+* Upgrade diemtypes and move stdlib*
+```
+git submodule update
+cd diem
+git pull origin master
+cd ..
+make gen
+```
+
 # API Documentation
 
 The Go Client SDK API documentation is currently available at [godoc.org](https://godoc.org/github.com/diem/client-sdk-go).

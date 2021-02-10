@@ -91,6 +91,19 @@ func NewRefundMetadata(originalTransactionVersion uint64, reason diemtypes.Refun
 	return diemtypes.ToBCS(&metadata)
 }
 
+// NewCoinTradeMetadata creates metadata for creating coin trade p2p transaction script with
+// a list of trade ids
+func NewCoinTradeMetadata(tradeIds []string) []byte {
+	metadata := diemtypes.Metadata__CoinTradeMetadata{
+		Value: &diemtypes.CoinTradeMetadata__CoinTradeMetadataV0{
+			Value: diemtypes.CoinTradeMetadataV0{
+				TradeIds: tradeIds,
+			},
+		},
+	}
+	return diemtypes.ToBCS(&metadata)
+}
+
 // FindRefundReferenceEventFromTransaction looks for receivedpayment type event in the
 // given transaction and event receiver is given receiver account address.
 func FindRefundReferenceEventFromTransaction(txn *diemclient.Transaction, receiver diemtypes.AccountAddress) *diemclient.Event {

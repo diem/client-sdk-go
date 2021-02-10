@@ -96,6 +96,20 @@ func TestRefundMetadata(t *testing.T) {
 	assert.Equal(t, md.Reason, reason)
 }
 
+func TestCoinTradeMetadata(t *testing.T) {
+	tradeIds := []string {
+		"abc",
+		"efg",
+	}
+	ret := txnmetadata.NewCoinTradeMetadata(tradeIds)
+	assert.Equal(t, hex.EncodeToString(ret), "0500020361626303656667")
+
+	metadata, err := diemtypes.BcsDeserializeMetadata(ret)
+	assert.NoError(t, err)
+	md := metadata.(*diemtypes.Metadata__CoinTradeMetadata).Value.(*diemtypes.CoinTradeMetadata__CoinTradeMetadataV0).Value
+	assert.Equal(t, md.TradeIds, tradeIds)
+}
+
 func TestNewRefundMetadataFromEvent(t *testing.T) {
 	referencedEventSeqNum := uint64(123)
 

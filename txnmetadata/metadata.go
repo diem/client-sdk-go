@@ -149,6 +149,8 @@ func DeserializeMetadata(event *diemclient.Event) (diemtypes.Metadata, error) {
 //
 // Note: for a receivedpayment event with TravelRuleMetadata, refund transaction is same with transfer money
 // transaction, no need refund metadata constructed like this function does.
+//
+// Deprecated: prefer NewRefundMetadata to create refund metadata.
 func NewRefundMetadataFromEventMetadata(eventSequenceNumber uint64, gm *diemtypes.Metadata__GeneralMetadata) ([]byte, error) {
 	if gm == nil {
 		return nil, errors.New("must provide refund event general metadata")

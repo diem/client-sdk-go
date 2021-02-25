@@ -21,7 +21,6 @@ client-sdk-go is the official Diem Client SDK for the Go programming language.
   - [submit transaction and wait](../master/examples/exampleutils/submit_and_wait.go): this example shows how to submit a transaction and wait for its result; it also shows how to handle a stale response error in various cases.
   - [create child VASP account](../master/examples/create-child-vasp-account/main.go): this example shows how to create ChildVASP account for a ParentVASP account.
   - [p2p transfer](../master/examples/p2p-transfers/main.go): this example shows 4 different types of p2p transfers between custodial accounts and non-custodial accounts.
-  - [refund](../master/examples/refund/main.go): this example shows peer to peer transfers from custodial accounts to non-custodial accounts, and then refunds the amount.
   - [intent identifier](../master/examples/intent-identifier/main.go): this example shows how to use diemid for encoding and decoding the intent identifier / url.
 
 ## Installing

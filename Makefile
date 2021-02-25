@@ -15,7 +15,7 @@ gen:
 		--diem-package-name github.com/diem/client-sdk-go \
 		--with-diem-types "testsuite/generate-format/tests/staged/diem.yaml" \
 		--target-source-dir ".." \
-		"language/stdlib/compiled/transaction_scripts/abi"
+		"language/diem-framework/compiled/legacy/transaction_scripts/abi"
 
 protoc:
 	# protoc  --go_out=. --go_opt=paths=source_relative ./diemjsonrpctypes/jsonrpc.proto

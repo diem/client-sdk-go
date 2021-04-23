@@ -82,7 +82,7 @@ type Client interface {
 	) (*Transaction, error)
 
 	LastResponseLedgerState() LedgerState
-	UpdateLastResponseLedgerState(state LedgerState)
+	UpdateLastResponseLedgerState(state LedgerState) error
 	WithRetryOptions(opts ...retry.Option) Client
 }
 
@@ -127,10 +127,19 @@ func (c *client) LastResponseLedgerState() LedgerState {
 }
 
 // UpdateLastResponseLedgerState updates LastResponseLedgerState
-func (c *client) UpdateLastResponseLedgerState(state LedgerState) {
+func (c *client) UpdateLastResponseLedgerState(state LedgerState) error {
 	c.mux.Lock()
 	defer c.mux.Unlock()
+	var last = c.last
+	if last.Version == state.Version && last.TimestampUsec == state.TimestampUsec {
+		return nil
+	}
+	if last.Version > state.Version || last.TimestampUsec > state.TimestampUsec {
+		return &StaleResponseError{Client: last, Server: state}
+	}
+
 	c.last = state
+	return nil
 }
 
 // WaitForTransaction3 waits for given `SignedTransaction` hex string
@@ -276,9 +285,14 @@ func (c *client) GetEvents(key string, start uint64, limit uint64) ([]*Event, er
 	return ret, nil
 }
 
+// Submit hex-encoded signed transaction bytes to mempool.
+// This function ignores StaleResponseError and does not retry on any errors.
 func (c *client) Submit(data string) error {
-	ok, err := c.call(Submit, nil, data)
+	ok, err := c.callWithoutRetry(Submit, nil, data)
 	if !ok {
+		if _, ok := err.(*StaleResponseError); ok {
+			return nil
+		}
 		return err
 	}
 	return nil
@@ -310,7 +324,7 @@ func (c *client) callWithoutRetry(method jsonrpc.Method, ret interface{}, params
 	if err = c.validateChainID(byte(resp.DiemChainID)); err != nil {
 		return false, err
 	}
-	err = c.validateAndUpdateState(LedgerState{
+	err = c.UpdateLastResponseLedgerState(LedgerState{
 		TimestampUsec: resp.DiemLedgerTimestampusec,
 		Version:       resp.DiemLedgerVersion,
 	})
@@ -328,17 +342,5 @@ func (c *client) validateChainID(chainID byte) error {
 	if c.chainID != chainID {
 		return fmt.Errorf("chain id mismatch error: expected server response chain id == %d, but got %d", c.chainID, chainID)
 	}
-	return nil
-}
-
-func (c *client) validateAndUpdateState(state LedgerState) error {
-	var last = c.LastResponseLedgerState()
-	if last.Version == state.Version && last.TimestampUsec == state.TimestampUsec {
-		return nil
-	}
-	if last.Version > state.Version || last.TimestampUsec > state.TimestampUsec {
-		return &StaleResponseError{Client: last, Server: state}
-	}
-	c.UpdateLastResponseLedgerState(state)
 	return nil
 }

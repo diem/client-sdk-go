@@ -244,6 +244,45 @@ func TestClient(t *testing.T) {
 				assert.NotNil(t, ret)
 			},
 		},
+		{
+			name: "submit: ignores stale response",
+			call: func(t *testing.T, client diemclient.Client) {
+				var currencyCode = "XUS"
+				var sequenceNum uint64 = 0
+				var amount uint64 = 10
+				account1 := testnet.GenAccount()
+				account2 := testnet.GenAccount()
+				script := stdlib.EncodePeerToPeerWithMetadataScript(
+					diemtypes.Currency(currencyCode),
+					account2.AccountAddress(),
+					amount, nil, nil)
+
+				txn := diemsigner.Sign(
+					account1,
+					account1.AccountAddress(),
+					sequenceNum,
+					script,
+					10000, 0, currencyCode,
+					uint64(time.Now().Add(time.Second*30).Unix()),
+					testnet.ChainID,
+				)
+				state := client.LastResponseLedgerState()
+				client.UpdateLastResponseLedgerState(diemclient.LedgerState{
+					TimestampUsec: state.TimestampUsec * 2,
+					Version:       state.Version + 1000000,
+				})
+				err := client.Submit(diemtypes.ToHex(txn))
+				require.NoError(t, err)
+
+				// use a fresh client to check transaction is submitted and executed successfully
+				fresh_client := diemclient.New(testnet.ChainID, testnet.URL)
+				fresh_client.UpdateLastResponseLedgerState(state)
+				ret, err := fresh_client.WaitForTransaction3(
+					diemtypes.ToHex(txn), time.Second*5)
+				require.NoError(t, err)
+				assert.NotNil(t, ret)
+			},
+		},
 	}
 
 	for _, tc := range cases {

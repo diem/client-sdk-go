@@ -8,7 +8,7 @@ import (
 	"github.com/diem/client-sdk-go/diemtypes"
 )
 
-// Sign transaction
+// Sign transaction with `diemtypes.Script`
 func Sign(
 	keys *diemkeys.Keys,
 	accountAddress diemtypes.AccountAddress,
@@ -17,9 +17,28 @@ func Sign(
 	expirationTimeSec uint64,
 	chainID byte,
 ) *diemtypes.SignedTransaction {
+	return SignTxn(
+		keys,
+		accountAddress,
+		sequenceNum,
+		&diemtypes.TransactionPayload__Script{script},
+		maxGasAmmount, gasUnitPrice, gasCurrencyCode,
+		expirationTimeSec,
+		chainID)
+}
+
+// Sign transaction with `diemtypes.TransactionPayload`
+func SignTxn(
+	keys *diemkeys.Keys,
+	accountAddress diemtypes.AccountAddress,
+	sequenceNum uint64, payload diemtypes.TransactionPayload,
+	maxGasAmmount uint64, gasUnitPrice uint64, gasCurrencyCode string,
+	expirationTimeSec uint64,
+	chainID byte,
+) *diemtypes.SignedTransaction {
 	rawTxn, signingMsg := NewRawTransactionAndSigningMsg(
 		accountAddress,
-		sequenceNum, script,
+		sequenceNum, payload,
 		maxGasAmmount, gasUnitPrice, gasCurrencyCode,
 		expirationTimeSec,
 		chainID)
@@ -31,7 +50,7 @@ func Sign(
 // NewRawTransactionAndSigningMsg creates raw transaction and signing message
 func NewRawTransactionAndSigningMsg(
 	accountAddress diemtypes.AccountAddress,
-	sequenceNum uint64, script diemtypes.Script,
+	sequenceNum uint64, payload diemtypes.TransactionPayload,
 	maxGasAmmount uint64, gasUnitPrice uint64, gasCurrencyCode string,
 	expirationTimeSec uint64,
 	chainID byte,
@@ -39,7 +58,7 @@ func NewRawTransactionAndSigningMsg(
 	rawTxn := diemtypes.RawTransaction{
 		Sender:                  accountAddress,
 		SequenceNumber:          sequenceNum,
-		Payload:                 &diemtypes.TransactionPayload__Script{script},
+		Payload:                 payload,
 		MaxGasAmount:            maxGasAmmount,
 		GasUnitPrice:            gasUnitPrice,
 		GasCurrencyCode:         gasCurrencyCode,

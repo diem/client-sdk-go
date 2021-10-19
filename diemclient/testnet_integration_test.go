@@ -179,7 +179,7 @@ func TestClient(t *testing.T) {
 				require.Error(t, err)
 				jrpcErr, ok := err.(*jsonrpc.ResponseError)
 				require.True(t, ok)
-				require.Equal(t, "Invalid param data(params[0]): should be hex-encoded string of BCS serialized Diem SignedTransaction type", jrpcErr.Message)
+				require.Equal(t, "Invalid params for method 'submit'", jrpcErr.Message)
 			},
 		},
 		{
